@@ -122,13 +122,13 @@ class DinePointsAPITester:
             login_success = success
         
         if not login_success:
-            # Try login with provided test credentials
+            # Try login with provided test credentials from review request
             success, response = self.run_test(
                 "Login with test credentials",
                 "POST",
                 "auth/login",
                 200,
-                data={"email": "test@restaurant.com", "password": "test123"}
+                data={"email": "demo@restaurant.com", "password": "Demo@123"}
             )
             login_success = success
         
