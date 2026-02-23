@@ -3193,6 +3193,7 @@ const SegmentsPage = () => {
                         <DialogContent className="max-w-sm mx-4 rounded-2xl">
                             <DialogHeader>
                                 <DialogTitle className="font-['Montserrat']">Edit Segment</DialogTitle>
+                                <DialogDescription>Update the segment name</DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                                 <div>
