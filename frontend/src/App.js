@@ -1576,10 +1576,10 @@ const CustomerDetailPage = () => {
                 customer_id: id,
                 points: parseInt(pointsData.points),
                 transaction_type: pointsAction,
-                description: pointsData.description || `${pointsAction === "earn" ? "Points earned" : "Points redeemed"}`,
-                bill_amount: pointsData.bill_amount ? parseFloat(pointsData.bill_amount) : null
+                description: pointsData.description || `${pointsAction === "bonus" ? "Bonus points" : "Points redeemed"}`,
+                bill_amount: null
             });
-            toast.success(`Points ${pointsAction === "earn" ? "added" : "redeemed"} successfully!`);
+            toast.success(`Points ${pointsAction === "bonus" ? "awarded" : "redeemed"} successfully!`);
             setShowPointsModal(false);
             setPointsData({ points: "", bill_amount: "", description: "" });
             fetchData();
