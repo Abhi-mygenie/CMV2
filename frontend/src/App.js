@@ -1191,13 +1191,19 @@ const CustomersPage = () => {
                                     <p className="font-medium text-[#1A1A1A] truncate">{customer.name}</p>
                                     <p className="text-sm text-[#52525B]">{customer.country_code || '+91'} {customer.phone}</p>
                                 </div>
-                                <div className="text-right flex items-center gap-2">
-                                    <div>
+                                <div className="text-right flex items-center gap-3">
+                                    <div className="text-right">
                                         <p className="font-semibold text-[#329937] points-display">{customer.total_points}</p>
                                         <Badge variant="outline" className={`tier-badge ${customer.tier.toLowerCase()}`}>
                                             {customer.tier}
                                         </Badge>
                                     </div>
+                                    {customer.wallet_balance > 0 && (
+                                        <div className="text-right border-l pl-3 border-gray-200">
+                                            <p className="font-semibold text-[#F26B33]">₹{customer.wallet_balance.toLocaleString()}</p>
+                                            <p className="text-[10px] text-[#A1A1AA]">Wallet</p>
+                                        </div>
+                                    )}
                                     <ChevronRight className="w-5 h-5 text-[#A1A1AA]" />
                                 </div>
                             </button>
