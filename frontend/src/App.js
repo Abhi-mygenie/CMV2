@@ -202,29 +202,6 @@ const LoginPage = () => {
                     >
                         {isLoading ? "Signing in..." : "Sign In"}
                     </Button>
-
-                    {/* Demo Mode Button */}
-                    <div className="relative my-6">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-300"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-[#F9F9F7] text-[#52525B]">or</span>
-                        </div>
-                    </div>
-
-                    <Button 
-                        type="button"
-                        onClick={handleDemoMode}
-                        className="w-full h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold active-scale flex items-center justify-center gap-2"
-                        data-testid="demo-mode-btn"
-                    >
-                        <Sparkles className="w-5 h-5" />
-                        Try Demo Mode
-                    </Button>
-                    <p className="text-xs text-center text-[#A1A1AA]">
-                        Explore all features with pre-loaded data
-                    </p>
                     
                     <div className="text-center mt-4">
                         <span className="text-sm text-[#52525B]">Don't have an account? </span>
