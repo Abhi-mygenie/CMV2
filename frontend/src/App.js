@@ -702,15 +702,6 @@ const CustomersPage = () => {
         }
     };
 
-    const fetchSegments = async () => {
-        try {
-            const res = await api.get('/segments');
-            setSavedSegments(res.data);
-        } catch (err) {
-            console.error("Failed to load segments:", err);
-        }
-    };
-
     const saveAsSegment = async () => {
         if (!segmentName.trim()) {
             toast.error("Please enter a segment name");
