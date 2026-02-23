@@ -15,6 +15,7 @@ DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded 
 ## Core Features
 1. **Customer Management**
    - Add/edit/delete customers
+   - Edit customer from customer list (edit icon next to name)
    - Track visits, spending, and loyalty points
    - Customer segmentation by tier (Bronze, Silver, Gold, Platinum)
    - Allergy tracking
@@ -31,6 +32,7 @@ DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded 
 3. **Wallet System**
    - Virtual wallet balance
    - Credit/Debit transactions
+   - Bonus amount on top-ups (credit to wallet or loyalty points)
 
 4. **Coupon Management**
    - Create/manage promotional coupons
@@ -41,6 +43,7 @@ DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded 
 5. **Customer Segments**
    - Create segments based on filters
    - Target specific customer groups
+   - Send WhatsApp campaigns to segments
 
 6. **QR Code Registration**
    - Generate QR codes for customer self-registration
@@ -54,13 +57,30 @@ DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded 
    - Active customers metrics
    - Average ratings
 
-## What's Been Implemented (Feb 23, 2026)
+9. **WhatsApp Automation** (NEW - Feb 23, 2026)
+   - Create reusable message templates with dynamic variables
+   - Variables: {{customer_name}}, {{points_earned}}, {{points_balance}}, {{wallet_balance}}, {{amount}}, {{tier}}, {{restaurant_name}}, {{coupon_code}}, {{expiry_date}}
+   - Configure automation rules (event -> template mapping)
+   - 13 supported events: points_earned, points_redeemed, bonus_points, wallet_credit, wallet_debit, birthday, anniversary, first_visit, tier_upgrade, coupon_earned, points_expiring, feedback_received, inactive_reminder
+   - Enable/disable rules, set delay before sending
+   - Live message preview with variable substitution
+
+## What's Been Implemented
+
+### Session: Feb 23, 2026
 - ✅ Cloned repository and configured for preview environment
 - ✅ Updated environment variables (frontend & backend .env)
 - ✅ Installed all dependencies
 - ✅ Added registration route and signup link to login page
-- ✅ Backend APIs tested (88.9% success rate)
-- ✅ Frontend fully functional
+- ✅ Test data seeding script
+- ✅ Bonus points UI/UX improvements
+- ✅ WhatsApp campaign UI on Segments page
+- ✅ Wallet top-up with bonus amount
+- ✅ Bonus destination choice (wallet or loyalty points)
+- ✅ Customer card shows wallet balance
+- ✅ Coupons page UI redesign
+- ✅ Customer edit from both detail and list pages
+- ✅ **WhatsApp Templates & Automation feature** (100% tested)
 
 ## API Endpoints
 - `/api/auth/*` - Authentication (login, register, me)
@@ -73,13 +93,26 @@ DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded 
 - `/api/qr/*` - QR code generation
 - `/api/feedback/*` - Customer feedback
 - `/api/analytics/*` - Dashboard analytics
+- `/api/whatsapp/templates` - WhatsApp template CRUD
+- `/api/whatsapp/automation` - Automation rule CRUD
+- `/api/whatsapp/automation/events` - List available events
+- `/api/whatsapp/automation/{id}/toggle` - Toggle rule enabled/disabled
 
-## Known Issues (Minor)
-- POS webhook endpoint requires valid API key
-- Some API endpoint parameter formats
+## MOCKED Features
+- Actual WhatsApp message sending (requires WhatsApp Business API integration)
+- Segments page "Send via WhatsApp" button shows "Coming Soon"
+
+## Known Issues
+- None critical
 
 ## Next Action Items
-- None required - app is running as-is
+- P1: Integrate WhatsApp Business API for actual message sending
+- P2: Customer search with autocomplete in wallet modal
+- P3: Backend refactoring (split server.py into routers)
 
 ## Preview URL
 https://customer-segment-cms.preview.emergentagent.com
+
+## Test Credentials
+- Email: demo@restaurant.com
+- Password: Demo@123
