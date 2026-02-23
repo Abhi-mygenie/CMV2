@@ -45,7 +45,7 @@ hashed_password = pwd_context.hash("demo123")
 demo_user = {
     "id": demo_user_id,
     "email": "demo@restaurant.com",
-    "hashed_password": hashed_password,
+    "password_hash": hashed_password,
     "restaurant_name": "Demo Restaurant & Cafe",
     "phone": "+919876543210",
     "created_at": datetime.utcnow().isoformat()
