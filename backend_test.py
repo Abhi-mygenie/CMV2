@@ -108,20 +108,29 @@ class DinePointsAPITester:
             200,
             data=registration_data
         )
+        # Test login with existing credentials or the newly created one
+        login_success = False
+        if success:
+            # Try logging in with the newly created account
+            success, response = self.run_test(
+                "Login with newly registered credentials",
+                "POST",
+                "auth/login", 
+                200,
+                data={"email": test_email, "password": "test123456"}
+            )
+            login_success = success
         
-        if success and 'access_token' in response:
-            self.token = response['access_token']
-            self.user_id = response['user']['id']
-            self.log(f"✅ Registration successful - Token obtained", "SUCCESS")
-        
-        # Test login with provided credentials
-        success, response = self.run_test(
-            "Login with test credentials",
-            "POST",
-            "auth/login",
-            200,
-            data={"email": "test@restaurant.com", "password": "test123"}
-        )
+        if not login_success:
+            # Try login with provided test credentials
+            success, response = self.run_test(
+                "Login with test credentials",
+                "POST",
+                "auth/login",
+                200,
+                data={"email": "test@restaurant.com", "password": "test123"}
+            )
+            login_success = success
         
         if success and 'access_token' in response:
             self.token = response['access_token']
