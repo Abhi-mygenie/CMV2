@@ -1,0 +1,403 @@
+{
+  "execution_date": "2026-02-23T17:28:22.708254",
+  "application_url": "https://loyalty-automation-1.preview.emergentagent.com",
+  "total_tests": 48,
+  "passed": 48,
+  "failed": 0,
+  "warnings": 0,
+  "modules": {
+    "Authentication": {
+      "tests": [
+        {
+          "id": "TC-AUTH-001",
+          "name": "Valid Login",
+          "status": "PASS",
+          "details": "User successfully logged in, redirected to dashboard, token stored"
+        },
+        {
+          "id": "TC-AUTH-002",
+          "name": "Invalid Email Login",
+          "status": "PASS",
+          "details": "Invalid credentials correctly rejected with error message"
+        },
+        {
+          "id": "TC-AUTH-003",
+          "name": "Invalid Password Login",
+          "status": "PASS",
+          "details": "Invalid password correctly rejected"
+        },
+        {
+          "id": "TC-AUTH-007",
+          "name": "Logout Functionality",
+          "status": "PASS",
+          "details": "User can logout, token cleared, redirected to login"
+        },
+        {
+          "id": "TC-AUTH-008",
+          "name": "Protected Route Access",
+          "status": "PASS",
+          "details": "Unauthenticated users redirected to login"
+        }
+      ],
+      "passed": 5,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Dashboard": {
+      "tests": [
+        {
+          "id": "TC-DASH-001",
+          "name": "Dashboard Loading",
+          "status": "PASS",
+          "details": "Dashboard loads with all stats: 6 customers, 2543 points issued, 4.7 rating"
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Customer Management": {
+      "tests": [
+        {
+          "id": "TC-CUST-001",
+          "name": "View All Customers",
+          "status": "PASS",
+          "details": "Customer list displays with 6 customers visible"
+        },
+        {
+          "id": "TC-CUST-002",
+          "name": "Add New Customer - All Fields",
+          "status": "PASS",
+          "details": "Customer created successfully with all fields"
+        },
+        {
+          "id": "TC-CUST-003",
+          "name": "Add Customer - Required Fields",
+          "status": "PASS",
+          "details": "Customer created with minimum data (name, phone)"
+        },
+        {
+          "id": "TC-CUST-004",
+          "name": "Add Customer - Duplicate Phone",
+          "status": "PASS",
+          "details": "Duplicate phone validation working"
+        },
+        {
+          "id": "TC-CUST-008",
+          "name": "Edit Customer Details",
+          "status": "PASS",
+          "details": "Customer details updated successfully"
+        },
+        {
+          "id": "TC-CUST-009",
+          "name": "Delete Customer",
+          "status": "PASS",
+          "details": "Customer deletion working with confirmation"
+        },
+        {
+          "id": "TC-CUST-010",
+          "name": "View Customer Details",
+          "status": "PASS",
+          "details": "Customer detail page shows profile, points, wallet"
+        },
+        {
+          "id": "TC-CUST-011",
+          "name": "Search Customer by Name",
+          "status": "PASS",
+          "details": "Search functionality working correctly"
+        },
+        {
+          "id": "TC-CUST-012",
+          "name": "Search Customer by Phone",
+          "status": "PASS",
+          "details": "Phone search working correctly"
+        }
+      ],
+      "passed": 9,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Points Transaction": {
+      "tests": [
+        {
+          "id": "TC-POINTS-001",
+          "name": "Earn Points from Bill",
+          "status": "PASS",
+          "details": "Points calculated correctly based on bill amount"
+        },
+        {
+          "id": "TC-POINTS-002",
+          "name": "Redeem Points",
+          "status": "PASS",
+          "details": "Points redemption working with balance update"
+        },
+        {
+          "id": "TC-POINTS-003",
+          "name": "Redeem More Than Balance",
+          "status": "PASS",
+          "details": "Insufficient points validation working"
+        },
+        {
+          "id": "TC-POINTS-004",
+          "name": "Issue Bonus Points",
+          "status": "PASS",
+          "details": "Bonus points issued successfully"
+        }
+      ],
+      "passed": 4,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Wallet Transaction": {
+      "tests": [
+        {
+          "id": "TC-WALLET-001",
+          "name": "Credit to Wallet",
+          "status": "PASS",
+          "details": "Wallet credit working correctly"
+        },
+        {
+          "id": "TC-WALLET-002",
+          "name": "Debit from Wallet",
+          "status": "PASS",
+          "details": "Wallet debit working with balance update"
+        },
+        {
+          "id": "TC-WALLET-003",
+          "name": "Debit More Than Balance",
+          "status": "PASS",
+          "details": "Insufficient balance validation working"
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Coupon Management": {
+      "tests": [
+        {
+          "id": "TC-COUPON-001",
+          "name": "Create Percentage Coupon",
+          "status": "PASS",
+          "details": "Percentage coupon created successfully"
+        },
+        {
+          "id": "TC-COUPON-002",
+          "name": "Create Fixed Discount Coupon",
+          "status": "PASS",
+          "details": "Fixed discount coupon created"
+        },
+        {
+          "id": "TC-COUPON-003",
+          "name": "Duplicate Coupon Code",
+          "status": "PASS",
+          "details": "Duplicate code validation working"
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Customer Segments": {
+      "tests": [
+        {
+          "id": "TC-SEG-001",
+          "name": "Create Segment by Tier",
+          "status": "PASS",
+          "details": "Segment created with tier filter"
+        },
+        {
+          "id": "TC-SEG-002",
+          "name": "Create Segment by Last Visit",
+          "status": "PASS",
+          "details": "Inactive customer segment created"
+        },
+        {
+          "id": "TC-SEG-006",
+          "name": "View Segment Customer List",
+          "status": "PASS",
+          "details": "Segment customers displayed correctly"
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Feedback": {
+      "tests": [
+        {
+          "id": "TC-FEED-001",
+          "name": "View All Feedback",
+          "status": "PASS",
+          "details": "Feedback list displayed with ratings and comments"
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "QR Code": {
+      "tests": [
+        {
+          "id": "TC-QR-001",
+          "name": "Generate QR Code",
+          "status": "PASS",
+          "details": "QR code generated with restaurant ID"
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "WhatsApp Templates": {
+      "tests": [
+        {
+          "id": "TC-TMPL-001",
+          "name": "Create WhatsApp Template",
+          "status": "PASS",
+          "details": "Template created with variable detection"
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0
+    },
+    "WhatsApp Automation": {
+      "tests": [
+        {
+          "id": "TC-AUTO-001",
+          "name": "Create Automation Rule",
+          "status": "PASS",
+          "details": "Automation rule created successfully"
+        },
+        {
+          "id": "TC-AUTO-004",
+          "name": "Enable/Disable Rule",
+          "status": "PASS",
+          "details": "Rule toggle working correctly"
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Loyalty Settings": {
+      "tests": [
+        {
+          "id": "TC-LOYAL-001",
+          "name": "View Loyalty Settings",
+          "status": "PASS",
+          "details": "All settings displayed correctly"
+        },
+        {
+          "id": "TC-LOYAL-002",
+          "name": "Update Points per Rupee",
+          "status": "PASS",
+          "details": "Points earning rate updated"
+        },
+        {
+          "id": "TC-LOYAL-006",
+          "name": "Configure Tier Thresholds",
+          "status": "PASS",
+          "details": "Tier thresholds updated successfully"
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Validation - Login": {
+      "tests": [
+        {
+          "id": "VAL-LOGIN-001",
+          "name": "Empty Email Field",
+          "status": "PASS",
+          "details": "HTML5 validation error displayed"
+        },
+        {
+          "id": "VAL-LOGIN-002",
+          "name": "Invalid Email Format",
+          "status": "PASS",
+          "details": "Email format validation working"
+        },
+        {
+          "id": "VAL-LOGIN-009",
+          "name": "Empty Password Field",
+          "status": "PASS",
+          "details": "Password required validation working"
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Validation - Customer": {
+      "tests": [
+        {
+          "id": "VAL-CUST-001",
+          "name": "Empty Name",
+          "status": "PASS",
+          "details": "Name required validation working"
+        },
+        {
+          "id": "VAL-CUST-009",
+          "name": "Empty Phone",
+          "status": "PASS",
+          "details": "Phone required validation working"
+        },
+        {
+          "id": "VAL-CUST-010",
+          "name": "Phone Too Short",
+          "status": "PASS",
+          "details": "Phone length validation working"
+        },
+        {
+          "id": "VAL-CUST-013",
+          "name": "Duplicate Phone",
+          "status": "PASS",
+          "details": "Duplicate phone check working"
+        },
+        {
+          "id": "VAL-CUST-017",
+          "name": "Invalid Email Format",
+          "status": "PASS",
+          "details": "Email format validation in customer form"
+        }
+      ],
+      "passed": 5,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Security": {
+      "tests": [
+        {
+          "id": "VAL-CUST-007",
+          "name": "SQL Injection in Name",
+          "status": "PASS",
+          "details": "SQL injection attempt sanitized"
+        },
+        {
+          "id": "VAL-CUST-008",
+          "name": "XSS in Name Field",
+          "status": "PASS",
+          "details": "XSS attempt escaped properly"
+        },
+        {
+          "id": "VAL-REG-010",
+          "name": "SQL Injection in Restaurant Name",
+          "status": "PASS",
+          "details": "SQL injection sanitized in registration"
+        },
+        {
+          "id": "VAL-REG-011",
+          "name": "XSS in Restaurant Name",
+          "status": "PASS",
+          "details": "XSS attempt handled safely"
+        }
+      ],
+      "passed": 4,
+      "failed": 0,
+      "warnings": 0
+    }
+  }
+}
