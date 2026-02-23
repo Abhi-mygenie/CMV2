@@ -340,6 +340,9 @@ class LoyaltySettingsUpdate(BaseModel):
     off_peak_end_time: Optional[str] = None
     off_peak_bonus_type: Optional[str] = None
     off_peak_bonus_value: Optional[float] = None
+    # Feedback/Review Bonus
+    feedback_bonus_enabled: Optional[bool] = None
+    feedback_bonus_points: Optional[int] = None
 
 # Feedback Models
 class FeedbackCreate(BaseModel):
