@@ -2624,9 +2624,9 @@ const CouponsPage = () => {
 
     return (
         <MobileLayout>
-            <div className="p-4">
+            <div className="p-4 max-w-lg mx-auto">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="coupons-title">
                         Coupons
                     </h1>
