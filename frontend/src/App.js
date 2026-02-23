@@ -66,6 +66,7 @@ import { useAuth } from "@/contexts/AuthContext";
 // Protected Route
 const ProtectedRoute = ({ children }) => {
     const { token, loading } = useAuth();
+    const { isDemoMode } = useDemoMode();
     
     if (loading) {
         return (
@@ -75,7 +76,7 @@ const ProtectedRoute = ({ children }) => {
         );
     }
     
-    if (!token) {
+    if (!token && !isDemoMode) {
         return <Navigate to="/login" />;
     }
     
