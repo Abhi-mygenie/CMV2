@@ -483,13 +483,15 @@ class DinePointsAPITester:
         
         # Run all test suites
         test_suites = [
+            self.test_health_and_basics,  # NEW - Health check from review request
+            self.test_authentication,      # Registration + Login from review request
+            self.test_analytics_dashboard, # Dashboard stats from review request (moved up for priority)
             self.test_customer_management,
             self.test_customer_segmentation,  # NEW FEATURE - Priority
             self.test_points_and_bonuses,
             self.test_loyalty_settings,
             self.test_coupon_management,
             self.test_feedback_system,
-            self.test_analytics_dashboard,
             self.test_qr_code_generation
         ]
         
