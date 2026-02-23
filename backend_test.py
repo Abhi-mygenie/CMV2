@@ -380,13 +380,13 @@ class DinePointsAPITester:
         
         return False
 
-    def test_analytics_dashboard(self):
-        """Test analytics and dashboard endpoints"""
-        self.log("=" * 50)
-        self.log("TESTING ANALYTICS DASHBOARD")
+    def test_analytics_api(self):
+        """Test analytics API as specified in review request"""
+        self.log("=" * 50)  
+        self.log("TESTING ANALYTICS API")
         self.log("=" * 50)
         
-        # Test dashboard stats
+        # Test GET /api/analytics/dashboard - Get dashboard stats
         success, stats = self.run_test("Get dashboard stats", "GET", "analytics/dashboard", 200)
         
         if success:
@@ -402,12 +402,68 @@ class DinePointsAPITester:
         
         return False
 
-    def test_qr_code_generation(self):
-        """Test QR code generation"""
+    def test_loyalty_settings_api(self):
+        """Test loyalty settings API as specified in review request"""
         self.log("=" * 50)
-        self.log("TESTING QR CODE GENERATION")
+        self.log("TESTING LOYALTY SETTINGS API")
         self.log("=" * 50)
         
+        # Test GET /api/loyalty/settings - Get loyalty settings
+        success, settings = self.run_test("Get loyalty settings", "GET", "loyalty/settings", 200)
+        return success
+
+    def test_segments_api(self):
+        """Test segments API as specified in review request"""
+        self.log("=" * 50)
+        self.log("TESTING SEGMENTS API")
+        self.log("=" * 50)
+        
+        # Test GET /api/segments - List segments
+        self.run_test("List segments", "GET", "segments", 200)
+        
+        # Create segment as specified in review request
+        segment_data = {
+            "name": "Test Segment",
+            "filters": {}
+        }
+        
+        # Test POST /api/segments - Create segment
+        success, response = self.run_test(
+            "Create segment (name: Test Segment, filters: {})",
+            "POST",
+            "segments",
+            200,
+            data=segment_data
+        )
+        
+        if success and 'id' in response:
+            self.test_segment_id = response['id']
+            self.log(f"✅ Segment created with ID: {self.test_segment_id}", "SUCCESS")
+            return True
+        
+        return False
+
+    def test_whatsapp_apis(self):
+        """Test WhatsApp APIs as specified in review request"""
+        self.log("=" * 50)
+        self.log("TESTING WHATSAPP APIs")
+        self.log("=" * 50)
+        
+        # Test GET /api/whatsapp/templates - List templates
+        self.run_test("List WhatsApp templates", "GET", "whatsapp/templates", 200)
+        
+        # Test GET /api/whatsapp/automation - List automation rules
+        self.run_test("List WhatsApp automation rules", "GET", "whatsapp/automation", 200)
+        
+        return True
+
+    def test_qr_api(self):
+        """Test QR API as specified in review request"""
+        self.log("=" * 50)
+        self.log("TESTING QR API")
+        self.log("=" * 50)
+        
+        # Test GET /api/qr/generate - Generate QR code
         success, response = self.run_test("Generate QR code", "GET", "qr/generate", 200)
         
         if success:
