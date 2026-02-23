@@ -9,10 +9,8 @@ import {
     ArrowUpRight, ArrowDownRight, Gift, Phone, Mail,
     User, LogOut, Copy, Download, Check, X, Edit2, Trash2,
     Eye, EyeOff, Building2, Calendar, MapPin, Filter, Clock,
-    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers, Wallet,
-    Sparkles, XCircle
+    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers, Wallet
 } from "lucide-react";
-import { DemoProvider, useDemoMode } from "@/contexts/DemoContext";
 import { AuthProvider as AuthProviderComponent } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
