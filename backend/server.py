@@ -1303,7 +1303,7 @@ async def expire_old_points(user: dict = Depends(get_current_user)):
 @api_router.get("/qr/generate")
 async def generate_customer_qr(user: dict = Depends(get_current_user)):
     """Generate QR code for customer registration"""
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://restaurant-segments.preview.emergentagent.com')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://loyalty-crm-3.preview.emergentagent.com')
     registration_url = f"{frontend_url}/register-customer/{user['id']}"
     
     qr_base64 = generate_qr_code(registration_url)

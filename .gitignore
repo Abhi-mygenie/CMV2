@@ -81,3 +81,7 @@ android-sdk/ dine-in-rewards/frontend/node_modules/.cache/default-development/0.
 frontend/node_modules/.cache/default-development/0.pack
 dine-in-rewards/frontend/node_modules/.cache/default-development/0.pack
 frontend/node_modules/.cache/default-development/1.pack
+-e 
+# Environment files
+*.env
+*.env.*
