@@ -3376,6 +3376,7 @@ const SegmentsPage = () => {
                                         onClick={() => {
                                             toast.info("WhatsApp integration coming soon!");
                                             setShowSendMessage(false);
+                                            setSelectedSegment(null);
                                             setSelectedCampaign("");
                                             setMessageTemplate("");
                                             setTemplateVariables({});
