@@ -881,6 +881,168 @@ async def delete_customer(customer_id: str, user: dict = Depends(get_current_use
     await db.points_transactions.delete_many({"customer_id": customer_id})
     return {"message": "Customer deleted"}
 
+# ============ SEGMENTS ROUTES ============
+
+@api_router.post("/segments", response_model=Segment)
+async def create_segment(segment_data: SegmentCreate, user: dict = Depends(get_current_user)):
+    """Create a new customer segment with filters"""
+    segment_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Count customers matching filters
+    customer_count = await count_customers_by_filters(user["id"], segment_data.filters)
+    
+    segment_doc = {
+        "id": segment_id,
+        "user_id": user["id"],
+        "name": segment_data.name,
+        "filters": segment_data.filters,
+        "customer_count": customer_count,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.segments.insert_one(segment_doc)
+    return Segment(**segment_doc)
+
+@api_router.get("/segments", response_model=List[Segment])
+async def list_segments(user: dict = Depends(get_current_user)):
+    """List all segments for the current user"""
+    segments = await db.segments.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    
+    # Update customer counts for each segment
+    for segment in segments:
+        count = await count_customers_by_filters(user["id"], segment["filters"])
+        segment["customer_count"] = count
+        # Update in database
+        await db.segments.update_one(
+            {"id": segment["id"]},
+            {"$set": {"customer_count": count}}
+        )
+    
+    return [Segment(**s) for s in segments]
+
+@api_router.get("/segments/{segment_id}", response_model=Segment)
+async def get_segment(segment_id: str, user: dict = Depends(get_current_user)):
+    """Get a specific segment"""
+    segment = await db.segments.find_one({"id": segment_id, "user_id": user["id"]}, {"_id": 0})
+    if not segment:
+        raise HTTPException(status_code=404, detail="Segment not found")
+    
+    # Update customer count
+    count = await count_customers_by_filters(user["id"], segment["filters"])
+    segment["customer_count"] = count
+    
+    return Segment(**segment)
+
+@api_router.get("/segments/{segment_id}/customers", response_model=List[Customer])
+async def get_segment_customers(segment_id: str, user: dict = Depends(get_current_user)):
+    """Get all customers in a segment"""
+    segment = await db.segments.find_one({"id": segment_id, "user_id": user["id"]}, {"_id": 0})
+    if not segment:
+        raise HTTPException(status_code=404, detail="Segment not found")
+    
+    # Build MongoDB query from filters
+    query = build_customer_query(user["id"], segment["filters"])
+    customers = await db.customers.find(query, {"_id": 0}).to_list(1000)
+    
+    return [Customer(**c) for c in customers]
+
+@api_router.put("/segments/{segment_id}", response_model=Segment)
+async def update_segment(segment_id: str, update_data: SegmentUpdate, user: dict = Depends(get_current_user)):
+    """Update a segment"""
+    segment = await db.segments.find_one({"id": segment_id, "user_id": user["id"]})
+    if not segment:
+        raise HTTPException(status_code=404, detail="Segment not found")
+    
+    update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
+    if update_dict:
+        update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        # If filters changed, recalculate customer count
+        if "filters" in update_dict:
+            count = await count_customers_by_filters(user["id"], update_dict["filters"])
+            update_dict["customer_count"] = count
+        
+        await db.segments.update_one({"id": segment_id}, {"$set": update_dict})
+    
+    updated_segment = await db.segments.find_one({"id": segment_id}, {"_id": 0})
+    return Segment(**updated_segment)
+
+@api_router.delete("/segments/{segment_id}")
+async def delete_segment(segment_id: str, user: dict = Depends(get_current_user)):
+    """Delete a segment"""
+    result = await db.segments.delete_one({"id": segment_id, "user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Segment not found")
+    return {"message": "Segment deleted"}
+
+# Helper function to count customers by filters
+async def count_customers_by_filters(user_id: str, filters: dict) -> int:
+    """Count customers matching the given filters"""
+    query = build_customer_query(user_id, filters)
+    return await db.customers.count_documents(query)
+
+# Helper function to build MongoDB query from filters
+def build_customer_query(user_id: str, filters: dict) -> dict:
+    """Build MongoDB query from filter dictionary"""
+    query = {"user_id": user_id}
+    
+    # Tier filter
+    if filters.get("tier"):
+        query["tier"] = {"$in": filters["tier"]} if isinstance(filters["tier"], list) else filters["tier"]
+    
+    # City filter
+    if filters.get("city"):
+        query["city"] = {"$in": filters["city"]} if isinstance(filters["city"], list) else filters["city"]
+    
+    # Points range
+    if filters.get("points_min") is not None:
+        query["total_points"] = query.get("total_points", {})
+        query["total_points"]["$gte"] = filters["points_min"]
+    if filters.get("points_max") is not None:
+        query["total_points"] = query.get("total_points", {})
+        query["total_points"]["$lte"] = filters["points_max"]
+    
+    # Visits range
+    if filters.get("visits_min") is not None:
+        query["total_visits"] = query.get("total_visits", {})
+        query["total_visits"]["$gte"] = filters["visits_min"]
+    if filters.get("visits_max") is not None:
+        query["total_visits"] = query.get("total_visits", {})
+        query["total_visits"]["$lte"] = filters["visits_max"]
+    
+    # Spent range
+    if filters.get("spent_min") is not None:
+        query["total_spent"] = query.get("total_spent", {})
+        query["total_spent"]["$gte"] = filters["spent_min"]
+    if filters.get("spent_max") is not None:
+        query["total_spent"] = query.get("total_spent", {})
+        query["total_spent"]["$lte"] = filters["spent_max"]
+    
+    # Dietary preference
+    if filters.get("dietary"):
+        query["dietary"] = {"$in": filters["dietary"]} if isinstance(filters["dietary"], list) else filters["dietary"]
+    
+    # Allergies
+    if filters.get("allergies"):
+        query["allergies"] = {"$in": filters["allergies"]} if isinstance(filters["allergies"], list) else filters["allergies"]
+    
+    # Favorite food
+    if filters.get("favorite_food"):
+        query["favorite_food"] = {"$regex": filters["favorite_food"], "$options": "i"}
+    
+    # Search by name or phone
+    if filters.get("search"):
+        search_regex = {"$regex": filters["search"], "$options": "i"}
+        query["$or"] = [
+            {"name": search_regex},
+            {"phone": search_regex},
+            {"email": search_regex}
+        ]
+    
+    return query
+
 # ============ POINTS ROUTES ============
 
 @api_router.post("/points/transaction", response_model=PointsTransaction)
