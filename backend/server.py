@@ -1778,6 +1778,53 @@ async def pos_payment_received(
             # Continue even if coupon fails
             pass
     
+    # Step 1.5: Redeem points if requested
+    points_redeemed = 0
+    if webhook_data.redeem_points and webhook_data.redeem_points > 0:
+        customer_points = customer.get("total_points", 0)
+        
+        # Validate redemption
+        min_redeem = settings.get("min_redemption_points", 50)
+        max_redeem_percent = settings.get("max_redemption_percent", 50.0)
+        max_redeem_amount = settings.get("max_redemption_amount", 500.0)
+        redemption_value = settings.get("redemption_value", 0.25)  # 1 point = ₹0.25
+        
+        if webhook_data.redeem_points < min_redeem:
+            # Minimum not met, ignore redemption
+            pass
+        elif webhook_data.redeem_points > customer_points:
+            # Not enough points, ignore redemption
+            pass
+        else:
+            # Calculate redemption amount
+            redemption_amount = webhook_data.redeem_points * redemption_value
+            max_allowed_redemption = current_amount * (max_redeem_percent / 100)
+            
+            # Apply limits
+            redemption_amount = min(redemption_amount, max_allowed_redemption, max_redeem_amount)
+            
+            # Calculate actual points used (in case amount was capped)
+            points_redeemed = int(redemption_amount / redemption_value)
+            
+            # Apply redemption
+            current_amount -= redemption_amount
+            response_data["points_redeemed"] = points_redeemed
+            response_data["redemption_amount"] = round(redemption_amount, 2)
+            
+            # Create redemption transaction (will update customer points later)
+            redeem_tx = {
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "customer_id": customer["id"],
+                "points": points_redeemed,
+                "transaction_type": "redeem",
+                "description": f"Redeemed {points_redeemed} points for ₹{redemption_amount:.2f} discount",
+                "bill_amount": webhook_data.bill_amount,
+                "balance_after": customer_points - points_redeemed,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.points_transactions.insert_one(redeem_tx)
+    
     # Step 2: Calculate and award points (based on original bill amount, not discounted)
     bonus_messages = []
     total_bonus_points = 0
