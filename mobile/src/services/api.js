@@ -81,10 +81,22 @@ export const customersAPI = {
 
 // Points API
 export const pointsAPI = {
-  issue: (customerId, data) => api.post(`/points/${customerId}/issue`, data),
-  redeem: (customerId, data) => api.post(`/points/${customerId}/redeem`, data),
-  getHistory: (customerId) => api.get(`/points/${customerId}/history`),
-  issueBonus: (customerId, data) => api.post(`/points/${customerId}/bonus`, data),
+  issue: (customerId, data) => api.post('/points/earn', null, { 
+    params: { customer_id: customerId, bill_amount: data.bill_amount } 
+  }),
+  redeem: (customerId, data) => api.post('/points/transaction', {
+    customer_id: customerId,
+    points: -Math.abs(data.points),
+    type: 'redeem',
+    notes: data.notes || 'Points redeemed',
+  }),
+  getHistory: (customerId) => api.get(`/points/transactions/${customerId}`),
+  issueBonus: (customerId, data) => api.post('/points/transaction', {
+    customer_id: customerId,
+    points: data.points,
+    type: 'bonus',
+    notes: data.notes || 'Bonus points',
+  }),
 };
 
 // Loyalty Settings API
