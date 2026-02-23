@@ -3215,8 +3215,9 @@ const SegmentsPage = () => {
                         setShowSendMessage(false);
                         setSelectedCampaign("");
                         setMessageTemplate("");
+                        setTemplateVariables({});
                     }}>
-                        <DialogContent className="max-w-md mx-4 rounded-2xl">
+                        <DialogContent className="max-w-lg mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle className="font-['Montserrat'] flex items-center gap-2">
                                     <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
@@ -3250,27 +3251,103 @@ const SegmentsPage = () => {
                                 {/* Template Dropdown */}
                                 <div>
                                     <Label className="text-sm font-medium">Choose Template</Label>
-                                    <Select value={messageTemplate} onValueChange={setMessageTemplate}>
+                                    <Select value={messageTemplate} onValueChange={handleTemplateChange}>
                                         <SelectTrigger className="h-11 rounded-xl mt-1" data-testid="template-select">
                                             <SelectValue placeholder="Select a template..." />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {templates.map(template => (
                                                 <SelectItem key={template.id} value={template.id}>
-                                                    {template.name}
+                                                    <div className="flex items-center gap-2">
+                                                        {template.mediaType === "image" && <span>🖼️</span>}
+                                                        {template.mediaType === "video" && <span>🎬</span>}
+                                                        {!template.mediaType && <span>📝</span>}
+                                                        {template.name}
+                                                    </div>
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
 
-                                {/* Template Preview */}
+                                {/* Template Variables */}
+                                {currentTemplate?.variables && currentTemplate.variables.length > 0 && (
+                                    <div className="space-y-3">
+                                        <Label className="text-sm font-medium">Template Variables</Label>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {currentTemplate.variables.map(variable => (
+                                                <div key={variable}>
+                                                    <Label className="text-xs text-[#52525B] capitalize">
+                                                        {variable.replace(/_/g, ' ')}
+                                                    </Label>
+                                                    <Input
+                                                        type="text"
+                                                        value={templateVariables[variable] || ""}
+                                                        onChange={(e) => setTemplateVariables({
+                                                            ...templateVariables,
+                                                            [variable]: e.target.value
+                                                        })}
+                                                        placeholder={`Enter ${variable.replace(/_/g, ' ')}`}
+                                                        className="h-9 rounded-lg mt-1 text-sm"
+                                                        data-testid={`var-${variable}`}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Complete Template Preview with Media */}
                                 {messageTemplate && (
-                                    <div className="p-3 bg-gray-50 rounded-xl border">
-                                        <p className="text-xs font-medium text-[#52525B] mb-1">Message Preview:</p>
-                                        <p className="text-sm text-gray-700">
-                                            {templates.find(t => t.id === messageTemplate)?.preview}
-                                        </p>
+                                    <div className="rounded-xl border overflow-hidden bg-[#E5DDD5]">
+                                        <div className="p-2">
+                                            <p className="text-xs font-medium text-[#52525B] mb-2 bg-white/80 rounded px-2 py-1 inline-block">
+                                                📱 Message Preview
+                                            </p>
+                                            
+                                            {/* WhatsApp Style Message Bubble */}
+                                            <div className="bg-[#DCF8C6] rounded-lg p-3 max-w-[85%] ml-auto shadow-sm">
+                                                {/* Media Preview */}
+                                                {currentTemplate?.mediaType === "image" && currentTemplate.mediaUrl && (
+                                                    <div className="mb-2 rounded-lg overflow-hidden">
+                                                        <img 
+                                                            src={currentTemplate.mediaUrl} 
+                                                            alt="Template media" 
+                                                            className="w-full h-40 object-cover"
+                                                        />
+                                                    </div>
+                                                )}
+                                                {currentTemplate?.mediaType === "video" && currentTemplate.mediaUrl && (
+                                                    <div className="mb-2 rounded-lg overflow-hidden bg-black relative">
+                                                        <div className="w-full h-32 flex items-center justify-center bg-gray-900">
+                                                            <div className="text-center text-white">
+                                                                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-2">
+                                                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M8 5v14l11-7z"/>
+                                                                    </svg>
+                                                                </div>
+                                                                <p className="text-xs">Video Attachment</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Message Text */}
+                                                <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                                                    {getPreviewMessage()}
+                                                </p>
+                                                
+                                                {/* Timestamp */}
+                                                <div className="flex items-center justify-end gap-1 mt-1">
+                                                    <span className="text-[10px] text-gray-500">
+                                                        {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                    </span>
+                                                    <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
 
@@ -3287,6 +3364,7 @@ const SegmentsPage = () => {
                                             setShowSendMessage(false);
                                             setSelectedCampaign("");
                                             setMessageTemplate("");
+                                            setTemplateVariables({});
                                         }}
                                         className="flex-1 rounded-xl"
                                     >
@@ -3298,6 +3376,7 @@ const SegmentsPage = () => {
                                             setShowSendMessage(false);
                                             setSelectedCampaign("");
                                             setMessageTemplate("");
+                                            setTemplateVariables({});
                                         }}
                                         className="flex-1 bg-[#25D366] hover:bg-[#20BD5A] rounded-xl"
                                         disabled={!messageTemplate || !selectedCampaign}
