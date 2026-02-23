@@ -132,7 +132,7 @@ class DinePointsAPITester:
             )
             login_success = success
         
-        if success and 'access_token' in response:
+        if login_success and 'access_token' in response:
             self.token = response['access_token']
             self.user_id = response['user']['id']
             self.log(f"✅ Login successful - Token obtained", "SUCCESS")
