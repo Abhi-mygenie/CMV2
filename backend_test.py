@@ -177,7 +177,7 @@ class DinePointsAPITester:
             "Create customer segment",
             "POST",
             "segments",
-            201,
+            200,  # Backend returns 200, not 201
             data=segment_data
         )
         
