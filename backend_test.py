@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import time
 
 class DinePointsAPITester:
-    def __init__(self, base_url="https://loyalty-crm-3.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://f3af903f-99d0-4b63-a819-ece8671ebffc.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.token = None
         self.user_id = None
