@@ -1594,16 +1594,28 @@ const CustomerDetailPage = () => {
         e.preventDefault();
         setSubmitting(true);
         try {
+            // For credit, calculate total amount including bonus
+            const paidAmount = parseFloat(walletData.amount);
+            const bonusAmount = walletAction === "credit" && walletData.bonus ? parseFloat(walletData.bonus) : 0;
+            const totalCredit = paidAmount + bonusAmount;
+            
             await api.post("/wallet/transaction", {
                 customer_id: id,
-                amount: parseFloat(walletData.amount),
+                amount: walletAction === "credit" ? totalCredit : paidAmount,
                 transaction_type: walletAction,
-                description: walletData.description || `${walletAction === "credit" ? "Money added" : "Payment made"}`,
+                description: walletData.description || (walletAction === "credit" 
+                    ? (bonusAmount > 0 ? `Paid ₹${paidAmount} + Bonus ₹${bonusAmount}` : "Wallet recharge")
+                    : "Payment made"),
                 payment_method: walletData.payment_method
             });
-            toast.success(`₹${walletData.amount} ${walletAction === "credit" ? "added to" : "deducted from"} wallet!`);
+            
+            if (walletAction === "credit" && bonusAmount > 0) {
+                toast.success(`₹${totalCredit} added to wallet (₹${paidAmount} paid + ₹${bonusAmount} bonus)!`);
+            } else {
+                toast.success(`₹${paidAmount} ${walletAction === "credit" ? "added to" : "deducted from"} wallet!`);
+            }
             setShowWalletModal(false);
-            setWalletData({ amount: "", description: "", payment_method: "cash" });
+            setWalletData({ amount: "", bonus: "", description: "", payment_method: "cash" });
             fetchData();
         } catch (err) {
             toast.error(err.response?.data?.detail || "Transaction failed");
