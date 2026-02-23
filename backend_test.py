@@ -279,40 +279,38 @@ class DinePointsAPITester:
         
         return True
 
-    def test_loyalty_settings(self):
-        """Test loyalty settings and bonus features"""
+    def test_wallet_apis(self):
+        """Test wallet APIs as specified in review request"""
         self.log("=" * 50)
-        self.log("TESTING LOYALTY SETTINGS & BONUS FEATURES")
+        self.log("TESTING WALLET APIs")
         self.log("=" * 50)
         
-        # Get current settings
-        success, settings = self.run_test("Get loyalty settings", "GET", "loyalty/settings", 200)
+        if not self.test_customer_id:
+            self.log("❌ No test customer available for wallet testing", "SKIP")
+            return False
+            
+        # Test Credit Wallet API - POST /api/wallet/{customer_id}/credit
+        credit_data = {
+            "amount": 50
+        }
         
-        if success:
-            # Test updating bonus features
-            update_data = {
-                "first_visit_bonus_enabled": True,
-                "first_visit_bonus_points": 100,
-                "birthday_bonus_enabled": True,
-                "birthday_bonus_points": 200,
-                "birthday_bonus_days_after": 14,
-                "off_peak_bonus_enabled": True,
-                "off_peak_start_time": "14:00",
-                "off_peak_end_time": "17:00",
-                "off_peak_bonus_type": "multiplier",
-                "off_peak_bonus_value": 3.0,
-                "feedback_bonus_enabled": True,
-                "feedback_bonus_points": 50
-            }
-            
-            self.run_test("Update loyalty settings", "PUT", "loyalty/settings", 200, data=update_data)
-            
-            # Verify settings persisted
-            self.run_test("Verify settings updated", "GET", "loyalty/settings", 200)
-            
-            return True
+        success, response = self.run_test(
+            "Credit wallet (amount: 50)",
+            "POST",
+            f"wallet/{self.test_customer_id}/credit",
+            200,
+            data=credit_data
+        )
         
-        return False
+        # Test Get Wallet History API - GET /api/wallet/{customer_id}/history
+        self.run_test(
+            f"Get wallet history",
+            "GET",
+            f"wallet/{self.test_customer_id}/history", 
+            200
+        )
+        
+        return True
 
     def test_coupon_management(self):
         """Test coupon CRUD operations"""
