@@ -74,11 +74,45 @@ class DinePointsAPITester:
             self.log(f"❌ {name} - Exception: {str(e)}", "FAIL")
             return False, {}
 
+    def test_health_and_basics(self):
+        """Test health check and basic endpoints"""
+        self.log("=" * 50)
+        self.log("TESTING HEALTH CHECK & BASICS")
+        self.log("=" * 50)
+        
+        # Test health check endpoint (mentioned in review request)
+        self.run_test("Health check", "GET", "health", 200)
+        
+        return True
+
     def test_authentication(self):
         """Test authentication endpoints"""
         self.log("=" * 50)
-        self.log("TESTING AUTHENTICATION")
+        self.log("TESTING AUTHENTICATION & REGISTRATION")
         self.log("=" * 50)
+        
+        # Test registration (mentioned in review request)
+        import random
+        test_email = f"testuser{random.randint(1000, 9999)}@restaurant.com"
+        registration_data = {
+            "email": test_email,
+            "password": "test123456",
+            "restaurant_name": "Test Restaurant",
+            "phone": "9876543210"
+        }
+        
+        success, response = self.run_test(
+            "User registration",
+            "POST", 
+            "auth/register",
+            200,
+            data=registration_data
+        )
+        
+        if success and 'access_token' in response:
+            self.token = response['access_token']
+            self.user_id = response['user']['id']
+            self.log(f"✅ Registration successful - Token obtained", "SUCCESS")
         
         # Test login with provided credentials
         success, response = self.run_test(
