@@ -1544,10 +1544,12 @@ const CustomerDetailPage = () => {
     const [activeTab, setActiveTab] = useState("points");
     const [showPointsModal, setShowPointsModal] = useState(false);
     const [showWalletModal, setShowWalletModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [pointsAction, setPointsAction] = useState("earn");
     const [walletAction, setWalletAction] = useState("credit");
     const [pointsData, setPointsData] = useState({ points: "", bill_amount: "", description: "" });
     const [walletData, setWalletData] = useState({ amount: "", bonus: "", bonusType: "wallet", description: "", payment_method: "cash" });
+    const [editData, setEditData] = useState({});
     const [submitting, setSubmitting] = useState(false);
 
     const fetchData = async () => {
