@@ -269,6 +269,18 @@ const LoginPage = () => {
                     >
                         {isLoading ? "Signing in..." : "Sign In"}
                     </Button>
+                    
+                    <div className="text-center mt-4">
+                        <span className="text-sm text-[#52525B]">Don't have an account? </span>
+                        <button 
+                            type="button"
+                            onClick={() => navigate("/register")}
+                            className="text-sm text-[#F26B33] font-medium hover:underline"
+                            data-testid="signup-link"
+                        >
+                            Sign up
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
