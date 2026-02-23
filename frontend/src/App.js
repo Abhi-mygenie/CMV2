@@ -1848,11 +1848,11 @@ const CustomerDetailPage = () => {
                 <DialogContent className="max-w-sm mx-4 rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="font-['Montserrat']">
-                            {pointsAction === "earn" ? "Add Points" : "Redeem Points"}
+                            {pointsAction === "bonus" ? "Give Bonus Points" : "Redeem Points"}
                         </DialogTitle>
                         <DialogDescription>
-                            {pointsAction === "earn" 
-                                ? "Add points for a purchase" 
+                            {pointsAction === "bonus" 
+                                ? "Award bonus points as a reward or gift" 
                                 : `Available: ${customer?.total_points} points`
                             }
                         </DialogDescription>
@@ -1874,29 +1874,15 @@ const CustomerDetailPage = () => {
                                     data-testid="points-amount-input"
                                 />
                             </div>
-                            {pointsAction === "earn" && (
-                                <div>
-                                    <Label htmlFor="bill" className="form-label">Bill Amount (₹)</Label>
-                                    <Input
-                                        id="bill"
-                                        type="number"
-                                        min="0"
-                                        value={pointsData.bill_amount}
-                                        onChange={(e) => setPointsData({...pointsData, bill_amount: e.target.value})}
-                                        placeholder="500"
-                                        className="h-12 rounded-xl"
-                                        data-testid="bill-amount-input"
-                                    />
-                                </div>
-                            )}
                             <div>
-                                <Label htmlFor="desc" className="form-label">Description</Label>
+                                <Label htmlFor="desc" className="form-label">Reason / Note *</Label>
                                 <Input
                                     id="desc"
                                     value={pointsData.description}
                                     onChange={(e) => setPointsData({...pointsData, description: e.target.value})}
-                                    placeholder={pointsAction === "earn" ? "Lunch purchase" : "Discount applied"}
+                                    placeholder={pointsAction === "bonus" ? "Birthday gift, Loyalty reward, etc." : "Discount applied"}
                                     className="h-12 rounded-xl"
+                                    required
                                     data-testid="points-description-input"
                                 />
                             </div>
@@ -1912,11 +1898,11 @@ const CustomerDetailPage = () => {
                             </Button>
                             <Button 
                                 type="submit" 
-                                className={`rounded-full ${pointsAction === "earn" ? "bg-[#329937] hover:bg-[#287A2D]" : "bg-[#F26B33] hover:bg-[#D85A2A]"}`}
+                                className={`rounded-full ${pointsAction === "bonus" ? "bg-[#329937] hover:bg-[#287A2D]" : "bg-[#F26B33] hover:bg-[#D85A2A]"}`}
                                 disabled={submitting}
                                 data-testid="submit-points-btn"
                             >
-                                {submitting ? "Processing..." : pointsAction === "earn" ? "Add Points" : "Redeem"}
+                                {submitting ? "Processing..." : pointsAction === "bonus" ? "Give Points" : "Redeem"}
                             </Button>
                         </DialogFooter>
                     </form>
