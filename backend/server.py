@@ -2342,6 +2342,294 @@ async def regenerate_api_key(user: dict = Depends(get_current_user)):
         "message": "API key regenerated. Update your POS configuration immediately. Old key is now invalid."
     }
 
+# ============ WHATSAPP TEMPLATES & AUTOMATION ============
+
+# WhatsApp Template Models
+class WhatsAppTemplateCreate(BaseModel):
+    name: str
+    message: str
+    media_type: Optional[str] = None  # image, video, document, None
+    media_url: Optional[str] = None
+    variables: Optional[List[str]] = None  # e.g., ["customer_name", "points", "amount"]
+
+class WhatsAppTemplateUpdate(BaseModel):
+    name: Optional[str] = None
+    message: Optional[str] = None
+    media_type: Optional[str] = None
+    media_url: Optional[str] = None
+    variables: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+
+class WhatsAppTemplate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    name: str
+    message: str
+    media_type: Optional[str] = None
+    media_url: Optional[str] = None
+    variables: Optional[List[str]] = None
+    is_active: bool = True
+    created_at: str
+    updated_at: str
+
+# Automation Event Types
+AUTOMATION_EVENTS = [
+    "points_earned",        # When customer earns points from a purchase
+    "points_redeemed",      # When customer redeems points
+    "bonus_points",         # When bonus points are given manually
+    "wallet_credit",        # When money is added to wallet
+    "wallet_debit",         # When money is deducted from wallet
+    "birthday",             # On customer's birthday
+    "anniversary",          # On customer's anniversary
+    "first_visit",          # After first purchase
+    "tier_upgrade",         # When customer upgrades tier
+    "coupon_earned",        # When customer receives a coupon
+    "points_expiring",      # When points are about to expire
+    "feedback_received",    # When customer submits feedback
+    "inactive_reminder"     # When customer hasn't visited in X days
+]
+
+class AutomationRuleCreate(BaseModel):
+    event_type: str  # One of AUTOMATION_EVENTS
+    template_id: str
+    is_enabled: bool = True
+    delay_minutes: int = 0  # Delay before sending (0 = immediate)
+    conditions: Optional[dict] = None  # Additional conditions (e.g., {"min_points": 100})
+
+class AutomationRuleUpdate(BaseModel):
+    event_type: Optional[str] = None
+    template_id: Optional[str] = None
+    is_enabled: Optional[bool] = None
+    delay_minutes: Optional[int] = None
+    conditions: Optional[dict] = None
+
+class AutomationRule(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    event_type: str
+    template_id: str
+    is_enabled: bool = True
+    delay_minutes: int = 0
+    conditions: Optional[dict] = None
+    created_at: str
+    updated_at: str
+
+# WhatsApp Template CRUD Endpoints
+@api_router.post("/whatsapp/templates", response_model=WhatsAppTemplate)
+async def create_whatsapp_template(template_data: WhatsAppTemplateCreate, user: dict = Depends(get_current_user)):
+    """Create a new WhatsApp message template"""
+    template_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    template_doc = {
+        "id": template_id,
+        "user_id": user["id"],
+        "name": template_data.name,
+        "message": template_data.message,
+        "media_type": template_data.media_type,
+        "media_url": template_data.media_url,
+        "variables": template_data.variables or [],
+        "is_active": True,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.whatsapp_templates.insert_one(template_doc)
+    return WhatsAppTemplate(**template_doc)
+
+@api_router.get("/whatsapp/templates", response_model=List[WhatsAppTemplate])
+async def list_whatsapp_templates(active_only: bool = False, user: dict = Depends(get_current_user)):
+    """List all WhatsApp templates for the user"""
+    query = {"user_id": user["id"]}
+    if active_only:
+        query["is_active"] = True
+    
+    templates = await db.whatsapp_templates.find(query, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return [WhatsAppTemplate(**t) for t in templates]
+
+@api_router.get("/whatsapp/templates/{template_id}", response_model=WhatsAppTemplate)
+async def get_whatsapp_template(template_id: str, user: dict = Depends(get_current_user)):
+    """Get a specific WhatsApp template"""
+    template = await db.whatsapp_templates.find_one({"id": template_id, "user_id": user["id"]}, {"_id": 0})
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return WhatsAppTemplate(**template)
+
+@api_router.put("/whatsapp/templates/{template_id}", response_model=WhatsAppTemplate)
+async def update_whatsapp_template(template_id: str, template_data: WhatsAppTemplateUpdate, user: dict = Depends(get_current_user)):
+    """Update a WhatsApp template"""
+    template = await db.whatsapp_templates.find_one({"id": template_id, "user_id": user["id"]})
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+    
+    update_dict = {k: v for k, v in template_data.model_dump().items() if v is not None}
+    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    if update_dict:
+        await db.whatsapp_templates.update_one({"id": template_id}, {"$set": update_dict})
+    
+    updated = await db.whatsapp_templates.find_one({"id": template_id}, {"_id": 0})
+    return WhatsAppTemplate(**updated)
+
+@api_router.delete("/whatsapp/templates/{template_id}")
+async def delete_whatsapp_template(template_id: str, user: dict = Depends(get_current_user)):
+    """Delete a WhatsApp template"""
+    # First check if template is used in any automation rule
+    rule_using_template = await db.automation_rules.find_one({"template_id": template_id, "user_id": user["id"]})
+    if rule_using_template:
+        raise HTTPException(status_code=400, detail="Cannot delete template that is used in automation rules. Remove the rules first.")
+    
+    result = await db.whatsapp_templates.delete_one({"id": template_id, "user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"message": "Template deleted"}
+
+# Automation Rules CRUD Endpoints
+@api_router.post("/whatsapp/automation", response_model=AutomationRule)
+async def create_automation_rule(rule_data: AutomationRuleCreate, user: dict = Depends(get_current_user)):
+    """Create a new automation rule (event -> template mapping)"""
+    # Validate event type
+    if rule_data.event_type not in AUTOMATION_EVENTS:
+        raise HTTPException(status_code=400, detail=f"Invalid event type. Must be one of: {', '.join(AUTOMATION_EVENTS)}")
+    
+    # Validate template exists
+    template = await db.whatsapp_templates.find_one({"id": rule_data.template_id, "user_id": user["id"]})
+    if not template:
+        raise HTTPException(status_code=400, detail="Template not found")
+    
+    # Check if rule already exists for this event
+    existing = await db.automation_rules.find_one({"user_id": user["id"], "event_type": rule_data.event_type})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"An automation rule already exists for event '{rule_data.event_type}'. Update or delete the existing rule.")
+    
+    rule_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    rule_doc = {
+        "id": rule_id,
+        "user_id": user["id"],
+        "event_type": rule_data.event_type,
+        "template_id": rule_data.template_id,
+        "is_enabled": rule_data.is_enabled,
+        "delay_minutes": rule_data.delay_minutes,
+        "conditions": rule_data.conditions,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.automation_rules.insert_one(rule_doc)
+    return AutomationRule(**rule_doc)
+
+@api_router.get("/whatsapp/automation", response_model=List[AutomationRule])
+async def list_automation_rules(user: dict = Depends(get_current_user)):
+    """List all automation rules"""
+    rules = await db.automation_rules.find({"user_id": user["id"]}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return [AutomationRule(**r) for r in rules]
+
+@api_router.get("/whatsapp/automation/events")
+async def get_automation_events():
+    """Get list of available automation events"""
+    event_descriptions = {
+        "points_earned": "When customer earns points from a purchase",
+        "points_redeemed": "When customer redeems points",
+        "bonus_points": "When bonus points are given manually",
+        "wallet_credit": "When money is added to wallet",
+        "wallet_debit": "When money is deducted from wallet",
+        "birthday": "On customer's birthday",
+        "anniversary": "On customer's anniversary",
+        "first_visit": "After customer's first purchase",
+        "tier_upgrade": "When customer upgrades to a higher tier",
+        "coupon_earned": "When customer receives a coupon",
+        "points_expiring": "When points are about to expire (reminder)",
+        "feedback_received": "When customer submits feedback",
+        "inactive_reminder": "When customer hasn't visited in X days"
+    }
+    return [{"event": e, "description": event_descriptions.get(e, "")} for e in AUTOMATION_EVENTS]
+
+@api_router.get("/whatsapp/automation/{rule_id}", response_model=AutomationRule)
+async def get_automation_rule(rule_id: str, user: dict = Depends(get_current_user)):
+    """Get a specific automation rule"""
+    rule = await db.automation_rules.find_one({"id": rule_id, "user_id": user["id"]}, {"_id": 0})
+    if not rule:
+        raise HTTPException(status_code=404, detail="Automation rule not found")
+    return AutomationRule(**rule)
+
+@api_router.put("/whatsapp/automation/{rule_id}", response_model=AutomationRule)
+async def update_automation_rule(rule_id: str, rule_data: AutomationRuleUpdate, user: dict = Depends(get_current_user)):
+    """Update an automation rule"""
+    rule = await db.automation_rules.find_one({"id": rule_id, "user_id": user["id"]})
+    if not rule:
+        raise HTTPException(status_code=404, detail="Automation rule not found")
+    
+    update_dict = {k: v for k, v in rule_data.model_dump().items() if v is not None}
+    
+    # Validate event type if being updated
+    if "event_type" in update_dict and update_dict["event_type"] not in AUTOMATION_EVENTS:
+        raise HTTPException(status_code=400, detail=f"Invalid event type")
+    
+    # Validate template if being updated
+    if "template_id" in update_dict:
+        template = await db.whatsapp_templates.find_one({"id": update_dict["template_id"], "user_id": user["id"]})
+        if not template:
+            raise HTTPException(status_code=400, detail="Template not found")
+    
+    update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
+    
+    if update_dict:
+        await db.automation_rules.update_one({"id": rule_id}, {"$set": update_dict})
+    
+    updated = await db.automation_rules.find_one({"id": rule_id}, {"_id": 0})
+    return AutomationRule(**updated)
+
+@api_router.delete("/whatsapp/automation/{rule_id}")
+async def delete_automation_rule(rule_id: str, user: dict = Depends(get_current_user)):
+    """Delete an automation rule"""
+    result = await db.automation_rules.delete_one({"id": rule_id, "user_id": user["id"]})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Automation rule not found")
+    return {"message": "Automation rule deleted"}
+
+@api_router.post("/whatsapp/automation/{rule_id}/toggle")
+async def toggle_automation_rule(rule_id: str, user: dict = Depends(get_current_user)):
+    """Toggle automation rule enabled/disabled status"""
+    rule = await db.automation_rules.find_one({"id": rule_id, "user_id": user["id"]})
+    if not rule:
+        raise HTTPException(status_code=404, detail="Automation rule not found")
+    
+    new_status = not rule.get("is_enabled", True)
+    await db.automation_rules.update_one(
+        {"id": rule_id},
+        {"$set": {"is_enabled": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"is_enabled": new_status}
+
+# Helper to get automation rules with template details
+@api_router.get("/whatsapp/automation-with-templates")
+async def get_automation_with_templates(user: dict = Depends(get_current_user)):
+    """Get all automation rules with their associated template details"""
+    rules = await db.automation_rules.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    templates = await db.whatsapp_templates.find({"user_id": user["id"]}, {"_id": 0}).to_list(100)
+    
+    # Create template lookup
+    template_lookup = {t["id"]: t for t in templates}
+    
+    # Enrich rules with template details
+    result = []
+    for rule in rules:
+        rule_with_template = dict(rule)
+        template = template_lookup.get(rule["template_id"])
+        if template:
+            rule_with_template["template"] = template
+        result.append(rule_with_template)
+    
+    return {
+        "rules": result,
+        "available_events": AUTOMATION_EVENTS,
+        "templates": templates
+    }
+
 # ============ ROOT ROUTES ============
 
 @api_router.get("/")
