@@ -186,6 +186,22 @@ export default function HomeScreen() {
           )}
         </View>
       </ScrollView>
+
+      {/* QR Code Modal */}
+      <QRCodeModal 
+        visible={showQRModal} 
+        onClose={() => setShowQRModal(false)} 
+      />
+
+      {/* QR Scanner Modal */}
+      <QRScannerModal
+        visible={showScannerModal}
+        onClose={() => setShowScannerModal(false)}
+        onScan={(data) => {
+          console.log('Scanned:', data);
+          // Handle scanned customer data
+        }}
+      />
     </SafeAreaView>
   );
 }
