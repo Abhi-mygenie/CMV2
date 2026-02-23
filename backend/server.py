@@ -1606,6 +1606,7 @@ class POSPaymentWebhook(BaseModel):
     bill_amount: float  # Total bill amount
     channel: str = "dine_in"  # dine_in, takeaway, delivery
     coupon_code: Optional[str] = None  # Optional coupon to apply
+    redeem_points: Optional[int] = None  # Optional points to redeem
     bill_id: Optional[str] = None  # POS bill reference ID
     metadata: Optional[dict] = None  # Additional POS metadata
 
