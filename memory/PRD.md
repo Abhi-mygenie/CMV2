@@ -111,7 +111,7 @@ DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded 
 - P3: Backend refactoring (split server.py into routers)
 
 ## Preview URL
-https://customer-segment-cms.preview.emergentagent.com
+https://loyalty-automation-1.preview.emergentagent.com
 
 ## Test Credentials
 - Email: demo@restaurant.com
