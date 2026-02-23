@@ -505,18 +505,18 @@ class DinePointsAPITester:
             self.log("❌ Authentication failed - stopping tests", "CRITICAL")
             return False
         
-        # Run all test suites
+        # Run all test suites in order of review request
         test_suites = [
-            self.test_health_and_basics,  # NEW - Health check from review request
-            self.test_authentication,      # Registration + Login from review request
-            self.test_analytics_dashboard, # Dashboard stats from review request (moved up for priority)
-            self.test_customer_management,
-            self.test_customer_segmentation,  # NEW FEATURE - Priority
-            self.test_points_and_bonuses,
-            self.test_loyalty_settings,
-            self.test_coupon_management,
-            self.test_feedback_system,
-            self.test_qr_code_generation
+            self.test_health_and_basics,      # Basic health check
+            self.test_customer_management,    # Customer APIs
+            self.test_points_apis,           # Points APIs 
+            self.test_wallet_apis,           # Wallet APIs
+            self.test_analytics_api,         # Analytics API
+            self.test_loyalty_settings_api,  # Loyalty Settings API
+            self.test_segments_api,          # Segments API
+            self.test_coupon_management,     # Coupons API
+            self.test_whatsapp_apis,         # WhatsApp APIs
+            self.test_qr_api                 # QR API
         ]
         
         for test_suite in test_suites:
