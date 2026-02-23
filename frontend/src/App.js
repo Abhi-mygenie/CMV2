@@ -873,6 +873,43 @@ const CustomersPage = () => {
         }
     };
 
+    const openEditModal = (customer, e) => {
+        e.stopPropagation(); // Prevent navigation to detail page
+        setEditingCustomer(customer);
+        setEditData({
+            name: customer.name,
+            phone: customer.phone,
+            country_code: customer.country_code || "+91",
+            email: customer.email || "",
+            dob: customer.dob || "",
+            anniversary: customer.anniversary || "",
+            customer_type: customer.customer_type || "normal",
+            gst_name: customer.gst_name || "",
+            gst_number: customer.gst_number || "",
+            address: customer.address || "",
+            city: customer.city || "",
+            pincode: customer.pincode || "",
+            notes: customer.notes || ""
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateCustomer = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await api.put(`/customers/${editingCustomer.id}`, editData);
+            toast.success("Customer updated successfully!");
+            setShowEditModal(false);
+            setEditingCustomer(null);
+            fetchCustomers();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to update customer");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     return (
         <MobileLayout>
             <div className="p-4 max-w-lg mx-auto">
