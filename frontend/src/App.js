@@ -1648,6 +1648,41 @@ const CustomerDetailPage = () => {
         }
     };
 
+    const openEditModal = () => {
+        setEditData({
+            name: customer.name,
+            phone: customer.phone,
+            country_code: customer.country_code || "+91",
+            email: customer.email || "",
+            dob: customer.dob || "",
+            anniversary: customer.anniversary || "",
+            customer_type: customer.customer_type || "normal",
+            gst_name: customer.gst_name || "",
+            gst_number: customer.gst_number || "",
+            address: customer.address || "",
+            city: customer.city || "",
+            pincode: customer.pincode || "",
+            allergies: customer.allergies || [],
+            notes: customer.notes || ""
+        });
+        setShowEditModal(true);
+    };
+
+    const handleUpdateCustomer = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await api.put(`/customers/${id}`, editData);
+            toast.success("Customer updated successfully!");
+            setShowEditModal(false);
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to update customer");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
     if (loading) {
         return (
             <MobileLayout>
