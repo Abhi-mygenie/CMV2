@@ -3363,6 +3363,7 @@ const SegmentsPage = () => {
                                         variant="outline"
                                         onClick={() => {
                                             setShowSendMessage(false);
+                                            setSelectedSegment(null);
                                             setSelectedCampaign("");
                                             setMessageTemplate("");
                                             setTemplateVariables({});
