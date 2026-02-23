@@ -3,8 +3,10 @@ import { View, Text, ScrollView, TouchableOpacity, RefreshControl } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { analyticsAPI, customersAPI } from '../../src/services/api';
-import { Plus, QrCode, TrendingUp, TrendingDown, Users, Star } from 'lucide-react-native';
+import { Plus, QrCode, TrendingUp, TrendingDown, Users, Star, ScanLine } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
+import QRCodeModal from '../../src/components/QRCodeModal';
+import QRScannerModal from '../../src/components/QRScannerModal';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -13,6 +15,8 @@ export default function HomeScreen() {
   const [recentCustomers, setRecentCustomers] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [showScannerModal, setShowScannerModal] = useState(false);
 
   const fetchData = async () => {
     try {
