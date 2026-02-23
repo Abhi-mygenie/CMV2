@@ -2,9 +2,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone
 import uuid
 
-from ..core.database import db
-from ..core.auth import hash_password, verify_password, create_token, generate_api_key, get_current_user
-from ..models.schemas import UserCreate, UserLogin, UserResponse, TokenResponse
+from core.database import db
+from core.auth import hash_password, verify_password, create_token, generate_api_key, get_current_user
+from models.schemas import UserCreate, UserLogin, UserResponse, TokenResponse
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 

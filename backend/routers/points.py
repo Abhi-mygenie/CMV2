@@ -3,10 +3,10 @@ from typing import List
 from datetime import datetime, timezone, timedelta
 import uuid
 
-from ..core.database import db
-from ..core.auth import get_current_user
-from ..core.helpers import calculate_tier, get_earn_percent_for_tier
-from ..models.schemas import (
+from core.database import db
+from core.auth import get_current_user
+from core.helpers import calculate_tier, get_earn_percent_for_tier
+from models.schemas import (
     PointsTransaction, PointsTransactionCreate,
     LoyaltySettings, LoyaltySettingsUpdate
 )

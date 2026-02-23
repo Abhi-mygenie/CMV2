@@ -3,9 +3,9 @@ from typing import List
 from datetime import datetime, timezone, timedelta
 import uuid
 
-from ..core.database import db
-from ..core.auth import get_current_user
-from ..models.schemas import Feedback, FeedbackCreate, DashboardStats
+from core.database import db
+from core.auth import get_current_user
+from models.schemas import Feedback, FeedbackCreate, DashboardStats
 
 router = APIRouter(prefix="/feedback", tags=["Feedback"])
 analytics_router = APIRouter(prefix="/analytics", tags=["Analytics"])

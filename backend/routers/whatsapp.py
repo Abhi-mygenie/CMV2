@@ -3,9 +3,9 @@ from typing import List
 from datetime import datetime, timezone
 import uuid
 
-from ..core.database import db
-from ..core.auth import get_current_user
-from ..models.schemas import (
+from core.database import db
+from core.auth import get_current_user
+from models.schemas import (
     WhatsAppTemplate, WhatsAppTemplateCreate, WhatsAppTemplateUpdate,
     AutomationRule, AutomationRuleCreate, AutomationRuleUpdate,
     AUTOMATION_EVENTS

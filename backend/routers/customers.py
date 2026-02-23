@@ -4,10 +4,10 @@ from datetime import datetime, timezone, timedelta
 import uuid
 import os
 
-from ..core.database import db
-from ..core.auth import get_current_user
-from ..core.helpers import generate_qr_code, build_customer_query
-from ..models.schemas import (
+from core.database import db
+from core.auth import get_current_user
+from core.helpers import generate_qr_code, build_customer_query
+from models.schemas import (
     Customer, CustomerCreate, CustomerUpdate,
     Segment, SegmentCreate, SegmentUpdate
 )

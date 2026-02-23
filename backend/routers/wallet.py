@@ -3,9 +3,9 @@ from typing import List
 from datetime import datetime, timezone
 import uuid
 
-from ..core.database import db
-from ..core.auth import get_current_user
-from ..models.schemas import WalletTransaction, WalletTransactionCreate
+from core.database import db
+from core.auth import get_current_user
+from models.schemas import WalletTransaction, WalletTransactionCreate
 
 router = APIRouter(prefix="/wallet", tags=["Wallet"])
 
