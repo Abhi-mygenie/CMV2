@@ -82,4 +82,4 @@ DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded 
 - None required - app is running as-is
 
 ## Preview URL
-https://f3af903f-99d0-4b63-a819-ece8671ebffc.preview.emergentagent.com
+https://customer-segment-cms.preview.emergentagent.com
