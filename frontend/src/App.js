@@ -704,6 +704,79 @@ const CustomersPage = () => {
 
     const fetchSegments = async () => {
         try {
+            const res = await api.get('/segments');
+            setSavedSegments(res.data);
+        } catch (err) {
+            console.error("Failed to load segments:", err);
+        }
+    };
+
+    const saveAsSegment = async () => {
+        if (!segmentName.trim()) {
+            toast.error("Please enter a segment name");
+            return;
+        }
+
+        try {
+            const segmentFilters = {
+                tier: filters.tier !== "all" ? filters.tier : undefined,
+                customer_type: filters.customer_type !== "all" ? filters.customer_type : undefined,
+                last_visit_days: filters.last_visit_days !== "all" ? filters.last_visit_days : undefined,
+                city: filters.city || undefined,
+                search: search || undefined
+            };
+
+            // Remove undefined values
+            Object.keys(segmentFilters).forEach(key => 
+                segmentFilters[key] === undefined && delete segmentFilters[key]
+            );
+
+            await api.post('/segments', {
+                name: segmentName,
+                filters: segmentFilters
+            });
+
+            toast.success(`Segment "${segmentName}" saved successfully!`);
+            setShowSaveSegmentDialog(false);
+            setSegmentName("");
+            fetchSegments();
+        } catch (err) {
+            toast.error("Failed to save segment");
+        }
+    };
+
+    const loadSegment = async (segment) => {
+        setSelectedSegment(segment);
+        const segmentFilters = segment.filters;
+        
+        setFilters({
+            tier: segmentFilters.tier || "all",
+            customer_type: segmentFilters.customer_type || "all",
+            last_visit_days: segmentFilters.last_visit_days || "all",
+            city: segmentFilters.city || "",
+            sort_by: "created_at",
+            sort_order: "desc"
+        });
+        setSearch(segmentFilters.search || "");
+    };
+
+    const deleteSegment = async (segmentId) => {
+        if (!window.confirm("Are you sure you want to delete this segment?")) return;
+        
+        try {
+            await api.delete(`/segments/${segmentId}`);
+            toast.success("Segment deleted");
+            fetchSegments();
+            if (selectedSegment?.id === segmentId) {
+                setSelectedSegment(null);
+            }
+        } catch (err) {
+            toast.error("Failed to delete segment");
+        }
+    };
+
+    const fetchSegments = async () => {
+        try {
             const res = await api.get("/customers/segments/stats");
             setSegments(res.data);
         } catch (err) {
