@@ -132,7 +132,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
             <TouchableOpacity 
               className="flex-1 bg-white rounded-xl p-4 ml-2 items-center shadow-sm border border-gray-100"
-              onPress={() => {}}
+              onPress={() => setShowQRModal(true)}
             >
               <View className="bg-secondary-100 rounded-full p-3 mb-2">
                 <QrCode size={24} color="#22c55e" />
