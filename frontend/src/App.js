@@ -5490,6 +5490,7 @@ function App() {
                         <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
                         <Route path="/coupons" element={<ProtectedRoute><CouponsPage /></ProtectedRoute>} />
                         <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                        <Route path="/whatsapp-automation" element={<ProtectedRoute><WhatsAppAutomationPage /></ProtectedRoute>} />
 
                         {/* Fallback */}
                         <Route path="*" element={<Navigate to="/" />} />
