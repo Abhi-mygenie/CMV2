@@ -1753,6 +1753,8 @@ async def pos_payment_received(
         settings.setdefault("min_redemption_points", 100)
         settings.setdefault("max_redemption_percent", 50.0)
         settings.setdefault("max_redemption_amount", 500.0)
+        settings.setdefault("feedback_bonus_enabled", True)
+        settings.setdefault("feedback_bonus_points", 25)
     
     response_data = {
         "customer": {
