@@ -655,6 +655,8 @@ const CustomersPage = () => {
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(location.state?.openAddModal || false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingCustomer, setEditingCustomer] = useState(null);
     const [showFilters, setShowFilters] = useState(false);
     const [segments, setSegments] = useState(null);
     const [filters, setFilters] = useState({
@@ -684,6 +686,7 @@ const CustomersPage = () => {
         custom_field_2: "",
         custom_field_3: ""
     });
+    const [editData, setEditData] = useState({});
     const [submitting, setSubmitting] = useState(false);
     const [showSaveSegmentDialog, setShowSaveSegmentDialog] = useState(false);
     const [segmentName, setSegmentName] = useState("");
