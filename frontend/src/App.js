@@ -4684,6 +4684,691 @@ const SettingsPage = () => {
     );
 };
 
+// ============ WHATSAPP AUTOMATION PAGE ============
+
+const WhatsAppAutomationPage = () => {
+    const { api } = useAuth();
+    const navigate = useNavigate();
+    const [templates, setTemplates] = useState([]);
+    const [automationRules, setAutomationRules] = useState([]);
+    const [availableEvents, setAvailableEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("templates");
+    
+    // Template form state
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [editingTemplate, setEditingTemplate] = useState(null);
+    const [templateForm, setTemplateForm] = useState({
+        name: "",
+        message: "",
+        media_type: null,
+        media_url: "",
+        variables: []
+    });
+    
+    // Automation rule form state
+    const [showRuleModal, setShowRuleModal] = useState(false);
+    const [editingRule, setEditingRule] = useState(null);
+    const [ruleForm, setRuleForm] = useState({
+        event_type: "",
+        template_id: "",
+        is_enabled: true,
+        delay_minutes: 0
+    });
+
+    // Available template variables
+    const availableVariables = [
+        { key: "customer_name", label: "Customer Name", example: "John" },
+        { key: "points_balance", label: "Points Balance", example: "1,250" },
+        { key: "points_earned", label: "Points Earned", example: "50" },
+        { key: "points_redeemed", label: "Points Redeemed", example: "100" },
+        { key: "wallet_balance", label: "Wallet Balance", example: "₹500" },
+        { key: "amount", label: "Amount", example: "₹1,000" },
+        { key: "tier", label: "Customer Tier", example: "Gold" },
+        { key: "restaurant_name", label: "Restaurant Name", example: "Demo Restaurant" },
+        { key: "coupon_code", label: "Coupon Code", example: "SAVE20" },
+        { key: "expiry_date", label: "Expiry Date", example: "31 Dec 2025" }
+    ];
+
+    // Event labels for better display
+    const eventLabels = {
+        "points_earned": "Points Earned (Purchase)",
+        "points_redeemed": "Points Redeemed",
+        "bonus_points": "Bonus Points Given",
+        "wallet_credit": "Wallet Top-up",
+        "wallet_debit": "Wallet Payment",
+        "birthday": "Birthday Wish",
+        "anniversary": "Anniversary Wish",
+        "first_visit": "First Visit Welcome",
+        "tier_upgrade": "Tier Upgrade",
+        "coupon_earned": "Coupon Received",
+        "points_expiring": "Points Expiring Reminder",
+        "feedback_received": "Feedback Thank You",
+        "inactive_reminder": "Win-back Message"
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        try {
+            const [templatesRes, rulesRes, eventsRes] = await Promise.all([
+                api.get("/whatsapp/templates"),
+                api.get("/whatsapp/automation"),
+                api.get("/whatsapp/automation/events")
+            ]);
+            setTemplates(templatesRes.data);
+            setAutomationRules(rulesRes.data);
+            setAvailableEvents(eventsRes.data);
+        } catch (err) {
+            toast.error("Failed to load WhatsApp settings");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Template CRUD
+    const handleSaveTemplate = async () => {
+        try {
+            if (editingTemplate) {
+                await api.put(`/whatsapp/templates/${editingTemplate.id}`, templateForm);
+                toast.success("Template updated!");
+            } else {
+                await api.post("/whatsapp/templates", templateForm);
+                toast.success("Template created!");
+            }
+            setShowTemplateModal(false);
+            setEditingTemplate(null);
+            setTemplateForm({ name: "", message: "", media_type: null, media_url: "", variables: [] });
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to save template");
+        }
+    };
+
+    const handleEditTemplate = (template) => {
+        setEditingTemplate(template);
+        setTemplateForm({
+            name: template.name,
+            message: template.message,
+            media_type: template.media_type || null,
+            media_url: template.media_url || "",
+            variables: template.variables || []
+        });
+        setShowTemplateModal(true);
+    };
+
+    const handleDeleteTemplate = async (templateId) => {
+        if (!window.confirm("Are you sure you want to delete this template?")) return;
+        try {
+            await api.delete(`/whatsapp/templates/${templateId}`);
+            toast.success("Template deleted!");
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to delete template");
+        }
+    };
+
+    // Automation Rule CRUD
+    const handleSaveRule = async () => {
+        try {
+            if (editingRule) {
+                await api.put(`/whatsapp/automation/${editingRule.id}`, ruleForm);
+                toast.success("Automation rule updated!");
+            } else {
+                await api.post("/whatsapp/automation", ruleForm);
+                toast.success("Automation rule created!");
+            }
+            setShowRuleModal(false);
+            setEditingRule(null);
+            setRuleForm({ event_type: "", template_id: "", is_enabled: true, delay_minutes: 0 });
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to save rule");
+        }
+    };
+
+    const handleEditRule = (rule) => {
+        setEditingRule(rule);
+        setRuleForm({
+            event_type: rule.event_type,
+            template_id: rule.template_id,
+            is_enabled: rule.is_enabled,
+            delay_minutes: rule.delay_minutes || 0
+        });
+        setShowRuleModal(true);
+    };
+
+    const handleDeleteRule = async (ruleId) => {
+        if (!window.confirm("Are you sure you want to delete this automation rule?")) return;
+        try {
+            await api.delete(`/whatsapp/automation/${ruleId}`);
+            toast.success("Automation rule deleted!");
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to delete rule");
+        }
+    };
+
+    const handleToggleRule = async (ruleId) => {
+        try {
+            await api.post(`/whatsapp/automation/${ruleId}/toggle`);
+            fetchData();
+        } catch (err) {
+            toast.error("Failed to toggle rule");
+        }
+    };
+
+    const toggleVariable = (varKey) => {
+        setTemplateForm(prev => ({
+            ...prev,
+            variables: prev.variables.includes(varKey)
+                ? prev.variables.filter(v => v !== varKey)
+                : [...prev.variables, varKey]
+        }));
+    };
+
+    const insertVariableInMessage = (varKey) => {
+        setTemplateForm(prev => ({
+            ...prev,
+            message: prev.message + `{{${varKey}}}`
+        }));
+        if (!templateForm.variables.includes(varKey)) {
+            toggleVariable(varKey);
+        }
+    };
+
+    // Get template name by ID
+    const getTemplateName = (templateId) => {
+        const template = templates.find(t => t.id === templateId);
+        return template?.name || "Unknown Template";
+    };
+
+    // Preview message with variable placeholders highlighted
+    const renderPreviewMessage = (message) => {
+        if (!message) return "";
+        return message.replace(/\{\{(\w+)\}\}/g, (match, varKey) => {
+            const varInfo = availableVariables.find(v => v.key === varKey);
+            return `[${varInfo?.example || varKey}]`;
+        });
+    };
+
+    if (loading) {
+        return (
+            <MobileLayout>
+                <div className="p-4 max-w-lg mx-auto">
+                    <div className="animate-pulse space-y-4">
+                        <div className="h-8 bg-gray-200 rounded w-48"></div>
+                        <div className="h-32 bg-gray-200 rounded-xl"></div>
+                        <div className="h-32 bg-gray-200 rounded-xl"></div>
+                    </div>
+                </div>
+            </MobileLayout>
+        );
+    }
+
+    return (
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-6">
+                    <button 
+                        onClick={() => navigate("/settings")}
+                        className="p-2 hover:bg-gray-100 rounded-full"
+                        data-testid="back-btn"
+                    >
+                        <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div>
+                        <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="whatsapp-title">
+                            WhatsApp Automation
+                        </h1>
+                        <p className="text-sm text-[#52525B]">Templates & event triggers</p>
+                    </div>
+                </div>
+
+                {/* Info Banner */}
+                <Card className="rounded-xl border-0 shadow-sm mb-4 bg-[#25D366]/10">
+                    <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                            <MessageSquare className="w-5 h-5 text-[#25D366] mt-0.5" />
+                            <div>
+                                <p className="text-sm font-medium text-[#1A1A1A]">Automated WhatsApp Messages</p>
+                                <p className="text-xs text-[#52525B] mt-1">
+                                    Create message templates and configure which events trigger automatic WhatsApp messages to your customers.
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Tabs */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+                    <TabsList className="w-full grid grid-cols-2 h-12 bg-gray-100 rounded-xl p-1">
+                        <TabsTrigger 
+                            value="templates" 
+                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                            data-testid="templates-tab"
+                        >
+                            Templates ({templates.length})
+                        </TabsTrigger>
+                        <TabsTrigger 
+                            value="automation" 
+                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                            data-testid="automation-tab"
+                        >
+                            Automation ({automationRules.length})
+                        </TabsTrigger>
+                    </TabsList>
+
+                    {/* Templates Tab */}
+                    <TabsContent value="templates" className="mt-4">
+                        <Button 
+                            onClick={() => {
+                                setEditingTemplate(null);
+                                setTemplateForm({ name: "", message: "", media_type: null, media_url: "", variables: [] });
+                                setShowTemplateModal(true);
+                            }}
+                            className="w-full h-12 bg-[#25D366] hover:bg-[#20BD5A] rounded-xl mb-4"
+                            data-testid="add-template-btn"
+                        >
+                            <Plus className="w-4 h-4 mr-2" /> Create New Template
+                        </Button>
+
+                        {templates.length === 0 ? (
+                            <Card className="rounded-xl border-0 shadow-sm">
+                                <CardContent className="p-8 text-center">
+                                    <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                    <p className="text-[#52525B]">No templates yet</p>
+                                    <p className="text-xs text-gray-400 mt-1">Create your first message template</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <div className="space-y-3">
+                                {templates.map(template => (
+                                    <Card key={template.id} className="rounded-xl border-0 shadow-sm" data-testid={`template-${template.id}`}>
+                                        <CardContent className="p-4">
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div>
+                                                    <p className="font-semibold text-[#1A1A1A]">{template.name}</p>
+                                                    {template.variables?.length > 0 && (
+                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                            {template.variables.map(v => (
+                                                                <Badge key={v} variant="outline" className="text-xs">
+                                                                    {`{{${v}}}`}
+                                                                </Badge>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <button 
+                                                        onClick={() => handleEditTemplate(template)}
+                                                        className="p-2 hover:bg-gray-100 rounded-full"
+                                                        data-testid={`edit-template-${template.id}`}
+                                                    >
+                                                        <Edit2 className="w-4 h-4 text-[#52525B]" />
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleDeleteTemplate(template.id)}
+                                                        className="p-2 hover:bg-red-50 rounded-full"
+                                                        data-testid={`delete-template-${template.id}`}
+                                                    >
+                                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="bg-gray-50 p-3 rounded-lg">
+                                                <p className="text-sm text-[#52525B] whitespace-pre-wrap">{template.message}</p>
+                                            </div>
+                                            {template.media_type && (
+                                                <p className="text-xs text-[#52525B] mt-2 flex items-center gap-1">
+                                                    📎 {template.media_type} attached
+                                                </p>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
+                    </TabsContent>
+
+                    {/* Automation Tab */}
+                    <TabsContent value="automation" className="mt-4">
+                        {templates.length === 0 ? (
+                            <Card className="rounded-xl border-0 shadow-sm">
+                                <CardContent className="p-8 text-center">
+                                    <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                                    <p className="text-[#52525B]">Create templates first</p>
+                                    <p className="text-xs text-gray-400 mt-1">You need at least one template to create automation rules</p>
+                                    <Button 
+                                        onClick={() => setActiveTab("templates")}
+                                        variant="outline"
+                                        className="mt-4"
+                                    >
+                                        Go to Templates
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <>
+                                <Button 
+                                    onClick={() => {
+                                        setEditingRule(null);
+                                        setRuleForm({ event_type: "", template_id: "", is_enabled: true, delay_minutes: 0 });
+                                        setShowRuleModal(true);
+                                    }}
+                                    className="w-full h-12 bg-[#F26B33] hover:bg-[#D85A2A] rounded-xl mb-4"
+                                    data-testid="add-rule-btn"
+                                >
+                                    <Plus className="w-4 h-4 mr-2" /> Add Automation Rule
+                                </Button>
+
+                                {automationRules.length === 0 ? (
+                                    <Card className="rounded-xl border-0 shadow-sm">
+                                        <CardContent className="p-8 text-center">
+                                            <Clock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                            <p className="text-[#52525B]">No automation rules yet</p>
+                                            <p className="text-xs text-gray-400 mt-1">Set up automatic messages for events</p>
+                                        </CardContent>
+                                    </Card>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {automationRules.map(rule => (
+                                            <Card key={rule.id} className="rounded-xl border-0 shadow-sm" data-testid={`rule-${rule.id}`}>
+                                                <CardContent className="p-4">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <Badge className={`${rule.is_enabled ? 'bg-[#25D366]' : 'bg-gray-400'} text-white`}>
+                                                                    {rule.is_enabled ? "Active" : "Inactive"}
+                                                                </Badge>
+                                                                {rule.delay_minutes > 0 && (
+                                                                    <Badge variant="outline" className="text-xs">
+                                                                        {rule.delay_minutes}m delay
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                            <p className="font-semibold text-[#1A1A1A]">
+                                                                {eventLabels[rule.event_type] || rule.event_type}
+                                                            </p>
+                                                            <p className="text-sm text-[#52525B] mt-1 flex items-center gap-1">
+                                                                <ChevronRight className="w-3 h-3" />
+                                                                Template: <span className="font-medium">{getTemplateName(rule.template_id)}</span>
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <Switch 
+                                                                checked={rule.is_enabled}
+                                                                onCheckedChange={() => handleToggleRule(rule.id)}
+                                                                data-testid={`toggle-rule-${rule.id}`}
+                                                            />
+                                                            <button 
+                                                                onClick={() => handleEditRule(rule)}
+                                                                className="p-2 hover:bg-gray-100 rounded-full"
+                                                                data-testid={`edit-rule-${rule.id}`}
+                                                            >
+                                                                <Edit2 className="w-4 h-4 text-[#52525B]" />
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleDeleteRule(rule.id)}
+                                                                className="p-2 hover:bg-red-50 rounded-full"
+                                                                data-testid={`delete-rule-${rule.id}`}
+                                                            >
+                                                                <Trash2 className="w-4 h-4 text-red-500" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Available Events Guide */}
+                                <Card className="rounded-xl border-0 shadow-sm mt-6">
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-semibold">Available Events</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="pt-0">
+                                        <ScrollArea className="h-48">
+                                            <div className="space-y-2">
+                                                {availableEvents.map(event => {
+                                                    const hasRule = automationRules.some(r => r.event_type === event.event);
+                                                    return (
+                                                        <div key={event.event} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                                                            <div>
+                                                                <p className="text-sm font-medium text-[#1A1A1A]">{eventLabels[event.event] || event.event}</p>
+                                                                <p className="text-xs text-[#52525B]">{event.description}</p>
+                                                            </div>
+                                                            {hasRule ? (
+                                                                <Badge className="bg-[#25D366] text-white text-xs">Configured</Badge>
+                                                            ) : (
+                                                                <Badge variant="outline" className="text-xs">Not set</Badge>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </ScrollArea>
+                                    </CardContent>
+                                </Card>
+                            </>
+                        )}
+                    </TabsContent>
+                </Tabs>
+
+                {/* Template Modal */}
+                <Dialog open={showTemplateModal} onOpenChange={setShowTemplateModal}>
+                    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
+                            <DialogDescription>
+                                Create a reusable message template with dynamic variables.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div>
+                                <Label className="form-label">Template Name</Label>
+                                <Input 
+                                    value={templateForm.name}
+                                    onChange={(e) => setTemplateForm({...templateForm, name: e.target.value})}
+                                    placeholder="e.g., Welcome Message, Points Update"
+                                    className="h-12 rounded-xl"
+                                    data-testid="template-name-input"
+                                />
+                            </div>
+                            
+                            <div>
+                                <Label className="form-label">Message</Label>
+                                <Textarea 
+                                    value={templateForm.message}
+                                    onChange={(e) => setTemplateForm({...templateForm, message: e.target.value})}
+                                    placeholder="Hi {{customer_name}}, you've earned {{points_earned}} points!"
+                                    className="min-h-[120px] rounded-xl"
+                                    data-testid="template-message-input"
+                                />
+                                <p className="text-xs text-[#52525B] mt-1">Use {"{{variable}}"} to insert dynamic content</p>
+                            </div>
+
+                            <div>
+                                <Label className="form-label mb-2 block">Insert Variables</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {availableVariables.map(v => (
+                                        <button
+                                            key={v.key}
+                                            type="button"
+                                            onClick={() => insertVariableInMessage(v.key)}
+                                            className={`px-2 py-1 text-xs rounded-lg border transition-colors ${
+                                                templateForm.variables.includes(v.key) 
+                                                    ? 'bg-[#25D366] text-white border-[#25D366]' 
+                                                    : 'bg-white text-[#52525B] border-gray-200 hover:border-[#25D366]'
+                                            }`}
+                                            data-testid={`var-${v.key}`}
+                                        >
+                                            {v.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label className="form-label">Media Type (Optional)</Label>
+                                <Select 
+                                    value={templateForm.media_type || "none"}
+                                    onValueChange={(v) => setTemplateForm({...templateForm, media_type: v === "none" ? null : v})}
+                                >
+                                    <SelectTrigger className="h-12 rounded-xl" data-testid="media-type-select">
+                                        <SelectValue placeholder="No media" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">No media</SelectItem>
+                                        <SelectItem value="image">Image</SelectItem>
+                                        <SelectItem value="video">Video</SelectItem>
+                                        <SelectItem value="document">Document</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {templateForm.media_type && (
+                                <div>
+                                    <Label className="form-label">Media URL</Label>
+                                    <Input 
+                                        value={templateForm.media_url}
+                                        onChange={(e) => setTemplateForm({...templateForm, media_url: e.target.value})}
+                                        placeholder="https://example.com/image.jpg"
+                                        className="h-12 rounded-xl"
+                                        data-testid="media-url-input"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Preview */}
+                            {templateForm.message && (
+                                <div>
+                                    <Label className="form-label">Preview</Label>
+                                    <div className="bg-[#DCF8C6] p-3 rounded-lg rounded-tl-none">
+                                        <p className="text-sm whitespace-pre-wrap">{renderPreviewMessage(templateForm.message)}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        <DialogFooter className="mt-4">
+                            <Button variant="outline" onClick={() => setShowTemplateModal(false)}>
+                                Cancel
+                            </Button>
+                            <Button 
+                                onClick={handleSaveTemplate}
+                                className="bg-[#25D366] hover:bg-[#20BD5A]"
+                                disabled={!templateForm.name || !templateForm.message}
+                                data-testid="save-template-btn"
+                            >
+                                {editingTemplate ? "Update" : "Create"} Template
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Automation Rule Modal */}
+                <Dialog open={showRuleModal} onOpenChange={setShowRuleModal}>
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>{editingRule ? "Edit Automation Rule" : "Add Automation Rule"}</DialogTitle>
+                            <DialogDescription>
+                                Configure when to automatically send WhatsApp messages.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            <div>
+                                <Label className="form-label">Trigger Event</Label>
+                                <Select 
+                                    value={ruleForm.event_type}
+                                    onValueChange={(v) => setRuleForm({...ruleForm, event_type: v})}
+                                    disabled={!!editingRule}
+                                >
+                                    <SelectTrigger className="h-12 rounded-xl" data-testid="event-type-select">
+                                        <SelectValue placeholder="Select an event" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableEvents.map(event => {
+                                            const hasRule = automationRules.some(r => r.event_type === event.event && r.id !== editingRule?.id);
+                                            return (
+                                                <SelectItem 
+                                                    key={event.event} 
+                                                    value={event.event}
+                                                    disabled={hasRule}
+                                                >
+                                                    {eventLabels[event.event] || event.event}
+                                                    {hasRule && " (already configured)"}
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div>
+                                <Label className="form-label">Message Template</Label>
+                                <Select 
+                                    value={ruleForm.template_id}
+                                    onValueChange={(v) => setRuleForm({...ruleForm, template_id: v})}
+                                >
+                                    <SelectTrigger className="h-12 rounded-xl" data-testid="template-select">
+                                        <SelectValue placeholder="Select a template" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {templates.map(template => (
+                                            <SelectItem key={template.id} value={template.id}>
+                                                {template.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div>
+                                <Label className="form-label">Delay (minutes)</Label>
+                                <Input 
+                                    type="number"
+                                    min="0"
+                                    value={ruleForm.delay_minutes}
+                                    onChange={(e) => setRuleForm({...ruleForm, delay_minutes: parseInt(e.target.value) || 0})}
+                                    className="h-12 rounded-xl"
+                                    data-testid="delay-input"
+                                />
+                                <p className="text-xs text-[#52525B] mt-1">0 = send immediately, or delay by X minutes</p>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <Label className="form-label">Enable Rule</Label>
+                                <Switch 
+                                    checked={ruleForm.is_enabled}
+                                    onCheckedChange={(checked) => setRuleForm({...ruleForm, is_enabled: checked})}
+                                    data-testid="enable-rule-switch"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="mt-4">
+                            <Button variant="outline" onClick={() => setShowRuleModal(false)}>
+                                Cancel
+                            </Button>
+                            <Button 
+                                onClick={handleSaveRule}
+                                className="bg-[#F26B33] hover:bg-[#D85A2A]"
+                                disabled={!ruleForm.event_type || !ruleForm.template_id}
+                                data-testid="save-rule-btn"
+                            >
+                                {editingRule ? "Update" : "Create"} Rule
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </MobileLayout>
+    );
+};
+
 // ============ PUBLIC CUSTOMER REGISTRATION ============
 
 const CustomerRegistrationPage = () => {
