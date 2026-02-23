@@ -695,9 +695,15 @@ export default function SettingsScreen() {
           <View className="bg-white rounded-xl mx-4 overflow-hidden">
             <MenuItem
               icon={MessageCircle}
-              title="WhatsApp Automation"
-              subtitle="Templates and automation rules"
-              onPress={() => setShowWhatsAppModal(true)}
+              title="WhatsApp Templates"
+              subtitle="Create message templates"
+              onPress={() => router.push('/(tabs)/whatsapp-templates')}
+            />
+            <MenuItem
+              icon={SettingsIcon}
+              title="Automation Rules"
+              subtitle="Configure auto-messaging"
+              onPress={() => router.push('/(tabs)/whatsapp-automation')}
             />
           </View>
         </View>
@@ -709,7 +715,7 @@ export default function SettingsScreen() {
               icon={User}
               title="Profile"
               subtitle="Edit your profile"
-              onPress={() => {}}
+              onPress={() => router.push('/(tabs)/profile')}
             />
             <MenuItem
               icon={LogOut}
