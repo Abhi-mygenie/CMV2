@@ -1008,7 +1008,10 @@ const CustomersPage = () => {
                                 {activeFiltersCount > 0 && (
                                     <div className="pt-3 border-t">
                                         <Button 
-                                            onClick={() => setShowSaveSegmentDialog(true)}
+                                            onClick={() => {
+                                                setShowSaveSegmentDialog(true);
+                                                setShowFilters(false); // Close filter popup
+                                            }}
                                             className="w-full h-9 text-xs bg-[#F26B33] hover:bg-[#D85A2A]"
                                             data-testid="save-segment-btn"
                                         >
