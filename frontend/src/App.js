@@ -1541,7 +1541,7 @@ const CustomerDetailPage = () => {
     const [pointsAction, setPointsAction] = useState("earn");
     const [walletAction, setWalletAction] = useState("credit");
     const [pointsData, setPointsData] = useState({ points: "", bill_amount: "", description: "" });
-    const [walletData, setWalletData] = useState({ amount: "", bonus: "", description: "", payment_method: "cash" });
+    const [walletData, setWalletData] = useState({ amount: "", bonus: "", bonusType: "wallet", description: "", payment_method: "cash" });
     const [submitting, setSubmitting] = useState(false);
 
     const fetchData = async () => {
