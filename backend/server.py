@@ -1491,6 +1491,46 @@ async def create_feedback(feedback_data: FeedbackCreate, user: dict = Depends(ge
     }
     
     await db.feedback.insert_one(feedback_doc)
+    
+    # Award feedback bonus if enabled
+    settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
+    if settings and settings.get("feedback_bonus_enabled", True):
+        bonus_points = settings.get("feedback_bonus_points", 25)
+        
+        # Get customer to check if they already received feedback bonus
+        customer = await db.customers.find_one({"id": feedback_data.customer_id}, {"_id": 0})
+        
+        if customer:
+            # Check if customer already got feedback bonus (only once per customer)
+            existing_bonus = await db.points_transactions.find_one({
+                "customer_id": feedback_data.customer_id,
+                "transaction_type": "bonus",
+                "description": {"$regex": "Feedback bonus"}
+            })
+            
+            if not existing_bonus:
+                # Award bonus points
+                new_balance = customer.get("total_points", 0) + bonus_points
+                
+                await db.customers.update_one(
+                    {"id": customer["id"]},
+                    {"$set": {"total_points": new_balance}}
+                )
+                
+                # Create bonus transaction
+                bonus_tx = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": user["id"],
+                    "customer_id": customer["id"],
+                    "points": bonus_points,
+                    "transaction_type": "bonus",
+                    "description": f"Feedback bonus! Thanks for your review ⭐",
+                    "bill_amount": None,
+                    "balance_after": new_balance,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.points_transactions.insert_one(bonus_tx)
+    
     return Feedback(**feedback_doc)
 
 @api_router.get("/feedback", response_model=List[Feedback])
