@@ -1724,9 +1724,18 @@ const CustomerDetailPage = () => {
                                     </div>
                                 )}
                             </div>
-                            <Badge className={`tier-badge ${customer.tier.toLowerCase()} bg-white/20 border-0`}>
-                                {customer.tier}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={openEditModal}
+                                    className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+                                    data-testid="edit-customer-btn"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
+                                <Badge className={`tier-badge ${customer.tier.toLowerCase()} bg-white/20 border-0`}>
+                                    {customer.tier}
+                                </Badge>
+                            </div>
                         </div>
                     </div>
                     
