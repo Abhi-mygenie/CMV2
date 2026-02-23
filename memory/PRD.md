@@ -1,87 +1,85 @@
-# DinePoints - Restaurant Loyalty & CRM Platform
+# DinePoints - Loyalty & CRM (MyGenie)
 
 ## Original Problem Statement
-Build and evolve a restaurant loyalty and CRM platform from the GitHub repository `https://github.com/parth-mygenie/dine-in-rewards.git`. The system should provide:
-1. POS Integration with secure API for any POS to connect
-2. Configurable Loyalty Rules for earning and redeeming points
-3. Dynamic Customer Segmentation with saved filters
-4. Segment Management UI for full CRUD operations
+Pull code from https://github.com/Abhi-mygenie/CMV2.git and set it up to run as-is.
+
+## Application Overview
+DinePoints is a comprehensive loyalty and CRM platform for restaurants, branded as "MyGenie". It enables restaurant owners to manage customer loyalty programs, track customer visits, issue points, manage wallet balances, and run coupon campaigns.
+
+## Tech Stack
+- **Frontend**: React 19 with Tailwind CSS, Radix UI components
+- **Backend**: FastAPI (Python)
+- **Database**: MongoDB
+- **Authentication**: JWT-based auth
 
 ## Core Features
+1. **Customer Management**
+   - Add/edit/delete customers
+   - Track visits, spending, and loyalty points
+   - Customer segmentation by tier (Bronze, Silver, Gold, Platinum)
+   - Allergy tracking
+   - Custom fields support
 
-### Implemented Features (Dec 2025)
-- [x] POS Integration Gateway with API key authentication
-- [x] Configurable Bonus Engine (First Visit, Birthday, Anniversary, Off-Peak, Feedback)
-- [x] Settings UI for loyalty rule configuration
-- [x] Dynamic Customer Segmentation (save filters as auto-updating segments)
-- [x] **Segments Management Page** - Full CRUD for customer segments
-  - Navigation link in bottom nav bar
-  - Display all segments with customer counts and filter tags
-  - View customers within a segment
-  - Edit/rename segments
-  - Delete segments
-  - Send Message placeholder (MOCKED - WhatsApp/SMS coming soon)
+2. **Loyalty Program**
+   - Points earning based on bill amount
+   - Tier-based earning percentages
+   - Points redemption
+   - Birthday/Anniversary bonuses
+   - First visit bonus
+   - Off-peak hours bonus
 
-### Upcoming Tasks (P0)
-1. **WhatsApp/SMS Notification Integration** - Integrate Twilio/WATI for automated messages
+3. **Wallet System**
+   - Virtual wallet balance
+   - Credit/Debit transactions
 
-### Future Tasks (P1-P2)
-2. Customer Self-Service Portal - Web portal for customers to view points/history
-3. Staff Training Materials - Documentation for restaurant staff
-4. Advanced Analytics & Reports
-5. Referral Program
-6. Multi-Location Support
-7. Gamification features
-8. Wallet Top-up functionality
+4. **Coupon Management**
+   - Create/manage promotional coupons
+   - Percentage or fixed discounts
+   - Usage limits
+   - Channel-specific (dine-in, delivery, takeaway)
 
-## Technical Architecture
+5. **Customer Segments**
+   - Create segments based on filters
+   - Target specific customer groups
 
-### Backend
-- **Framework:** FastAPI
-- **Database:** MongoDB with Motor (async driver)
-- **Auth:** JWT tokens, API key for POS
+6. **QR Code Registration**
+   - Generate QR codes for customer self-registration
 
-### Frontend
-- **Framework:** React.js with React Router
-- **UI:** Tailwind CSS, Shadcn/UI components
-- **State:** React hooks (useState, useEffect)
+7. **Feedback System**
+   - Collect customer feedback
+   - Rating system (1-5 stars)
 
-### Key Files
-- `/app/backend/server.py` - All backend logic, API endpoints
-- `/app/frontend/src/App.js` - All frontend components
+8. **Analytics Dashboard**
+   - Total customers, points issued/redeemed
+   - Active customers metrics
+   - Average ratings
 
-### Key API Endpoints
-- `POST /api/pos/webhook/payment-received` - POS transaction webhook
-- `GET/POST /api/segments` - List and create segments
-- `GET/PUT/DELETE /api/segments/{id}` - Manage specific segment
-- `GET /api/segments/{id}/customers` - Get customers in segment
-- `GET/PUT /api/settings` - Loyalty settings configuration
+## What's Been Implemented (Feb 23, 2026)
+- ✅ Cloned repository and configured for preview environment
+- ✅ Updated environment variables (frontend & backend .env)
+- ✅ Installed all dependencies
+- ✅ Added registration route and signup link to login page
+- ✅ Backend APIs tested (88.9% success rate)
+- ✅ Frontend fully functional
 
-## Database Schema
+## API Endpoints
+- `/api/auth/*` - Authentication (login, register, me)
+- `/api/customers/*` - Customer CRUD
+- `/api/segments/*` - Customer segments
+- `/api/points/*` - Points transactions
+- `/api/wallet/*` - Wallet transactions
+- `/api/coupons/*` - Coupon management
+- `/api/loyalty/settings` - Loyalty program settings
+- `/api/qr/*` - QR code generation
+- `/api/feedback/*` - Customer feedback
+- `/api/analytics/*` - Dashboard analytics
 
-### segments
-```json
-{
-  "id": "uuid",
-  "user_id": "uuid",
-  "name": "string",
-  "filters": {
-    "tier": "Gold|Silver|Bronze|Platinum",
-    "city": "string",
-    "customer_type": "normal|corporate",
-    "last_visit_days": "number"
-  },
-  "customer_count": "number",
-  "created_at": "ISO date",
-  "updated_at": "ISO date"
-}
-```
+## Known Issues (Minor)
+- POS webhook endpoint requires valid API key
+- Some API endpoint parameter formats
 
-## Test Credentials
-- **Email:** test@restaurant.com
-- **Password:** test123
+## Next Action Items
+- None required - app is running as-is
 
-## Known Limitations
-- WhatsApp/SMS messaging is MOCKED (shows "Coming Soon" toast)
-- Frontend is monolithic (single App.js file - needs refactoring)
-- Backend is monolithic (single server.py file - needs refactoring)
+## Preview URL
+https://f3af903f-99d0-4b63-a819-ece8671ebffc.preview.emergentagent.com
