@@ -239,7 +239,7 @@ class DinePointsAPITester:
             return False
 
     def test_points_apis(self):
-        """Test points APIs as specified in review request"""
+        """Test points APIs - using actual backend endpoints"""
         self.log("=" * 50)
         self.log("TESTING POINTS APIs")
         self.log("=" * 50)
@@ -248,24 +248,19 @@ class DinePointsAPITester:
             self.log("❌ No test customer available for points testing", "SKIP")
             return False
             
-        # Test Issue Points API - POST /api/points/{customer_id}/issue
-        issue_data = {
-            "bill_amount": 100
-        }
-        
+        # Test POST /api/points/earn - Earn points based on bill amount (simulating bill_amount: 100)
         success, response = self.run_test(
-            "Issue points (bill_amount: 100)",
+            "Earn points (bill_amount: 100)",
             "POST",
-            f"points/{self.test_customer_id}/issue",
-            200,
-            data=issue_data
+            f"points/earn?customer_id={self.test_customer_id}&bill_amount=100",
+            200
         )
         
-        # Test Get Points History API - GET /api/points/{customer_id}/history
+        # Test GET /api/points/transactions/{customer_id} - Get points history
         self.run_test(
             f"Get points history",
             "GET", 
-            f"points/{self.test_customer_id}/history",
+            f"points/transactions/{self.test_customer_id}",
             200
         )
         
