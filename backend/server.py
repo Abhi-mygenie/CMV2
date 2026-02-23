@@ -604,7 +604,9 @@ async def register(user_data: UserCreate):
         "off_peak_start_time": "14:00",
         "off_peak_end_time": "17:00",
         "off_peak_bonus_type": "multiplier",
-        "off_peak_bonus_value": 2.0
+        "off_peak_bonus_value": 2.0,
+        "feedback_bonus_enabled": True,
+        "feedback_bonus_points": 25
     }
     await db.loyalty_settings.insert_one(settings_doc)
     
