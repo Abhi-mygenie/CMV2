@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const assetsDir = path.join(__dirname, 'assets');
+const assetsDir = path.join(__dirname, '..', 'assets');
 
 // MyGenie brand colors
 const primaryColor = '#f97316'; // Orange
