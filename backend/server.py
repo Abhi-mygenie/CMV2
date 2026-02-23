@@ -440,6 +440,108 @@ def generate_qr_code(data: str) -> str:
     img.save(buffer, format='PNG')
     return base64.b64encode(buffer.getvalue()).decode()
 
+def check_birthday_bonus(customer: dict, settings: dict) -> tuple[bool, int, str]:
+    """Check if customer is eligible for birthday bonus"""
+    if not settings.get('birthday_bonus_enabled', False):
+        return False, 0, ""
+    
+    if not customer.get('dob'):
+        return False, 0, ""
+    
+    try:
+        dob = datetime.fromisoformat(customer['dob'].replace('Z', '+00:00'))
+        today = datetime.now(timezone.utc)
+        
+        # Create birthday for this year
+        birthday_this_year = dob.replace(year=today.year)
+        
+        # Check if within bonus window
+        days_before = settings.get('birthday_bonus_days_before', 0)
+        days_after = settings.get('birthday_bonus_days_after', 7)
+        
+        start_date = birthday_this_year - timedelta(days=days_before)
+        end_date = birthday_this_year + timedelta(days=days_after)
+        
+        if start_date <= today <= end_date:
+            bonus_points = settings.get('birthday_bonus_points', 100)
+            return True, bonus_points, f"Birthday bonus! Happy Birthday 🎂"
+    except:
+        pass
+    
+    return False, 0, ""
+
+def check_anniversary_bonus(customer: dict, settings: dict) -> tuple[bool, int, str]:
+    """Check if customer is eligible for anniversary bonus"""
+    if not settings.get('anniversary_bonus_enabled', False):
+        return False, 0, ""
+    
+    if not customer.get('anniversary'):
+        return False, 0, ""
+    
+    try:
+        anniversary = datetime.fromisoformat(customer['anniversary'].replace('Z', '+00:00'))
+        today = datetime.now(timezone.utc)
+        
+        # Create anniversary for this year
+        anniversary_this_year = anniversary.replace(year=today.year)
+        
+        # Check if within bonus window
+        days_before = settings.get('anniversary_bonus_days_before', 0)
+        days_after = settings.get('anniversary_bonus_days_after', 7)
+        
+        start_date = anniversary_this_year - timedelta(days=days_before)
+        end_date = anniversary_this_year + timedelta(days=days_after)
+        
+        if start_date <= today <= end_date:
+            bonus_points = settings.get('anniversary_bonus_points', 150)
+            return True, bonus_points, f"Anniversary bonus! Happy Anniversary 🎉"
+    except:
+        pass
+    
+    return False, 0, ""
+
+def check_first_visit_bonus(customer: dict, settings: dict) -> tuple[bool, int, str]:
+    """Check if customer is eligible for first visit bonus"""
+    if not settings.get('first_visit_bonus_enabled', False):
+        return False, 0, ""
+    
+    # First visit means total_visits is currently 0 (before incrementing)
+    if customer.get('total_visits', 0) == 0:
+        bonus_points = settings.get('first_visit_bonus_points', 50)
+        return True, bonus_points, "Welcome bonus! Thanks for your first visit 🎁"
+    
+    return False, 0, ""
+
+def check_off_peak_bonus(settings: dict) -> tuple[bool, float, str, str]:
+    """Check if current time is in off-peak hours and return bonus multiplier or flat amount"""
+    if not settings.get('off_peak_bonus_enabled', False):
+        return False, 1.0, "multiplier", ""
+    
+    try:
+        now = datetime.now(timezone.utc)
+        # Convert to local time (assuming IST for Indian restaurants)
+        # You can make timezone configurable too
+        local_time = now + timedelta(hours=5, minutes=30)  # IST offset
+        current_time = local_time.strftime("%H:%M")
+        
+        start_time = settings.get('off_peak_start_time', '14:00')
+        end_time = settings.get('off_peak_end_time', '17:00')
+        
+        if start_time <= current_time <= end_time:
+            bonus_type = settings.get('off_peak_bonus_type', 'multiplier')
+            bonus_value = settings.get('off_peak_bonus_value', 2.0)
+            
+            if bonus_type == 'multiplier':
+                message = f"Off-peak hours bonus! {bonus_value}x points ⏰"
+            else:
+                message = f"Off-peak hours bonus! +{int(bonus_value)} points ⏰"
+            
+            return True, bonus_value, bonus_type, message
+    except:
+        pass
+    
+    return False, 1.0, "multiplier", ""
+
 # ============ AUTH ROUTES ============
 
 @api_router.post("/auth/register", response_model=TokenResponse)
