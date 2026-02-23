@@ -246,56 +246,36 @@ class DinePointsAPITester:
             self.log("❌ Segment creation failed", "FAIL")
             return False
 
-    def test_points_and_bonuses(self):
-        """Test points transactions and bonus features"""
+    def test_points_apis(self):
+        """Test points APIs as specified in review request"""
         self.log("=" * 50)
-        self.log("TESTING POINTS & BONUSES")
+        self.log("TESTING POINTS APIs")
         self.log("=" * 50)
         
         if not self.test_customer_id:
             self.log("❌ No test customer available for points testing", "SKIP")
             return False
             
-        # Test POS webhook with bonuses (first visit + birthday)
-        webhook_data = {
-            "customer_phone": "8888888888",
-            "bill_amount": 1000.00,
-            "channel": "dine_in"
+        # Test Issue Points API - POST /api/points/{customer_id}/issue
+        issue_data = {
+            "bill_amount": 100
         }
         
         success, response = self.run_test(
-            "POS webhook - First visit + Birthday bonus",
+            "Issue points (bill_amount: 100)",
             "POST",
-            "pos/webhook/payment-received",
+            f"points/{self.test_customer_id}/issue",
             200,
-            data=webhook_data,
-            use_api_key=True
+            data=issue_data
         )
         
-        if success:
-            points_earned = response.get('points_earned', 0)
-            bonuses = response.get('bonus_applied', [])
-            self.log(f"✅ Points earned: {points_earned}, Bonuses: {bonuses}", "SUCCESS")
-        
-        # Test points redemption
-        redeem_data = {
-            "customer_phone": "8888888888",
-            "bill_amount": 1000.00,
-            "channel": "dine_in",
-            "redeem_points": 100
-        }
-        
+        # Test Get Points History API - GET /api/points/{customer_id}/history
         self.run_test(
-            "POS webhook - Points redemption",
-            "POST",
-            "pos/webhook/payment-received",
-            200,
-            data=redeem_data,
-            use_api_key=True
+            f"Get points history",
+            "GET", 
+            f"points/{self.test_customer_id}/history",
+            200
         )
-        
-        # Test get customer transactions
-        self.run_test(f"Get customer transactions", "GET", f"points/transactions/{self.test_customer_id}", 200)
         
         return True
 
