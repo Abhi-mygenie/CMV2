@@ -1819,10 +1819,6 @@ async def pos_payment_received(
             # Continue even if coupon fails
             pass
     
-    print(f"[DEBUG] Settings object keys: {list(settings.keys())}")
-    print(f"[DEBUG] first_visit_bonus_enabled: {settings.get('first_visit_bonus_enabled')}")
-    print(f"[DEBUG] birthday_bonus_enabled: {settings.get('birthday_bonus_enabled')}")
-    
     # Step 1.5: Redeem points if requested
     points_redeemed = 0
     if webhook_data.redeem_points and webhook_data.redeem_points > 0:
