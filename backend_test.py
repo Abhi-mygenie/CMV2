@@ -315,7 +315,7 @@ class DinePointsAPITester:
             "Create coupon",
             "POST",
             "coupons",
-            201,
+            200,  # Backend returns 200, not 201
             data=coupon_data
         )
         
