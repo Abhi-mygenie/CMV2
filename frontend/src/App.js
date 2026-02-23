@@ -5429,38 +5429,33 @@ const DemoModeEntry = () => {
 
 function App() {
     return (
-        <DemoProvider>
-            <AuthProviderComponent>
-                <div className="App">
-                    <Toaster position="top-center" richColors />
-                    <BrowserRouter>
-                        <Routes>
-                            {/* Public Routes */}
-                            <Route path="/login" element={<LoginPage />} />
-                            <Route path="/register" element={<RegisterPage />} />
-                            <Route path="/register-customer/:restaurantId" element={<CustomerRegistrationPage />} />
-                            
-                            {/* Demo Mode Direct Entry */}
-                            <Route path="/demo" element={<DemoModeEntry />} />
+        <AuthProviderComponent>
+            <div className="App">
+                <Toaster position="top-center" richColors />
+                <BrowserRouter>
+                    <Routes>
+                        {/* Public Routes */}
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/register-customer/:restaurantId" element={<CustomerRegistrationPage />} />
 
-                            {/* Protected Routes */}
-                            <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-                            <Route path="/customers" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
-                            <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetailPage /></ProtectedRoute>} />
-                            <Route path="/segments" element={<ProtectedRoute><SegmentsPage /></ProtectedRoute>} />
-                            <Route path="/qr" element={<ProtectedRoute><QRCodePage /></ProtectedRoute>} />
-                            <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
-                            <Route path="/coupons" element={<ProtectedRoute><CouponsPage /></ProtectedRoute>} />
-                            <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-                            <Route path="/whatsapp-automation" element={<ProtectedRoute><WhatsAppAutomationPage /></ProtectedRoute>} />
+                        {/* Protected Routes */}
+                        <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                        <Route path="/customers" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
+                        <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetailPage /></ProtectedRoute>} />
+                        <Route path="/segments" element={<ProtectedRoute><SegmentsPage /></ProtectedRoute>} />
+                        <Route path="/qr" element={<ProtectedRoute><QRCodePage /></ProtectedRoute>} />
+                        <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
+                        <Route path="/coupons" element={<ProtectedRoute><CouponsPage /></ProtectedRoute>} />
+                        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+                        <Route path="/whatsapp-automation" element={<ProtectedRoute><WhatsAppAutomationPage /></ProtectedRoute>} />
 
-                            {/* Fallback */}
-                            <Route path="*" element={<Navigate to="/" />} />
-                        </Routes>
-                    </BrowserRouter>
-                </div>
-            </AuthProviderComponent>
-        </DemoProvider>
+                        {/* Fallback */}
+                        <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                </BrowserRouter>
+            </div>
+        </AuthProviderComponent>
     );
 }
 
