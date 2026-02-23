@@ -3020,6 +3020,233 @@ const SettingsPage = () => {
                             </CardContent>
                         </Card>
 
+                        {/* Bonus Features Section */}
+                        <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 mt-6 font-['Montserrat']">🎁 Bonus Features</h2>
+                        
+                        {/* First Visit Bonus */}
+                        <Card className="rounded-xl border-0 shadow-sm mb-4">
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="font-semibold text-[#1A1A1A]">First Visit Bonus</p>
+                                        <p className="text-xs text-[#52525B]">Welcome new customers</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.first_visit_bonus_enabled ?? true}
+                                        onCheckedChange={(checked) => setSettings({...settings, first_visit_bonus_enabled: checked})}
+                                        data-testid="first-visit-toggle"
+                                    />
+                                </div>
+                                {settings.first_visit_bonus_enabled && (
+                                    <div>
+                                        <Label className="form-label">Bonus Points</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={settings.first_visit_bonus_points ?? 50}
+                                            onChange={(e) => setSettings({...settings, first_visit_bonus_points: parseInt(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="first-visit-points-input"
+                                        />
+                                        <p className="text-xs text-[#52525B] mt-1">Points awarded on customer's first purchase</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Birthday Bonus */}
+                        <Card className="rounded-xl border-0 shadow-sm mb-4">
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="font-semibold text-[#1A1A1A]">Birthday Bonus 🎂</p>
+                                        <p className="text-xs text-[#52525B]">Celebrate customer birthdays</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.birthday_bonus_enabled ?? true}
+                                        onCheckedChange={(checked) => setSettings({...settings, birthday_bonus_enabled: checked})}
+                                        data-testid="birthday-toggle"
+                                    />
+                                </div>
+                                {settings.birthday_bonus_enabled && (
+                                    <div className="space-y-3">
+                                        <div>
+                                            <Label className="form-label">Bonus Points</Label>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                value={settings.birthday_bonus_points ?? 100}
+                                                onChange={(e) => setSettings({...settings, birthday_bonus_points: parseInt(e.target.value)})}
+                                                className="h-12 rounded-xl"
+                                                data-testid="birthday-points-input"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <Label className="form-label text-xs">Days Before</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="30"
+                                                    value={settings.birthday_bonus_days_before ?? 0}
+                                                    onChange={(e) => setSettings({...settings, birthday_bonus_days_before: parseInt(e.target.value)})}
+                                                    className="h-10 rounded-lg text-sm"
+                                                    data-testid="birthday-days-before"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label text-xs">Days After</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="30"
+                                                    value={settings.birthday_bonus_days_after ?? 7}
+                                                    onChange={(e) => setSettings({...settings, birthday_bonus_days_after: parseInt(e.target.value)})}
+                                                    className="h-10 rounded-lg text-sm"
+                                                    data-testid="birthday-days-after"
+                                                />
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-[#52525B]">Bonus valid for specified days around customer's birthday</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Anniversary Bonus */}
+                        <Card className="rounded-xl border-0 shadow-sm mb-4">
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="font-semibold text-[#1A1A1A]">Anniversary Bonus 🎉</p>
+                                        <p className="text-xs text-[#52525B]">Celebrate anniversaries</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.anniversary_bonus_enabled ?? true}
+                                        onCheckedChange={(checked) => setSettings({...settings, anniversary_bonus_enabled: checked})}
+                                        data-testid="anniversary-toggle"
+                                    />
+                                </div>
+                                {settings.anniversary_bonus_enabled && (
+                                    <div className="space-y-3">
+                                        <div>
+                                            <Label className="form-label">Bonus Points</Label>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                value={settings.anniversary_bonus_points ?? 150}
+                                                onChange={(e) => setSettings({...settings, anniversary_bonus_points: parseInt(e.target.value)})}
+                                                className="h-12 rounded-xl"
+                                                data-testid="anniversary-points-input"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <Label className="form-label text-xs">Days Before</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="30"
+                                                    value={settings.anniversary_bonus_days_before ?? 0}
+                                                    onChange={(e) => setSettings({...settings, anniversary_bonus_days_before: parseInt(e.target.value)})}
+                                                    className="h-10 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label text-xs">Days After</Label>
+                                                <Input
+                                                    type="number"
+                                                    min="0"
+                                                    max="30"
+                                                    value={settings.anniversary_bonus_days_after ?? 7}
+                                                    onChange={(e) => setSettings({...settings, anniversary_bonus_days_after: parseInt(e.target.value)})}
+                                                    className="h-10 rounded-lg text-sm"
+                                                />
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-[#52525B]">Bonus valid for specified days around anniversary date</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Off-Peak Hours Bonus */}
+                        <Card className="rounded-xl border-0 shadow-sm mb-4">
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="font-semibold text-[#1A1A1A]">Off-Peak Hours Bonus ⏰</p>
+                                        <p className="text-xs text-[#52525B]">Drive traffic during slow hours</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.off_peak_bonus_enabled ?? false}
+                                        onCheckedChange={(checked) => setSettings({...settings, off_peak_bonus_enabled: checked})}
+                                        data-testid="off-peak-toggle"
+                                    />
+                                </div>
+                                {settings.off_peak_bonus_enabled && (
+                                    <div className="space-y-3">
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <Label className="form-label">Start Time</Label>
+                                                <Input
+                                                    type="time"
+                                                    value={settings.off_peak_start_time ?? "14:00"}
+                                                    onChange={(e) => setSettings({...settings, off_peak_start_time: e.target.value})}
+                                                    className="h-12 rounded-xl"
+                                                    data-testid="off-peak-start"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">End Time</Label>
+                                                <Input
+                                                    type="time"
+                                                    value={settings.off_peak_end_time ?? "17:00"}
+                                                    onChange={(e) => setSettings({...settings, off_peak_end_time: e.target.value})}
+                                                    className="h-12 rounded-xl"
+                                                    data-testid="off-peak-end"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <Label className="form-label">Bonus Type</Label>
+                                            <Select
+                                                value={settings.off_peak_bonus_type ?? "multiplier"}
+                                                onValueChange={(value) => setSettings({...settings, off_peak_bonus_type: value})}
+                                            >
+                                                <SelectTrigger className="h-12 rounded-xl" data-testid="bonus-type-select">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="multiplier">Multiplier (e.g., 2x points)</SelectItem>
+                                                    <SelectItem value="flat">Flat Bonus (e.g., +50 points)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div>
+                                            <Label className="form-label">
+                                                {settings.off_peak_bonus_type === "multiplier" ? "Multiplier (e.g., 2.0 for 2x)" : "Flat Points"}
+                                            </Label>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                step={settings.off_peak_bonus_type === "multiplier" ? "0.5" : "1"}
+                                                value={settings.off_peak_bonus_value ?? 2.0}
+                                                onChange={(e) => setSettings({...settings, off_peak_bonus_value: parseFloat(e.target.value)})}
+                                                className="h-12 rounded-xl"
+                                                data-testid="off-peak-value"
+                                            />
+                                            <p className="text-xs text-[#52525B] mt-1">
+                                                {settings.off_peak_bonus_type === "multiplier" 
+                                                    ? "Points will be multiplied by this value" 
+                                                    : "Fixed points added to base points"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
                         {/* Save Button */}
                         <Button 
                             onClick={handleSave}
