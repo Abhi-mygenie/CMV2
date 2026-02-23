@@ -2847,9 +2847,28 @@ const SegmentsPage = () => {
     const [selectedSegment, setSelectedSegment] = useState(null);
     const [showSendMessage, setShowSendMessage] = useState(false);
     const [messageTemplate, setMessageTemplate] = useState("");
+    const [selectedCampaign, setSelectedCampaign] = useState("");
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editingSegment, setEditingSegment] = useState(null);
     const [segmentName, setSegmentName] = useState("");
+
+    // Sample campaigns - in real app, fetch from API
+    const campaigns = [
+        { id: "new_year", name: "New Year Sale 2026" },
+        { id: "weekend_special", name: "Weekend Special" },
+        { id: "loyalty_boost", name: "Loyalty Boost" },
+        { id: "win_back", name: "Win-back Campaign" },
+        { id: "birthday_club", name: "Birthday Club" }
+    ];
+
+    // Sample templates
+    const templates = [
+        { id: "welcome", name: "Welcome Message", preview: "Hi {{name}}! Welcome to our loyalty program. You've earned {{points}} points!" },
+        { id: "birthday", name: "Birthday Offer", preview: "Happy Birthday {{name}}! 🎂 Get 20% off + bonus 200 points!" },
+        { id: "winback", name: "Win-back Campaign", preview: "We miss you {{name}}! Come back for 100 bonus points!" },
+        { id: "promo", name: "Promotional Offer", preview: "Special offer for you {{name}}! 30% off this weekend!" },
+        { id: "points_expiry", name: "Points Expiry Reminder", preview: "Hi {{name}}, your points expire soon. Use them now!" }
+    ];
 
     useEffect(() => {
         fetchSegments();
