@@ -3934,6 +3934,7 @@ function App() {
                         <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
                         <Route path="/customers" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
                         <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetailPage /></ProtectedRoute>} />
+                        <Route path="/segments" element={<ProtectedRoute><SegmentsPage /></ProtectedRoute>} />
                         <Route path="/qr" element={<ProtectedRoute><QRCodePage /></ProtectedRoute>} />
                         <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
                         <Route path="/coupons" element={<ProtectedRoute><CouponsPage /></ProtectedRoute>} />
