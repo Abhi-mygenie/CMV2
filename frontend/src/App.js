@@ -1935,7 +1935,9 @@ const CustomerDetailPage = () => {
                     <form onSubmit={handleWalletTransaction}>
                         <div className="space-y-4 py-4">
                             <div>
-                                <Label htmlFor="amount" className="form-label">Amount (₹) *</Label>
+                                <Label htmlFor="amount" className="form-label">
+                                    {walletAction === "credit" ? "Amount Paid (₹) *" : "Amount (₹) *"}
+                                </Label>
                                 <Input
                                     id="amount"
                                     type="number"
@@ -1950,26 +1952,65 @@ const CustomerDetailPage = () => {
                                 />
                             </div>
                             {walletAction === "credit" && (
-                                <div>
-                                    <Label className="form-label">Payment Method</Label>
-                                    <div className="flex gap-2 mt-2">
-                                        {["cash", "upi", "card"].map((method) => (
-                                            <button
-                                                key={method}
-                                                type="button"
-                                                onClick={() => setWalletData({...walletData, payment_method: method})}
-                                                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
-                                                    walletData.payment_method === method 
-                                                        ? "bg-[#F26B33] text-white border-[#F26B33]" 
-                                                        : "bg-white text-[#52525B] border-gray-200 hover:border-[#F26B33]"
-                                                }`}
-                                                data-testid={`payment-method-${method}`}
-                                            >
-                                                {method.toUpperCase()}
-                                            </button>
-                                        ))}
+                                <>
+                                    <div>
+                                        <Label htmlFor="bonus" className="form-label">Bonus Amount (₹)</Label>
+                                        <Input
+                                            id="bonus"
+                                            type="number"
+                                            min="0"
+                                            value={walletData.bonus}
+                                            onChange={(e) => setWalletData({...walletData, bonus: e.target.value})}
+                                            placeholder="0"
+                                            className="h-12 rounded-xl"
+                                            data-testid="wallet-bonus-input"
+                                        />
+                                        <p className="text-xs text-[#52525B] mt-1">Extra amount to credit as bonus</p>
                                     </div>
-                                </div>
+                                    
+                                    {/* Total Credit Preview */}
+                                    {walletData.amount && (
+                                        <div className="p-3 bg-[#329937]/10 rounded-xl border border-[#329937]/20">
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-[#52525B]">Amount Paid:</span>
+                                                <span className="font-medium">₹{walletData.amount}</span>
+                                            </div>
+                                            {walletData.bonus && parseFloat(walletData.bonus) > 0 && (
+                                                <div className="flex justify-between items-center text-sm mt-1">
+                                                    <span className="text-[#52525B]">Bonus:</span>
+                                                    <span className="font-medium text-[#329937]">+₹{walletData.bonus}</span>
+                                                </div>
+                                            )}
+                                            <div className="flex justify-between items-center text-sm mt-2 pt-2 border-t border-[#329937]/20">
+                                                <span className="font-semibold text-[#1A1A1A]">Total Credit:</span>
+                                                <span className="font-bold text-[#329937]">
+                                                    ₹{(parseFloat(walletData.amount || 0) + parseFloat(walletData.bonus || 0)).toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    <div>
+                                        <Label className="form-label">Payment Method</Label>
+                                        <div className="flex gap-2 mt-2">
+                                            {["cash", "upi", "card"].map((method) => (
+                                                <button
+                                                    key={method}
+                                                    type="button"
+                                                    onClick={() => setWalletData({...walletData, payment_method: method})}
+                                                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
+                                                        walletData.payment_method === method 
+                                                            ? "bg-[#F26B33] text-white border-[#F26B33]" 
+                                                            : "bg-white text-[#52525B] border-gray-200 hover:border-[#F26B33]"
+                                                    }`}
+                                                    data-testid={`payment-method-${method}`}
+                                                >
+                                                    {method.toUpperCase()}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
                             )}
                             <div>
                                 <Label htmlFor="wallet-desc" className="form-label">Description</Label>
