@@ -11,18 +11,22 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#22c55e"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dinepoints.app"
+      "bundleIdentifier": "com.dinepoints.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes for customer check-in."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#22c55e"
       },
-      "package": "com.dinepoints.app"
+      "package": "com.dinepoints.app",
+      "permissions": ["CAMERA"]
     },
     "web": {
       "bundler": "metro",
@@ -31,7 +35,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow DinePoints to access your camera to scan QR codes."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
