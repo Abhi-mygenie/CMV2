@@ -101,6 +101,15 @@ export default function LoginScreen() {
               </View>
             </View>
 
+            {/* Forgot Password */}
+            <View className="flex-row justify-end mt-2">
+              <Link href="/(auth)/forgot-password" asChild>
+                <TouchableOpacity>
+                  <Text className="text-primary-500 text-sm">Forgot password?</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
+
             {/* Sign In Button */}
             <TouchableOpacity
               className={`bg-primary-500 rounded-lg py-4 mt-6 ${loading ? 'opacity-70' : ''}`}
