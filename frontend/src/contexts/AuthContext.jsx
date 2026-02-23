@@ -1,7 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import axios from "axios";
-import { useDemoMode } from "./DemoContext";
-import { createMockApiClient } from "../services/mockApi";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -31,31 +29,9 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("token"));
     const [loading, setLoading] = useState(true);
-    const demoMode = useDemoMode();
 
-    // Create API client based on demo mode
-    const api = demoMode.isDemoMode && demoMode.demoData
-        ? createMockApiClient(demoMode.demoData, {
-            addCustomer: demoMode.addCustomer,
-            updateCustomer: demoMode.updateCustomer,
-            deleteCustomer: demoMode.deleteCustomer,
-            addPointsTransaction: demoMode.addPointsTransaction,
-            addWalletTransaction: demoMode.addWalletTransaction,
-            addCoupon: demoMode.addCoupon,
-            updateCoupon: demoMode.updateCoupon,
-            deleteCoupon: demoMode.deleteCoupon,
-            addSegment: demoMode.addSegment,
-            deleteSegment: demoMode.deleteSegment,
-            addFeedback: demoMode.addFeedback,
-            addWhatsAppTemplate: demoMode.addWhatsAppTemplate,
-            updateWhatsAppTemplate: demoMode.updateWhatsAppTemplate,
-            deleteWhatsAppTemplate: demoMode.deleteWhatsAppTemplate,
-            addAutomationRule: demoMode.addAutomationRule,
-            updateAutomationRule: demoMode.updateAutomationRule,
-            deleteAutomationRule: demoMode.deleteAutomationRule,
-            updateLoyaltySettings: demoMode.updateLoyaltySettings
-        })
-        : createApiClient(token);
+    // Create API client
+    const api = createApiClient(token);
 
     useEffect(() => {
         if (demoMode.isDemoMode && demoMode.demoData) {
