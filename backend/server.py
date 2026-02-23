@@ -1778,13 +1778,52 @@ async def pos_payment_received(
             pass
     
     # Step 2: Calculate and award points (based on original bill amount, not discounted)
+    bonus_messages = []
+    total_bonus_points = 0
+    
     if webhook_data.bill_amount >= settings.get("min_order_value", 100.0):
         customer_tier = customer.get("tier", "Bronze")
         earn_percent = get_earn_percent_for_tier(customer_tier, settings)
-        points_earned = int(webhook_data.bill_amount * earn_percent / 100)
+        base_points = int(webhook_data.bill_amount * earn_percent / 100)
+        
+        # Check for off-peak hours bonus
+        is_off_peak, off_peak_value, off_peak_type, off_peak_msg = check_off_peak_bonus(settings)
+        if is_off_peak:
+            if off_peak_type == "multiplier":
+                base_points = int(base_points * off_peak_value)
+            else:  # flat bonus
+                total_bonus_points += int(off_peak_value)
+            bonus_messages.append(off_peak_msg)
+        
+        # Check for first visit bonus
+        is_first_visit, first_visit_points, first_visit_msg = check_first_visit_bonus(customer, settings)
+        if is_first_visit:
+            total_bonus_points += first_visit_points
+            bonus_messages.append(first_visit_msg)
+        
+        # Check for birthday bonus
+        is_birthday, birthday_points, birthday_msg = check_birthday_bonus(customer, settings)
+        if is_birthday:
+            total_bonus_points += birthday_points
+            bonus_messages.append(birthday_msg)
+        
+        # Check for anniversary bonus
+        is_anniversary, anniversary_points, anniversary_msg = check_anniversary_bonus(customer, settings)
+        if is_anniversary:
+            total_bonus_points += anniversary_points
+            bonus_messages.append(anniversary_msg)
+        
+        # Total points earned
+        points_earned = base_points + total_bonus_points
         
         new_points_balance = customer.get("total_points", 0) + points_earned
         new_tier = calculate_tier(new_points_balance, settings)
+        
+        # Build description
+        description_parts = [f"Earned {earn_percent}% on bill of ₹{webhook_data.bill_amount}"]
+        if bonus_messages:
+            description_parts.extend(bonus_messages)
+        description = " | ".join(description_parts)
         
         # Update customer
         await db.customers.update_one(
@@ -1809,16 +1848,61 @@ async def pos_payment_received(
             "customer_id": customer["id"],
             "points": points_earned,
             "transaction_type": "earn",
-            "description": f"Earned {earn_percent}% on bill of ₹{webhook_data.bill_amount}",
+            "description": description,
             "bill_amount": webhook_data.bill_amount,
             "balance_after": new_points_balance,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         await db.points_transactions.insert_one(tx_doc)
         
+        # Create separate bonus transactions for tracking
+        if is_first_visit:
+            bonus_tx = {
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "customer_id": customer["id"],
+                "points": first_visit_points,
+                "transaction_type": "bonus",
+                "description": first_visit_msg,
+                "bill_amount": None,
+                "balance_after": new_points_balance,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.points_transactions.insert_one(bonus_tx)
+        
+        if is_birthday:
+            bonus_tx = {
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "customer_id": customer["id"],
+                "points": birthday_points,
+                "transaction_type": "bonus",
+                "description": birthday_msg,
+                "bill_amount": None,
+                "balance_after": new_points_balance,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.points_transactions.insert_one(bonus_tx)
+        
+        if is_anniversary:
+            bonus_tx = {
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "customer_id": customer["id"],
+                "points": anniversary_points,
+                "transaction_type": "bonus",
+                "description": anniversary_msg,
+                "bill_amount": None,
+                "balance_after": new_points_balance,
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.points_transactions.insert_one(bonus_tx)
+        
         response_data["points_earned"] = points_earned
         response_data["points_balance"] = new_points_balance
         response_data["tier"] = new_tier
+        if bonus_messages:
+            response_data["bonus_applied"] = bonus_messages
     
     response_data["final_amount"] = round(current_amount, 2)
     
