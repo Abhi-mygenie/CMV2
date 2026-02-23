@@ -1594,28 +1594,44 @@ const CustomerDetailPage = () => {
         e.preventDefault();
         setSubmitting(true);
         try {
-            // For credit, calculate total amount including bonus
             const paidAmount = parseFloat(walletData.amount);
             const bonusAmount = walletAction === "credit" && walletData.bonus ? parseFloat(walletData.bonus) : 0;
-            const totalCredit = paidAmount + bonusAmount;
+            const bonusType = walletData.bonusType || "wallet";
+            
+            // Credit wallet with paid amount (+ bonus if bonus goes to wallet)
+            const walletCredit = bonusType === "wallet" ? paidAmount + bonusAmount : paidAmount;
             
             await api.post("/wallet/transaction", {
                 customer_id: id,
-                amount: walletAction === "credit" ? totalCredit : paidAmount,
+                amount: walletAction === "credit" ? walletCredit : paidAmount,
                 transaction_type: walletAction,
                 description: walletData.description || (walletAction === "credit" 
-                    ? (bonusAmount > 0 ? `Paid ₹${paidAmount} + Bonus ₹${bonusAmount}` : "Wallet recharge")
+                    ? (bonusAmount > 0 && bonusType === "wallet" ? `Paid ₹${paidAmount} + Bonus ₹${bonusAmount}` : "Wallet recharge")
                     : "Payment made"),
                 payment_method: walletData.payment_method
             });
             
+            // If bonus goes to points, add points separately
+            if (walletAction === "credit" && bonusAmount > 0 && bonusType === "points") {
+                await api.post("/points/transaction", {
+                    customer_id: id,
+                    points: bonusAmount,
+                    transaction_type: "bonus",
+                    description: `Bonus points on wallet recharge of ₹${paidAmount}`
+                });
+            }
+            
             if (walletAction === "credit" && bonusAmount > 0) {
-                toast.success(`₹${totalCredit} added to wallet (₹${paidAmount} paid + ₹${bonusAmount} bonus)!`);
+                if (bonusType === "wallet") {
+                    toast.success(`₹${walletCredit} added to wallet (₹${paidAmount} paid + ₹${bonusAmount} bonus)!`);
+                } else {
+                    toast.success(`₹${paidAmount} added to wallet + ${bonusAmount} bonus points!`);
+                }
             } else {
                 toast.success(`₹${paidAmount} ${walletAction === "credit" ? "added to" : "deducted from"} wallet!`);
             }
             setShowWalletModal(false);
-            setWalletData({ amount: "", bonus: "", description: "", payment_method: "cash" });
+            setWalletData({ amount: "", bonus: "", bonusType: "wallet", description: "", payment_method: "cash" });
             fetchData();
         } catch (err) {
             toast.error(err.response?.data?.detail || "Transaction failed");
