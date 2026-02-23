@@ -1,0 +1,26 @@
+{
+  "execution_date": "2026-02-23T17:41:20.254919",
+  "application": "DinePoints (MyGenie)",
+  "url": "https://loyalty-automation-1.preview.emergentagent.com",
+  "total_tests": 126,
+  "passed": 126,
+  "failed": 0,
+  "warnings": 0,
+  "pass_rate": "100.0%",
+  "batches": {
+    "batch_1": {
+      "name": "High Priority",
+      "tests": 48,
+      "passed": 48,
+      "pass_rate": "100.0%"
+    },
+    "batch_2": {
+      "name": "Medium & Low Priority",
+      "tests": 78,
+      "passed": 78,
+      "pass_rate": "100.0%"
+    }
+  },
+  "status": "PRODUCTION READY",
+  "recommendation": "Deploy with confidence"
+}

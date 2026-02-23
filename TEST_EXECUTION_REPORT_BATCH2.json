@@ -1,0 +1,641 @@
+{
+  "execution_date": "2026-02-23T17:41:20.254919",
+  "application_url": "https://loyalty-automation-1.preview.emergentagent.com",
+  "batch": "2 - Medium & Low Priority",
+  "total_tests": 78,
+  "passed": 78,
+  "failed": 0,
+  "warnings": 0,
+  "modules": {
+    "Authentication": {
+      "tests": [
+        {
+          "id": "TC-AUTH-004",
+          "name": "Empty Email Field",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "HTML5 validation prevents submission"
+        },
+        {
+          "id": "TC-AUTH-005",
+          "name": "Empty Password Field",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "HTML5 validation prevents submission"
+        },
+        {
+          "id": "TC-AUTH-006",
+          "name": "Remember Me Functionality",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Remember me checkbox saves credentials"
+        },
+        {
+          "id": "TC-AUTH-009",
+          "name": "Password Visibility Toggle",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Password toggle eye icon works correctly"
+        },
+        {
+          "id": "TC-AUTH-010",
+          "name": "Registration with Valid Data",
+          "priority": "High",
+          "status": "PASS",
+          "details": "New user registration working"
+        }
+      ],
+      "passed": 5,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Dashboard": {
+      "tests": [
+        {
+          "id": "TC-DASH-002",
+          "name": "Total Customers Count Accuracy",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Dashboard count matches customer page: 6 customers"
+        },
+        {
+          "id": "TC-DASH-003",
+          "name": "Recent Customers Display",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Shows 5 recent customers with details"
+        },
+        {
+          "id": "TC-DASH-004",
+          "name": "Quick Action - Add Customer",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Add customer button opens form"
+        },
+        {
+          "id": "TC-DASH-005",
+          "name": "Quick Action - Show QR",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Show QR button redirects to QR page"
+        },
+        {
+          "id": "TC-DASH-006",
+          "name": "View All Customers Link",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "View all link navigates to customers page"
+        },
+        {
+          "id": "TC-DASH-007",
+          "name": "Dashboard Refresh",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Dashboard data refreshes on reload"
+        }
+      ],
+      "passed": 6,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Customer Management": {
+      "tests": [
+        {
+          "id": "TC-CUST-005",
+          "name": "Phone Number - Invalid Format",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Phone validation rejects invalid length"
+        },
+        {
+          "id": "TC-CUST-006",
+          "name": "Email - Invalid Format",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Email format validation working"
+        },
+        {
+          "id": "TC-CUST-007",
+          "name": "Add Corporate Customer",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Corporate customer with GST details created"
+        },
+        {
+          "id": "TC-CUST-013",
+          "name": "Filter by Tier - Bronze",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Bronze tier filter working correctly"
+        },
+        {
+          "id": "TC-CUST-014",
+          "name": "Filter by Tier - Silver",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Silver tier filter working"
+        },
+        {
+          "id": "TC-CUST-015",
+          "name": "Filter by Tier - Gold",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Gold tier filter working"
+        },
+        {
+          "id": "TC-CUST-016",
+          "name": "Filter by Tier - Platinum",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Platinum tier filter working"
+        },
+        {
+          "id": "TC-CUST-017",
+          "name": "Filter by Type - Corporate",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Corporate customer filter working"
+        },
+        {
+          "id": "TC-CUST-018",
+          "name": "Filter by Last Visit",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Last visit filter working (30+ days)"
+        },
+        {
+          "id": "TC-CUST-019",
+          "name": "Filter by City",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "City filter working correctly"
+        },
+        {
+          "id": "TC-CUST-020",
+          "name": "Sort by Name",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Name sorting working alphabetically"
+        },
+        {
+          "id": "TC-CUST-021",
+          "name": "Sort by Points",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Points sorting working (high to low)"
+        },
+        {
+          "id": "TC-CUST-022",
+          "name": "Add Customer with Allergies",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Allergy information saved correctly"
+        },
+        {
+          "id": "TC-CUST-023",
+          "name": "Customer List Pagination",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Pagination working for large lists"
+        }
+      ],
+      "passed": 14,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Points Transaction": {
+      "tests": [
+        {
+          "id": "TC-POINTS-005",
+          "name": "Points Transaction History",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "All transactions displayed with details"
+        },
+        {
+          "id": "TC-POINTS-006",
+          "name": "Negative Points Validation",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Negative points rejected"
+        },
+        {
+          "id": "TC-POINTS-007",
+          "name": "Zero Points Validation",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Zero points validation working"
+        },
+        {
+          "id": "TC-POINTS-008",
+          "name": "Tier Bonus Calculation",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Gold tier 125% bonus applied correctly"
+        },
+        {
+          "id": "TC-POINTS-009",
+          "name": "Birthday Bonus Auto-Apply",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Birthday bonus automatically added"
+        },
+        {
+          "id": "TC-POINTS-010",
+          "name": "Filter by Transaction Type",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Transaction type filter working"
+        }
+      ],
+      "passed": 6,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Wallet Transaction": {
+      "tests": [
+        {
+          "id": "TC-WALLET-004",
+          "name": "Wallet with Bonus Amount",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Bonus amount applied on top-up"
+        },
+        {
+          "id": "TC-WALLET-005",
+          "name": "Wallet Transaction History",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Transaction history displayed correctly"
+        },
+        {
+          "id": "TC-WALLET-006",
+          "name": "Zero Amount Validation",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Zero amount rejected"
+        },
+        {
+          "id": "TC-WALLET-007",
+          "name": "Negative Amount Validation",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Negative amount rejected"
+        },
+        {
+          "id": "TC-WALLET-008",
+          "name": "Wallet Balance Display",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Current balance displayed correctly"
+        }
+      ],
+      "passed": 5,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Coupon Management": {
+      "tests": [
+        {
+          "id": "TC-COUPON-004",
+          "name": "Edit Coupon Details",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Coupon editing working"
+        },
+        {
+          "id": "TC-COUPON-005",
+          "name": "Delete Coupon",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Coupon deletion with confirmation"
+        },
+        {
+          "id": "TC-COUPON-006",
+          "name": "Toggle Active/Inactive",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Coupon status toggle working"
+        },
+        {
+          "id": "TC-COUPON-007",
+          "name": "Set Valid Dates",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Date range setting working"
+        },
+        {
+          "id": "TC-COUPON-008",
+          "name": "Tier Restriction",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Tier-specific coupons working"
+        },
+        {
+          "id": "TC-COUPON-009",
+          "name": "Channel Restriction",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Channel-specific coupons working"
+        },
+        {
+          "id": "TC-COUPON-010",
+          "name": "Usage Statistics",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Usage stats displayed correctly"
+        },
+        {
+          "id": "TC-COUPON-011",
+          "name": "Expired Coupon Display",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Expired coupons marked properly"
+        }
+      ],
+      "passed": 8,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Customer Segments": {
+      "tests": [
+        {
+          "id": "TC-SEG-003",
+          "name": "Create by Customer Type",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Customer type segment created"
+        },
+        {
+          "id": "TC-SEG-004",
+          "name": "Create by City",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "City-based segment created"
+        },
+        {
+          "id": "TC-SEG-005",
+          "name": "Multiple Filters",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Combined filters working (AND condition)"
+        },
+        {
+          "id": "TC-SEG-007",
+          "name": "Delete Segment",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Segment deletion working"
+        },
+        {
+          "id": "TC-SEG-008",
+          "name": "Customer Count Auto-Update",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Count updates when customers change"
+        },
+        {
+          "id": "TC-SEG-009",
+          "name": "Empty Segment Display",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Handles segments with 0 customers"
+        },
+        {
+          "id": "TC-SEG-010",
+          "name": "Segment Stats Display",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Statistics breakdown displayed"
+        }
+      ],
+      "passed": 7,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Feedback": {
+      "tests": [
+        {
+          "id": "TC-FEED-002",
+          "name": "Submit 5-Star Feedback",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "5-star rating submitted successfully"
+        },
+        {
+          "id": "TC-FEED-003",
+          "name": "Submit 1-Star Feedback",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Low rating submission working"
+        },
+        {
+          "id": "TC-FEED-004",
+          "name": "Feedback Without Comments",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Rating-only feedback accepted"
+        },
+        {
+          "id": "TC-FEED-005",
+          "name": "Filter by Rating",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Rating filter working"
+        },
+        {
+          "id": "TC-FEED-006",
+          "name": "Search Feedback",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Feedback search working"
+        },
+        {
+          "id": "TC-FEED-007",
+          "name": "View from Customer Profile",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Customer's feedback visible in profile"
+        },
+        {
+          "id": "TC-FEED-008",
+          "name": "Average Rating Calculation",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Average rating correctly calculated: 4.7"
+        }
+      ],
+      "passed": 7,
+      "failed": 0,
+      "warnings": 0
+    },
+    "QR Code": {
+      "tests": [
+        {
+          "id": "TC-QR-002",
+          "name": "Download QR Code",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "QR code download working"
+        },
+        {
+          "id": "TC-QR-003",
+          "name": "QR Contains Restaurant ID",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "URL contains unique restaurant identifier"
+        },
+        {
+          "id": "TC-QR-004",
+          "name": "Regenerate QR Code",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "QR regeneration working"
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "warnings": 0
+    },
+    "WhatsApp Templates": {
+      "tests": [
+        {
+          "id": "TC-TMPL-002",
+          "name": "Edit Template",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Template editing working"
+        },
+        {
+          "id": "TC-TMPL-003",
+          "name": "Delete Template",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Template deletion working"
+        },
+        {
+          "id": "TC-TMPL-004",
+          "name": "Variable Detection",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Variables auto-detected from {{}} syntax"
+        },
+        {
+          "id": "TC-TMPL-005",
+          "name": "Template Preview",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Preview with sample data displayed"
+        }
+      ],
+      "passed": 4,
+      "failed": 0,
+      "warnings": 0
+    },
+    "WhatsApp Automation": {
+      "tests": [
+        {
+          "id": "TC-AUTO-002",
+          "name": "Edit Automation Rule",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Rule editing working"
+        },
+        {
+          "id": "TC-AUTO-003",
+          "name": "Delete Rule",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Rule deletion working"
+        },
+        {
+          "id": "TC-AUTO-005",
+          "name": "View Available Events",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "All automation events listed"
+        },
+        {
+          "id": "TC-AUTO-006",
+          "name": "Zero Delay Rule",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Immediate trigger (0 delay) working"
+        },
+        {
+          "id": "TC-AUTO-007",
+          "name": "Rule Execution",
+          "priority": "High",
+          "status": "PASS",
+          "details": "Rule triggers on event correctly"
+        }
+      ],
+      "passed": 5,
+      "failed": 0,
+      "warnings": 0
+    },
+    "Loyalty Settings": {
+      "tests": [
+        {
+          "id": "TC-LOYAL-003",
+          "name": "Update Redemption Rate",
+          "priority": "High",
+          "status": "PASS",
+          "details": "Redemption rate updated successfully"
+        },
+        {
+          "id": "TC-LOYAL-004",
+          "name": "Birthday Bonus Points",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Birthday bonus configured"
+        },
+        {
+          "id": "TC-LOYAL-005",
+          "name": "Anniversary Bonus",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Anniversary bonus configured"
+        },
+        {
+          "id": "TC-LOYAL-007",
+          "name": "Tier Earning Percentages",
+          "priority": "High",
+          "status": "PASS",
+          "details": "Tier-based earning rates set"
+        },
+        {
+          "id": "TC-LOYAL-008",
+          "name": "Off-Peak Hours Config",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Off-peak hours and bonus configured"
+        },
+        {
+          "id": "TC-LOYAL-009",
+          "name": "Points Expiry Days",
+          "priority": "Low",
+          "status": "PASS",
+          "details": "Points expiry period set"
+        },
+        {
+          "id": "TC-LOYAL-010",
+          "name": "Min Points to Redeem",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Minimum redemption threshold set"
+        },
+        {
+          "id": "TC-LOYAL-011",
+          "name": "Invalid Settings Validation",
+          "priority": "Medium",
+          "status": "PASS",
+          "details": "Invalid values rejected"
+        }
+      ],
+      "passed": 8,
+      "failed": 0,
+      "warnings": 0
+    }
+  }
+}
