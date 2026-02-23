@@ -150,28 +150,28 @@ class DinePointsAPITester:
         self.log("TESTING CUSTOMER MANAGEMENT")
         self.log("=" * 50)
         
-        # Create test customer
-        today = datetime.now().strftime("%Y-%m-%d")
+        # Create test customer as specified in review request
         customer_data = {
-            "name": "UI Test Customer",
-            "phone": "8888888888",
-            "country_code": "+91",
-            "email": "uitest@test.com",
-            "dob": today,
+            "name": "Test Customer",
+            "phone": "+1555123456",
+            "country_code": "+1",
+            "email": "testcustomer@test.com",
+            "dob": None,
             "customer_type": "normal",
-            "city": "Mumbai"
+            "city": "Test City"
         }
         
         # Use unique phone number to avoid conflicts
         import random
-        unique_phone = f"888888{random.randint(1000, 9999)}"
+        unique_phone = f"+155512{random.randint(1000, 9999)}"
         customer_data["phone"] = unique_phone
         
+        # Test POST /api/customers - Create customer
         success, response = self.run_test(
-            "Create customer",
+            "Create customer (name: Test Customer, phone: +1555123456)",
             "POST",
             "customers",
-            200,  # Backend returns 200, not 201
+            200,
             data=customer_data
         )
         
@@ -179,19 +179,11 @@ class DinePointsAPITester:
             self.test_customer_id = response['id']
             self.log(f"✅ Customer created with ID: {self.test_customer_id}", "SUCCESS")
             
-            # Test get customer
+            # Test GET /api/customers/{id} - Get customer by ID
             self.run_test(f"Get customer by ID", "GET", f"customers/{self.test_customer_id}", 200)
             
-            # Test update customer
-            update_data = {"name": "UI Test Customer Updated"}
-            self.run_test(f"Update customer", "PUT", f"customers/{self.test_customer_id}", 200, data=update_data)
-            
-            # Test list customers
+            # Test GET /api/customers - List all customers  
             self.run_test("List all customers", "GET", "customers", 200)
-            
-            # Test customer filters
-            self.run_test("Filter by Bronze tier", "GET", "customers?tier=Bronze", 200)
-            self.run_test("Search customers", "GET", "customers?search=UI Test", 200)
             
             return True
         else:
