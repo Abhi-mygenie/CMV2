@@ -5403,30 +5403,6 @@ const CustomerRegistrationPage = () => {
 // ============ MAIN APP ============
 
 // Demo Mode Entry Component
-const DemoModeEntry = () => {
-    const { enableDemoMode, isDemoMode } = useDemoMode();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        if (!isDemoMode) {
-            enableDemoMode();
-            toast.success("🎉 Demo Mode Activated! Explore all features with pre-loaded data.");
-        }
-        // Redirect to dashboard
-        navigate("/", { replace: true });
-    }, []);
-
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
-            <div className="text-center text-white">
-                <Sparkles className="w-16 h-16 mx-auto mb-4 animate-pulse" />
-                <h1 className="text-3xl font-bold mb-2">Activating Demo Mode...</h1>
-                <p className="text-lg">Loading 55+ customers and all features</p>
-            </div>
-        </div>
-    );
-};
-
 function App() {
     return (
         <AuthProviderComponent>
