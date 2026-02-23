@@ -1,7 +1,6 @@
 // Comprehensive mock data for demo mode
-import { v4 as uuidv4 } from 'uuid';
 
-// Helper to generate UUIDs
+// Helper to generate IDs
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
 // Demo user
