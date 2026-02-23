@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, Switch, RefreshCon
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { loyaltyAPI, couponsAPI, whatsappAPI } from '../../src/services/api';
-import { Settings as SettingsIcon, Award, Ticket, MessageCircle, ChevronRight, X, LogOut, User, Plus, Trash2, Edit2, ToggleLeft, ToggleRight } from 'lucide-react-native';
+import { Settings as SettingsIcon, Award, Ticket, MessageCircle, ChevronRight, X, LogOut, User, Plus, Trash2, Edit2, ToggleLeft, ToggleRight, Bell } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 
 // Loyalty Settings Modal
