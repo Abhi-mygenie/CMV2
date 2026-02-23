@@ -279,6 +279,24 @@ class LoyaltySettings(BaseModel):
     custom_field_1_enabled: bool = False
     custom_field_2_enabled: bool = False
     custom_field_3_enabled: bool = False
+    # Birthday/Anniversary Bonus
+    birthday_bonus_enabled: bool = True
+    birthday_bonus_points: int = 100
+    birthday_bonus_days_before: int = 0  # Days before birthday to give bonus
+    birthday_bonus_days_after: int = 7  # Days after birthday bonus is valid
+    anniversary_bonus_enabled: bool = True
+    anniversary_bonus_points: int = 150
+    anniversary_bonus_days_before: int = 0
+    anniversary_bonus_days_after: int = 7
+    # First Visit Bonus
+    first_visit_bonus_enabled: bool = True
+    first_visit_bonus_points: int = 50
+    # Off-Peak Hours Bonus
+    off_peak_bonus_enabled: bool = False
+    off_peak_start_time: str = "14:00"  # 2 PM (24-hour format HH:MM)
+    off_peak_end_time: str = "17:00"  # 5 PM
+    off_peak_bonus_type: str = "multiplier"  # "multiplier" or "flat"
+    off_peak_bonus_value: float = 2.0  # 2x points or flat 50 points
 
 class LoyaltySettingsUpdate(BaseModel):
     min_order_value: Optional[float] = None
