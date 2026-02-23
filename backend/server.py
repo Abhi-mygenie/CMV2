@@ -319,6 +319,24 @@ class LoyaltySettingsUpdate(BaseModel):
     custom_field_1_enabled: Optional[bool] = None
     custom_field_2_enabled: Optional[bool] = None
     custom_field_3_enabled: Optional[bool] = None
+    # Birthday/Anniversary Bonus
+    birthday_bonus_enabled: Optional[bool] = None
+    birthday_bonus_points: Optional[int] = None
+    birthday_bonus_days_before: Optional[int] = None
+    birthday_bonus_days_after: Optional[int] = None
+    anniversary_bonus_enabled: Optional[bool] = None
+    anniversary_bonus_points: Optional[int] = None
+    anniversary_bonus_days_before: Optional[int] = None
+    anniversary_bonus_days_after: Optional[int] = None
+    # First Visit Bonus
+    first_visit_bonus_enabled: Optional[bool] = None
+    first_visit_bonus_points: Optional[int] = None
+    # Off-Peak Hours Bonus
+    off_peak_bonus_enabled: Optional[bool] = None
+    off_peak_start_time: Optional[str] = None
+    off_peak_end_time: Optional[str] = None
+    off_peak_bonus_type: Optional[str] = None
+    off_peak_bonus_value: Optional[float] = None
 
 # Feedback Models
 class FeedbackCreate(BaseModel):
