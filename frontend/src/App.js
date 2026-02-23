@@ -2617,34 +2617,30 @@ const CouponsPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F9F9F7]">
-            {/* Header */}
-            <div className="bg-[#FFF5F0] px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                    <button onClick={() => navigate("/settings")} className="text-[#329937]">
-                        <ChevronLeft className="w-6 h-6" />
-                    </button>
-                    <h1 className="text-xl font-bold text-[#329937] font-['Montserrat']" data-testid="coupons-title">
+        <MobileLayout>
+            <div className="p-4">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="coupons-title">
                         Coupons
                     </h1>
+                    <Button
+                        onClick={() => { resetForm(); setShowAddModal(true); }}
+                        className="h-10 rounded-full bg-[#F26B33] hover:bg-[#D85A2A] px-4"
+                        data-testid="add-coupon-btn"
+                    >
+                        <Plus className="w-4 h-4 mr-1" /> New
+                    </Button>
                 </div>
-                <Button
-                    onClick={() => { resetForm(); setShowAddModal(true); }}
-                    className="w-10 h-10 rounded-full bg-[#F26B33] hover:bg-[#D85A2A] p-0"
-                    data-testid="add-coupon-btn"
-                >
-                    <Plus className="w-5 h-5" />
-                </Button>
-            </div>
+                <p className="text-sm text-[#52525B] mb-4">Manage promotional coupons</p>
 
-            {/* Content */}
-            <div className="p-4 max-w-lg mx-auto pb-8">
+                {/* Content */}
                 {loading ? (
                     <div className="space-y-3">
                         {[1,2,3].map(i => (
-                            <div key={i} className="bg-blue-50 rounded-xl p-4 animate-pulse">
-                                <div className="h-5 bg-blue-100 rounded w-32 mb-2"></div>
-                                <div className="h-4 bg-blue-100 rounded w-40"></div>
+                            <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 animate-pulse">
+                                <div className="h-5 bg-gray-200 rounded w-32 mb-2"></div>
+                                <div className="h-4 bg-gray-200 rounded w-40"></div>
                             </div>
                         ))}
                     </div>
@@ -2662,63 +2658,70 @@ const CouponsPage = () => {
                 ) : (
                     <div className="space-y-3">
                         {coupons.map((coupon) => (
-                            <div 
+                            <Card 
                                 key={coupon.id}
-                                className={`rounded-xl p-4 ${isCouponActive(coupon) ? 'bg-blue-50' : 'bg-gray-100'}`}
+                                className={`rounded-xl border ${isCouponActive(coupon) ? 'border-[#329937]/30 bg-white' : 'border-gray-200 bg-gray-50'}`}
                                 data-testid={`coupon-card-${coupon.id}`}
                             >
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-semibold text-[#1A1A1A] text-lg">{coupon.code}</p>
-                                            {!coupon.is_active && (
-                                                <Badge variant="outline" className="text-xs text-gray-500">Inactive</Badge>
-                                            )}
-                                            {coupon.is_active && new Date(coupon.end_date) < new Date() && (
-                                                <Badge variant="outline" className="text-xs text-red-500">Expired</Badge>
-                                            )}
-                                        </div>
-                                        <p className="text-sm text-[#52525B] mt-1">
-                                            {coupon.discount_type === "percentage" 
-                                                ? `${coupon.discount_value}% off` 
-                                                : `₹${coupon.discount_value} off`}
-                                            {coupon.max_discount && coupon.discount_type === "percentage" && 
-                                                ` (max ₹${coupon.max_discount})`}
-                                        </p>
-                                        <p className="text-xs text-[#A1A1AA] mt-1">
-                                            {formatDate(coupon.start_date)} - {formatDate(coupon.end_date)}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <span className="text-xs text-[#52525B]">
-                                                Used: {coupon.total_used}{coupon.usage_limit ? `/${coupon.usage_limit}` : ''}
-                                            </span>
-                                            <div className="flex gap-1">
+                                <CardContent className="p-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-bold text-[#1A1A1A] text-lg">{coupon.code}</p>
+                                                {isCouponActive(coupon) && (
+                                                    <Badge className="bg-[#329937]/10 text-[#329937] text-xs border-0">Active</Badge>
+                                                )}
+                                                {!coupon.is_active && (
+                                                    <Badge variant="outline" className="text-xs text-gray-500">Inactive</Badge>
+                                                )}
+                                                {coupon.is_active && new Date(coupon.end_date) < new Date() && (
+                                                    <Badge variant="outline" className="text-xs text-red-500 border-red-200">Expired</Badge>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-[#F26B33] font-medium mt-1">
+                                                {coupon.discount_type === "percentage" 
+                                                    ? `${coupon.discount_value}% off` 
+                                                    : `₹${coupon.discount_value} off`}
+                                                {coupon.max_discount && coupon.discount_type === "percentage" && 
+                                                    ` (max ₹${coupon.max_discount})`}
+                                            </p>
+                                            <p className="text-xs text-[#A1A1AA] mt-1">
+                                                {formatDate(coupon.start_date)} - {formatDate(coupon.end_date)}
+                                            </p>
+                                            <div className="flex items-center gap-2 mt-3 flex-wrap">
+                                                <Badge variant="outline" className="text-xs bg-gray-50">
+                                                    Used: {coupon.total_used}{coupon.usage_limit ? `/${coupon.usage_limit}` : ''}
+                                                </Badge>
                                                 {coupon.applicable_channels.map(ch => (
-                                                    <Badge key={ch} variant="outline" className="text-xs capitalize">
+                                                    <Badge key={ch} variant="outline" className="text-xs capitalize bg-white">
                                                         {ch.replace("_", " ")}
                                                     </Badge>
                                                 ))}
                                             </div>
                                         </div>
+                                        <div className="flex items-center gap-1">
+                                            <Button 
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleEdit(coupon)}
+                                                className="h-9 w-9 p-0 text-[#52525B] hover:text-[#F26B33] hover:bg-[#F26B33]/10"
+                                                data-testid={`edit-coupon-${coupon.id}`}
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                            <Button 
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleDelete(coupon.id)}
+                                                className="h-9 w-9 p-0 text-[#52525B] hover:text-red-600 hover:bg-red-50"
+                                                data-testid={`delete-coupon-${coupon.id}`}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <button 
-                                            onClick={() => handleEdit(coupon)}
-                                            className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg"
-                                            data-testid={`edit-coupon-${coupon.id}`}
-                                        >
-                                            <Edit2 className="w-4 h-4" />
-                                        </button>
-                                        <button 
-                                            onClick={() => handleDelete(coupon.id)}
-                                            className="p-2 text-red-500 hover:bg-red-100 rounded-lg"
-                                            data-testid={`delete-coupon-${coupon.id}`}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                                </CardContent>
+                            </Card>
                         ))}
                     </div>
                 )}
