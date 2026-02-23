@@ -8,11 +8,8 @@ import os
 import sys
 from datetime import datetime, timedelta
 from pymongo import MongoClient
-from passlib.context import CryptContext
+import bcrypt
 import random
-
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # MongoDB connection
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
@@ -40,7 +37,10 @@ if demo_user:
 # Create demo user
 print("👤 Creating demo user account...")
 demo_user_id = "demo-user-restaurant"
-hashed_password = pwd_context.hash("demo123")
+
+# Hash password using bcrypt (same as backend)
+password = "demo123"
+hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 demo_user = {
     "id": demo_user_id,
