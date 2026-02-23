@@ -1864,7 +1864,8 @@ async def pos_payment_received(
         # Total points earned
         points_earned = base_points + total_bonus_points
         
-        new_points_balance = customer.get("total_points", 0) + points_earned
+        # Calculate final balance (earned - redeemed)
+        new_points_balance = customer.get("total_points", 0) + points_earned - points_redeemed
         new_tier = calculate_tier(new_points_balance, settings)
         
         # Build description
