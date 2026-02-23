@@ -718,6 +718,12 @@ export default function SettingsScreen() {
               onPress={() => router.push('/(tabs)/profile')}
             />
             <MenuItem
+              icon={Bell}
+              title="Notifications"
+              subtitle="Manage push notifications"
+              onPress={() => router.push('/(tabs)/notification-settings')}
+            />
+            <MenuItem
               icon={LogOut}
               title="Logout"
               onPress={handleLogout}
