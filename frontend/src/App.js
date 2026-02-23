@@ -673,6 +673,10 @@ const CustomersPage = () => {
         custom_field_3: ""
     });
     const [submitting, setSubmitting] = useState(false);
+    const [showSaveSegmentDialog, setShowSaveSegmentDialog] = useState(false);
+    const [segmentName, setSegmentName] = useState("");
+    const [savedSegments, setSavedSegments] = useState([]);
+    const [selectedSegment, setSelectedSegment] = useState(null);
 
     const buildQueryString = () => {
         const params = new URLSearchParams();
