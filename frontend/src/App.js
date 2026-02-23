@@ -3213,6 +3213,7 @@ const SegmentsPage = () => {
                 {showSendMessage && selectedSegment && (
                     <Dialog open={true} onOpenChange={() => {
                         setShowSendMessage(false);
+                        setSelectedSegment(null);
                         setSelectedCampaign("");
                         setMessageTemplate("");
                         setTemplateVariables({});
