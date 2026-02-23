@@ -3247,6 +3247,37 @@ const SettingsPage = () => {
                             </CardContent>
                         </Card>
 
+                        {/* Feedback/Review Bonus */}
+                        <Card className="rounded-xl border-0 shadow-sm mb-4">
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <p className="font-semibold text-[#1A1A1A]">Feedback Bonus ⭐</p>
+                                        <p className="text-xs text-[#52525B]">Reward customers for reviews</p>
+                                    </div>
+                                    <Switch
+                                        checked={settings.feedback_bonus_enabled ?? true}
+                                        onCheckedChange={(checked) => setSettings({...settings, feedback_bonus_enabled: checked})}
+                                        data-testid="feedback-toggle"
+                                    />
+                                </div>
+                                {settings.feedback_bonus_enabled && (
+                                    <div>
+                                        <Label className="form-label">Bonus Points</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={settings.feedback_bonus_points ?? 25}
+                                            onChange={(e) => setSettings({...settings, feedback_bonus_points: parseInt(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="feedback-points-input"
+                                        />
+                                        <p className="text-xs text-[#52525B] mt-1">Points awarded once when customer submits feedback (one-time bonus)</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
                         {/* Save Button */}
                         <Button 
                             onClick={handleSave}
