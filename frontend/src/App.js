@@ -9,7 +9,7 @@ import {
     ArrowUpRight, ArrowDownRight, Gift, Phone, Mail,
     User, LogOut, Copy, Download, Check, X, Edit2, Trash2,
     Eye, EyeOff, Building2, Calendar, MapPin, Filter, Clock,
-    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers
+    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers, Wallet
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
