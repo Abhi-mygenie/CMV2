@@ -34,12 +34,8 @@ export const AuthProvider = ({ children }) => {
     const api = createApiClient(token);
 
     useEffect(() => {
-        if (demoMode.isDemoMode && demoMode.demoData) {
-            // In demo mode, set user immediately
-            setUser(demoMode.demoData.user);
-            setLoading(false);
-        } else if (token) {
-            // In normal mode, fetch user from API
+        if (token) {
+            // Fetch user from API
             api.get("/auth/me")
                 .then(res => setUser(res.data))
                 .catch(() => {
@@ -50,7 +46,7 @@ export const AuthProvider = ({ children }) => {
         } else {
             setLoading(false);
         }
-    }, [token, demoMode.isDemoMode, demoMode.demoData]);
+    }, [token]);
 
     const login = async (email, password) => {
         const res = await axios.post(`${API}/auth/login`, { email, password });
