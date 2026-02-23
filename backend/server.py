@@ -865,6 +865,17 @@ async def update_customer(customer_id: str, update_data: CustomerUpdate, user: d
         raise HTTPException(status_code=404, detail="Customer not found")
     
     update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
+    
+    # Check phone uniqueness if phone is being updated
+    if "phone" in update_dict and update_dict["phone"] != customer.get("phone"):
+        existing = await db.customers.find_one({
+            "user_id": user["id"], 
+            "phone": update_dict["phone"],
+            "id": {"$ne": customer_id}  # Exclude current customer
+        })
+        if existing:
+            raise HTTPException(status_code=400, detail="Another customer with this phone already exists")
+    
     if update_dict:
         await db.customers.update_one({"id": customer_id}, {"$set": update_dict})
     
