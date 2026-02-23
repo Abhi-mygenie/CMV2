@@ -1724,10 +1724,50 @@ async def pos_payment_received(
             "silver_earn_percent": 7.0,
             "gold_earn_percent": 10.0,
             "platinum_earn_percent": 15.0,
+            "redemption_value": 0.25,
+            "min_redemption_points": 100,
+            "max_redemption_percent": 50.0,
+            "max_redemption_amount": 500.0,
             "tier_silver_min": 500,
             "tier_gold_min": 1500,
-            "tier_platinum_min": 5000
+            "tier_platinum_min": 5000,
+            "birthday_bonus_enabled": True,
+            "birthday_bonus_points": 100,
+            "birthday_bonus_days_before": 0,
+            "birthday_bonus_days_after": 7,
+            "anniversary_bonus_enabled": True,
+            "anniversary_bonus_points": 150,
+            "anniversary_bonus_days_before": 0,
+            "anniversary_bonus_days_after": 7,
+            "first_visit_bonus_enabled": True,
+            "first_visit_bonus_points": 50,
+            "off_peak_bonus_enabled": False,
+            "off_peak_start_time": "14:00",
+            "off_peak_end_time": "17:00",
+            "off_peak_bonus_type": "multiplier",
+            "off_peak_bonus_value": 2.0
         }
+    else:
+        # Ensure all new fields have defaults if missing
+        settings.setdefault("birthday_bonus_enabled", True)
+        settings.setdefault("birthday_bonus_points", 100)
+        settings.setdefault("birthday_bonus_days_before", 0)
+        settings.setdefault("birthday_bonus_days_after", 7)
+        settings.setdefault("anniversary_bonus_enabled", True)
+        settings.setdefault("anniversary_bonus_points", 150)
+        settings.setdefault("anniversary_bonus_days_before", 0)
+        settings.setdefault("anniversary_bonus_days_after", 7)
+        settings.setdefault("first_visit_bonus_enabled", True)
+        settings.setdefault("first_visit_bonus_points", 50)
+        settings.setdefault("off_peak_bonus_enabled", False)
+        settings.setdefault("off_peak_start_time", "14:00")
+        settings.setdefault("off_peak_end_time", "17:00")
+        settings.setdefault("off_peak_bonus_type", "multiplier")
+        settings.setdefault("off_peak_bonus_value", 2.0)
+        settings.setdefault("redemption_value", 0.25)
+        settings.setdefault("min_redemption_points", 100)
+        settings.setdefault("max_redemption_percent", 50.0)
+        settings.setdefault("max_redemption_amount", 500.0)
     
     response_data = {
         "customer": {
