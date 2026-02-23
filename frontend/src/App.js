@@ -1012,10 +1012,103 @@ const CustomersPage = () => {
                                         </div>
                                     </div>
                                 )}
+
+                                {/* Save as Segment Button */}
+                                {activeFiltersCount > 0 && (
+                                    <div className="pt-3 border-t">
+                                        <Button 
+                                            onClick={() => setShowSaveSegmentDialog(true)}
+                                            className="w-full h-9 text-xs bg-[#F26B33] hover:bg-[#D85A2A]"
+                                            data-testid="save-segment-btn"
+                                        >
+                                            <Save className="w-3 h-3 mr-1" /> Save as Segment
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Saved Segments */}
+                                {savedSegments.length > 0 && (
+                                    <div className="pt-3 border-t">
+                                        <p className="text-xs font-semibold text-[#52525B] mb-2">Saved Segments</p>
+                                        <div className="space-y-2">
+                                            {savedSegments.map(segment => (
+                                                <div key={segment.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                                    <button
+                                                        onClick={() => {
+                                                            loadSegment(segment);
+                                                            setShowFilters(false);
+                                                        }}
+                                                        className="flex-1 text-left"
+                                                    >
+                                                        <p className="text-xs font-medium text-[#1A1A1A]">{segment.name}</p>
+                                                        <p className="text-[10px] text-[#52525B]">{segment.customer_count} customers</p>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteSegment(segment.id)}
+                                                        className="ml-2 text-red-500 hover:text-red-700"
+                                                    >
+                                                        <Trash2 className="w-3 h-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </PopoverContent>
                     </Popover>
                 </div>
+
+                {/* Save Segment Dialog */}
+                {showSaveSegmentDialog && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowSaveSegmentDialog(false)}>
+                        <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+                            <h3 className="text-lg font-semibold mb-4">Save Segment</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <Label className="text-sm font-medium">Segment Name</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="e.g., VIP Customers"
+                                        value={segmentName}
+                                        onChange={(e) => setSegmentName(e.target.value)}
+                                        className="mt-1 h-11 rounded-xl"
+                                        data-testid="segment-name-input"
+                                    />
+                                </div>
+                                <div className="bg-gray-50 p-3 rounded-lg">
+                                    <p className="text-xs font-medium text-[#52525B] mb-2">Current Filters:</p>
+                                    <div className="space-y-1 text-xs text-[#1A1A1A]">
+                                        {filters.tier !== "all" && <p>• Tier: {filters.tier}</p>}
+                                        {filters.customer_type !== "all" && <p>• Type: {filters.customer_type}</p>}
+                                        {filters.last_visit_days !== "all" && <p>• Last Visit: {filters.last_visit_days} days</p>}
+                                        {filters.city && <p>• City: {filters.city}</p>}
+                                        {search && <p>• Search: {search}</p>}
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowSaveSegmentDialog(false);
+                                            setSegmentName("");
+                                        }}
+                                        className="flex-1"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={saveAsSegment}
+                                        className="flex-1 bg-[#F26B33] hover:bg-[#D85A2A]"
+                                        data-testid="save-segment-confirm-btn"
+                                    >
+                                        Save
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Segment Stats Bar */}
                 {segments && (
