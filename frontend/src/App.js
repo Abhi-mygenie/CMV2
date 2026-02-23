@@ -89,7 +89,6 @@ const LoginPage = () => {
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const { login } = useAuth();
-    const { enableDemoMode } = useDemoMode();
     const navigate = useNavigate();
 
     // Load saved credentials on mount
