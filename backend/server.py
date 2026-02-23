@@ -213,6 +213,25 @@ class Coupon(BaseModel):
     total_used: int = 0
     created_at: str
 
+# Segment Models
+class SegmentCreate(BaseModel):
+    name: str
+    filters: dict  # JSON object with filter criteria
+
+class SegmentUpdate(BaseModel):
+    name: Optional[str] = None
+    filters: Optional[dict] = None
+
+class Segment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    user_id: str
+    name: str
+    filters: dict
+    customer_count: int = 0
+    created_at: str
+    updated_at: str
+
 class CouponUsage(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str
