@@ -373,6 +373,7 @@ const RegisterPage = () => {
 const MobileLayout = ({ children }) => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { isDemoMode, disableDemoMode } = useDemoMode();
     
     const navItems = [
         { path: "/", icon: Home, label: "Home" },
@@ -382,8 +383,32 @@ const MobileLayout = ({ children }) => {
         { path: "/settings", icon: Settings, label: "Settings" }
     ];
 
+    const handleExitDemo = () => {
+        disableDemoMode();
+        toast.info("Exited demo mode");
+        navigate("/login");
+    };
+
     return (
         <div className="min-h-screen bg-[#F9F9F7] pb-20">
+            {/* Demo Mode Banner */}
+            {isDemoMode && (
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 flex items-center justify-between sticky top-0 z-50 shadow-md" data-testid="demo-mode-banner">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4" />
+                        <span className="text-sm font-medium">Demo Mode - Explore freely!</span>
+                    </div>
+                    <button 
+                        onClick={handleExitDemo}
+                        className="text-white hover:bg-white/20 p-1 rounded-full transition-colors"
+                        data-testid="exit-demo-btn"
+                        title="Exit Demo Mode"
+                    >
+                        <XCircle className="w-5 h-5" />
+                    </button>
+                </div>
+            )}
+            
             {children}
             
             {/* Bottom Navigation */}
