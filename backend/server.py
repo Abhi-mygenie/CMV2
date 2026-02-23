@@ -442,30 +442,19 @@ def generate_qr_code(data: str) -> str:
 
 def check_birthday_bonus(customer: dict, settings: dict) -> tuple[bool, int, str]:
     """Check if customer is eligible for birthday bonus"""
-    print(f"[DEBUG] Checking birthday bonus for customer: {customer.get('name')}")
-    print(f"[DEBUG] Birthday bonus enabled: {settings.get('birthday_bonus_enabled', False)}")
-    
     if not settings.get('birthday_bonus_enabled', False):
-        print("[DEBUG] Birthday bonus is disabled")
         return False, 0, ""
     
     if not customer.get('dob'):
-        print("[DEBUG] Customer has no DOB")
         return False, 0, ""
     
     try:
         dob_str = customer['dob']
-        print(f"[DEBUG] Customer DOB string: {dob_str}")
-        
         dob = datetime.fromisoformat(dob_str.replace('Z', '+00:00'))
         today = datetime.now(timezone.utc)
         
-        print(f"[DEBUG] Parsed DOB: {dob}")
-        print(f"[DEBUG] Today: {today}")
-        
         # Create birthday for this year
         birthday_this_year = dob.replace(year=today.year)
-        print(f"[DEBUG] Birthday this year: {birthday_this_year}")
         
         # Check if within bonus window
         days_before = settings.get('birthday_bonus_days_before', 0)
@@ -474,19 +463,12 @@ def check_birthday_bonus(customer: dict, settings: dict) -> tuple[bool, int, str
         start_date = birthday_this_year - timedelta(days=days_before)
         end_date = birthday_this_year + timedelta(days=days_after)
         
-        print(f"[DEBUG] Bonus window: {start_date} to {end_date}")
-        print(f"[DEBUG] Is today in window? {start_date <= today <= end_date}")
-        
         if start_date <= today <= end_date:
             bonus_points = settings.get('birthday_bonus_points', 100)
-            print(f"[DEBUG] Birthday bonus TRIGGERED! {bonus_points} points")
             return True, bonus_points, f"Birthday bonus! Happy Birthday 🎂"
     except Exception as e:
-        print(f"[DEBUG] Exception in birthday check: {e}")
-        import traceback
-        traceback.print_exc()
+        pass
     
-    print("[DEBUG] Birthday bonus not applicable")
     return False, 0, ""
 
 def check_anniversary_bonus(customer: dict, settings: dict) -> tuple[bool, int, str]:
