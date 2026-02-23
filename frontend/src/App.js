@@ -124,12 +124,6 @@ const LoginPage = () => {
         }
     };
 
-    const handleDemoMode = () => {
-        enableDemoMode();
-        toast.success("Demo mode activated! Explore all features.");
-        navigate("/");
-    };
-
     return (
         <div className="min-h-screen bg-[#F9F9F7] flex flex-col justify-center p-6">
             <div className="max-w-sm mx-auto w-full">
