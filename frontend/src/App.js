@@ -1577,6 +1577,181 @@ const CustomersPage = () => {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            {/* Edit Customer Modal */}
+            <Dialog open={showEditModal} onOpenChange={(open) => { setShowEditModal(open); if (!open) setEditingCustomer(null); }}>
+                <DialogContent className="max-w-md mx-4 rounded-2xl max-h-[90vh] overflow-hidden">
+                    <DialogHeader>
+                        <DialogTitle className="font-['Montserrat']">Edit Customer</DialogTitle>
+                        <DialogDescription>Update customer details</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleUpdateCustomer}>
+                        <ScrollArea className="h-[60vh] pr-4">
+                            <div className="space-y-4 py-2">
+                                <div>
+                                    <Label className="form-label">Name *</Label>
+                                    <Input
+                                        value={editData.name || ""}
+                                        onChange={(e) => setEditData({...editData, name: e.target.value})}
+                                        placeholder="Customer name"
+                                        className="h-11 rounded-xl"
+                                        required
+                                        data-testid="edit-list-name-input"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <Label className="form-label">Phone Number * (Unique)</Label>
+                                    <div className="flex gap-2">
+                                        <Select 
+                                            value={editData.country_code || "+91"} 
+                                            onValueChange={(v) => setEditData({...editData, country_code: v})}
+                                        >
+                                            <SelectTrigger className="w-24 h-11 rounded-xl">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="+91">+91</SelectItem>
+                                                <SelectItem value="+1">+1</SelectItem>
+                                                <SelectItem value="+44">+44</SelectItem>
+                                                <SelectItem value="+971">+971</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <Input
+                                            value={editData.phone || ""}
+                                            onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                                            placeholder="9876543210"
+                                            className="flex-1 h-11 rounded-xl"
+                                            required
+                                            data-testid="edit-list-phone-input"
+                                        />
+                                    </div>
+                                    <p className="text-xs text-[#52525B] mt-1">Phone number must be unique</p>
+                                </div>
+
+                                <div>
+                                    <Label className="form-label">Email</Label>
+                                    <Input
+                                        type="email"
+                                        value={editData.email || ""}
+                                        onChange={(e) => setEditData({...editData, email: e.target.value})}
+                                        placeholder="customer@email.com"
+                                        className="h-11 rounded-xl"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label className="form-label">Date of Birth</Label>
+                                        <Input
+                                            type="date"
+                                            value={editData.dob || ""}
+                                            onChange={(e) => setEditData({...editData, dob: e.target.value})}
+                                            className="h-11 rounded-xl"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label">Anniversary</Label>
+                                        <Input
+                                            type="date"
+                                            value={editData.anniversary || ""}
+                                            onChange={(e) => setEditData({...editData, anniversary: e.target.value})}
+                                            className="h-11 rounded-xl"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label className="form-label">Customer Type</Label>
+                                    <Select 
+                                        value={editData.customer_type || "normal"} 
+                                        onValueChange={(v) => setEditData({...editData, customer_type: v})}
+                                    >
+                                        <SelectTrigger className="h-11 rounded-xl">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="normal">Normal</SelectItem>
+                                            <SelectItem value="corporate">Corporate</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {editData.customer_type === "corporate" && (
+                                    <>
+                                        <div>
+                                            <Label className="form-label">GST Name</Label>
+                                            <Input
+                                                value={editData.gst_name || ""}
+                                                onChange={(e) => setEditData({...editData, gst_name: e.target.value})}
+                                                placeholder="Company Name"
+                                                className="h-11 rounded-xl"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label className="form-label">GST Number</Label>
+                                            <Input
+                                                value={editData.gst_number || ""}
+                                                onChange={(e) => setEditData({...editData, gst_number: e.target.value})}
+                                                placeholder="29ABCDE1234F1Z5"
+                                                className="h-11 rounded-xl"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+
+                                <div>
+                                    <Label className="form-label">City</Label>
+                                    <Input
+                                        value={editData.city || ""}
+                                        onChange={(e) => setEditData({...editData, city: e.target.value})}
+                                        placeholder="Mumbai"
+                                        className="h-11 rounded-xl"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label className="form-label">Address</Label>
+                                    <Input
+                                        value={editData.address || ""}
+                                        onChange={(e) => setEditData({...editData, address: e.target.value})}
+                                        placeholder="Full address"
+                                        className="h-11 rounded-xl"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label className="form-label">Notes</Label>
+                                    <Input
+                                        value={editData.notes || ""}
+                                        onChange={(e) => setEditData({...editData, notes: e.target.value})}
+                                        placeholder="Any special notes..."
+                                        className="h-11 rounded-xl"
+                                    />
+                                </div>
+                            </div>
+                        </ScrollArea>
+                        <DialogFooter className="mt-4">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => { setShowEditModal(false); setEditingCustomer(null); }}
+                                className="rounded-full"
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                className="rounded-full bg-[#F26B33] hover:bg-[#D85A2A]"
+                                disabled={submitting}
+                                data-testid="save-edit-list-btn"
+                            >
+                                {submitting ? "Saving..." : "Save Changes"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </MobileLayout>
     );
 };
