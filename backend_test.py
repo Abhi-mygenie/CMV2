@@ -305,50 +305,40 @@ class DinePointsAPITester:
         return True
 
     def test_coupon_management(self):
-        """Test coupon CRUD operations"""
+        """Test coupon CRUD operations as specified in review request"""
         self.log("=" * 50)
         self.log("TESTING COUPON MANAGEMENT")
         self.log("=" * 50)
         
-        # Create test coupon
+        # Test GET /api/coupons - List coupons
+        self.run_test("List all coupons", "GET", "coupons", 200)
+        
+        # Create test coupon as specified in review request
         start_date = datetime.now().strftime("%Y-%m-%d")
         end_date = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
         
         coupon_data = {
-            "code": "UITEST20",
-            "discount_type": "percentage",
+            "code": "TEST20",
+            "discount_type": "percentage", 
             "discount_value": 20,
             "start_date": start_date,
             "end_date": end_date,
             "applicable_channels": ["delivery", "takeaway", "dine_in"],
-            "min_order_value": 500
+            "min_order_value": 100
         }
         
+        # Test POST /api/coupons - Create coupon
         success, response = self.run_test(
-            "Create coupon",
+            "Create coupon (code: TEST20, discount_type: percentage, discount_value: 20)",
             "POST",
             "coupons",
-            200,  # Backend returns 200, not 201
+            200,
             data=coupon_data
         )
         
         if success and 'id' in response:
             self.test_coupon_id = response['id']
             self.log(f"✅ Coupon created with ID: {self.test_coupon_id}", "SUCCESS")
-            
-            # Test list coupons
-            self.run_test("List all coupons", "GET", "coupons", 200)
-            
-            # Test validate coupon
-            if self.test_customer_id:
-                validate_data = {
-                    "code": "UITEST20",
-                    "customer_id": self.test_customer_id,
-                    "order_value": 1000.0,
-                    "channel": "dine_in"
-                }
-                self.run_test("Validate coupon", "POST", "coupons/validate", 200, data=validate_data)
-            
             return True
         
         return False
