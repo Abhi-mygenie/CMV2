@@ -267,7 +267,7 @@ class DinePointsAPITester:
         return True
 
     def test_wallet_apis(self):
-        """Test wallet APIs as specified in review request"""
+        """Test wallet APIs - using actual backend endpoints"""
         self.log("=" * 50)
         self.log("TESTING WALLET APIs")
         self.log("=" * 50)
@@ -276,24 +276,28 @@ class DinePointsAPITester:
             self.log("❌ No test customer available for wallet testing", "SKIP")
             return False
             
-        # Test Credit Wallet API - POST /api/wallet/{customer_id}/credit
+        # Test POST /api/wallet/transaction - Credit wallet (amount: 50)
         credit_data = {
-            "amount": 50
+            "customer_id": self.test_customer_id,
+            "amount": 50,
+            "transaction_type": "credit",
+            "description": "Test wallet credit",
+            "payment_method": "cash"
         }
         
         success, response = self.run_test(
             "Credit wallet (amount: 50)",
             "POST",
-            f"wallet/{self.test_customer_id}/credit",
+            "wallet/transaction",
             200,
             data=credit_data
         )
         
-        # Test Get Wallet History API - GET /api/wallet/{customer_id}/history
+        # Test GET /api/wallet/transactions/{customer_id} - Get wallet history
         self.run_test(
             f"Get wallet history",
             "GET",
-            f"wallet/{self.test_customer_id}/history", 
+            f"wallet/transactions/{self.test_customer_id}", 
             200
         )
         
