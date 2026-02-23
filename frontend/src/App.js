@@ -1970,7 +1970,7 @@ const CustomerDetailPage = () => {
                             {walletAction === "credit" && (
                                 <>
                                     <div>
-                                        <Label htmlFor="bonus" className="form-label">Bonus Amount (₹)</Label>
+                                        <Label htmlFor="bonus" className="form-label">Bonus Amount</Label>
                                         <Input
                                             id="bonus"
                                             type="number"
@@ -1981,8 +1981,48 @@ const CustomerDetailPage = () => {
                                             className="h-12 rounded-xl"
                                             data-testid="wallet-bonus-input"
                                         />
-                                        <p className="text-xs text-[#52525B] mt-1">Extra amount to credit as bonus</p>
                                     </div>
+                                    
+                                    {/* Bonus Type Selector */}
+                                    {walletData.bonus && parseFloat(walletData.bonus) > 0 && (
+                                        <div>
+                                            <Label className="form-label">Give Bonus As</Label>
+                                            <div className="flex gap-2 mt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setWalletData({...walletData, bonusType: "wallet"})}
+                                                    className={`flex-1 py-3 px-3 rounded-xl text-sm font-medium border-2 transition-colors ${
+                                                        walletData.bonusType === "wallet" 
+                                                            ? "bg-[#329937]/10 text-[#329937] border-[#329937]" 
+                                                            : "bg-white text-[#52525B] border-gray-200 hover:border-[#329937]"
+                                                    }`}
+                                                    data-testid="bonus-type-wallet"
+                                                >
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <Wallet className="w-5 h-5" />
+                                                        <span>Wallet Balance</span>
+                                                        <span className="text-xs opacity-70">+₹{walletData.bonus}</span>
+                                                    </div>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setWalletData({...walletData, bonusType: "points"})}
+                                                    className={`flex-1 py-3 px-3 rounded-xl text-sm font-medium border-2 transition-colors ${
+                                                        walletData.bonusType === "points" 
+                                                            ? "bg-[#F26B33]/10 text-[#F26B33] border-[#F26B33]" 
+                                                            : "bg-white text-[#52525B] border-gray-200 hover:border-[#F26B33]"
+                                                    }`}
+                                                    data-testid="bonus-type-points"
+                                                >
+                                                    <div className="flex flex-col items-center gap-1">
+                                                        <Gift className="w-5 h-5" />
+                                                        <span>Loyalty Points</span>
+                                                        <span className="text-xs opacity-70">+{walletData.bonus} pts</span>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                     
                                     {/* Total Credit Preview */}
                                     {walletData.amount && (
@@ -1992,17 +2032,30 @@ const CustomerDetailPage = () => {
                                                 <span className="font-medium">₹{walletData.amount}</span>
                                             </div>
                                             {walletData.bonus && parseFloat(walletData.bonus) > 0 && (
-                                                <div className="flex justify-between items-center text-sm mt-1">
-                                                    <span className="text-[#52525B]">Bonus:</span>
-                                                    <span className="font-medium text-[#329937]">+₹{walletData.bonus}</span>
-                                                </div>
+                                                <>
+                                                    <div className="flex justify-between items-center text-sm mt-1">
+                                                        <span className="text-[#52525B]">Bonus ({walletData.bonusType === "wallet" ? "Wallet" : "Points"}):</span>
+                                                        <span className={`font-medium ${walletData.bonusType === "wallet" ? "text-[#329937]" : "text-[#F26B33]"}`}>
+                                                            {walletData.bonusType === "wallet" ? `+₹${walletData.bonus}` : `+${walletData.bonus} pts`}
+                                                        </span>
+                                                    </div>
+                                                </>
                                             )}
                                             <div className="flex justify-between items-center text-sm mt-2 pt-2 border-t border-[#329937]/20">
-                                                <span className="font-semibold text-[#1A1A1A]">Total Credit:</span>
+                                                <span className="font-semibold text-[#1A1A1A]">Wallet Credit:</span>
                                                 <span className="font-bold text-[#329937]">
-                                                    ₹{(parseFloat(walletData.amount || 0) + parseFloat(walletData.bonus || 0)).toLocaleString()}
+                                                    ₹{walletData.bonusType === "wallet" 
+                                                        ? (parseFloat(walletData.amount || 0) + parseFloat(walletData.bonus || 0)).toLocaleString()
+                                                        : parseFloat(walletData.amount || 0).toLocaleString()
+                                                    }
                                                 </span>
                                             </div>
+                                            {walletData.bonus && parseFloat(walletData.bonus) > 0 && walletData.bonusType === "points" && (
+                                                <div className="flex justify-between items-center text-sm mt-1">
+                                                    <span className="font-semibold text-[#1A1A1A]">Points Credit:</span>
+                                                    <span className="font-bold text-[#F26B33]">+{walletData.bonus} pts</span>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                     
