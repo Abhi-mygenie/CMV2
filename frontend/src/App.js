@@ -1,0 +1,3178 @@
+import { useState, useEffect, createContext, useContext } from "react";
+import "@/App.css";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams } from "react-router-dom";
+import axios from "axios";
+import { Toaster, toast } from "sonner";
+import { 
+    Home, Users, QrCode, MessageSquare, Settings, 
+    Plus, Search, ChevronRight, Star, TrendingUp,
+    ArrowUpRight, ArrowDownRight, Gift, Phone, Mail,
+    User, LogOut, Copy, Download, Check, X, Edit2, Trash2,
+    Eye, EyeOff, Building2, Calendar, MapPin, Filter, Clock,
+    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+// Country codes for phone
+const COUNTRY_CODES = [
+    { code: "+91", country: "India", flag: "🇮🇳" },
+    { code: "+1", country: "USA", flag: "🇺🇸" },
+    { code: "+44", country: "UK", flag: "🇬🇧" },
+    { code: "+971", country: "UAE", flag: "🇦🇪" },
+    { code: "+65", country: "Singapore", flag: "🇸🇬" },
+    { code: "+61", country: "Australia", flag: "🇦🇺" },
+    { code: "+81", country: "Japan", flag: "🇯🇵" },
+    { code: "+86", country: "China", flag: "🇨🇳" },
+];
+
+// Common allergies for restaurants
+const COMMON_ALLERGIES = [
+    "Gluten", "Dairy", "Eggs", "Peanuts", "Tree Nuts", 
+    "Soy", "Fish", "Shellfish", "Sesame", "Mustard"
+];
+
+// Custom field 1 dropdown options (can be configured in POS later)
+const CUSTOM_FIELD_1_OPTIONS = [
+    "Dine-in",
+    "Takeaway",
+    "Delivery",
+    "Corporate",
+    "Event",
+    "Other"
+];
+
+// Auth Context
+const AuthContext = createContext(null);
+
+const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within AuthProvider");
+    }
+    return context;
+};
+
+// API helper with auth
+const createApiClient = (token) => {
+    const client = axios.create({
+        baseURL: API,
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    return client;
+};
+
+// Auth Provider
+const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem("token"));
+    const [loading, setLoading] = useState(true);
+
+    const api = createApiClient(token);
+
+    useEffect(() => {
+        if (token) {
+            api.get("/auth/me")
+                .then(res => setUser(res.data))
+                .catch(() => {
+                    localStorage.removeItem("token");
+                    setToken(null);
+                })
+                .finally(() => setLoading(false));
+        } else {
+            setLoading(false);
+        }
+    }, [token]);
+
+    const login = async (email, password) => {
+        const res = await axios.post(`${API}/auth/login`, { email, password });
+        localStorage.setItem("token", res.data.access_token);
+        setToken(res.data.access_token);
+        setUser(res.data.user);
+        return res.data;
+    };
+
+    const register = async (data) => {
+        const res = await axios.post(`${API}/auth/register`, data);
+        localStorage.setItem("token", res.data.access_token);
+        setToken(res.data.access_token);
+        setUser(res.data.user);
+        return res.data;
+    };
+
+    const logout = () => {
+        localStorage.removeItem("token");
+        setToken(null);
+        setUser(null);
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, token, api, login, register, logout, loading }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+// Protected Route
+const ProtectedRoute = ({ children }) => {
+    const { token, loading } = useAuth();
+    
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#F9F9F7]">
+                <div className="animate-pulse text-[#F26B33] text-lg font-semibold">Loading...</div>
+            </div>
+        );
+    }
+    
+    if (!token) {
+        return <Navigate to="/login" />;
+    }
+    
+    return children;
+};
+
+// ============ AUTH PAGES ============
+
+const LoginPage = () => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    // Load saved credentials on mount
+    useEffect(() => {
+        const savedEmail = localStorage.getItem("remembered_email");
+        const savedPassword = localStorage.getItem("remembered_password");
+        if (savedEmail && savedPassword) {
+            setEmail(savedEmail);
+            setPassword(savedPassword);
+            setRememberMe(true);
+        }
+    }, []);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            // Save or clear credentials based on remember me
+            if (rememberMe) {
+                localStorage.setItem("remembered_email", email);
+                localStorage.setItem("remembered_password", password);
+            } else {
+                localStorage.removeItem("remembered_email");
+                localStorage.removeItem("remembered_password");
+            }
+            await login(email, password);
+            toast.success("Welcome back!");
+            navigate("/");
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Login failed");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-[#F9F9F7] flex flex-col justify-center p-6">
+            <div className="max-w-sm mx-auto w-full">
+                <div className="text-center mb-8">
+                    <img 
+                        src="https://customer-assets.emergentagent.com/job_dine-points-app/artifacts/acdjlx1x_mygenie_logo.svg" 
+                        alt="MyGenie Logo" 
+                        className="h-20 mx-auto"
+                    />
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="email" className="form-label">Email</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="owner@restaurant.com"
+                            className="h-12 rounded-xl"
+                            required
+                            data-testid="login-email-input"
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="password" className="form-label">Password</Label>
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter password"
+                                className="h-12 rounded-xl pr-12"
+                                required
+                                data-testid="login-password-input"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#A1A1AA] hover:text-[#52525B] transition-colors"
+                                data-testid="toggle-password-visibility"
+                            >
+                                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="w-4 h-4 rounded border-gray-300 text-[#F26B33] focus:ring-[#F26B33]"
+                                data-testid="remember-me-checkbox"
+                            />
+                            <span className="text-sm text-[#52525B]">Remember me</span>
+                        </label>
+                        <button 
+                            type="button"
+                            onClick={() => toast.info("Please contact admin to reset your password")}
+                            className="text-sm text-[#F26B33] font-medium hover:underline"
+                            data-testid="forgot-password-btn"
+                        >
+                            Forgot password?
+                        </button>
+                    </div>
+
+                    <Button 
+                        type="submit" 
+                        className="w-full h-12 rounded-full bg-[#F26B33] hover:bg-[#D85A2A] text-white font-semibold active-scale"
+                        disabled={isLoading}
+                        data-testid="login-submit-btn"
+                    >
+                        {isLoading ? "Signing in..." : "Sign In"}
+                    </Button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+const RegisterPage = () => {
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+        restaurant_name: "",
+        phone: ""
+    });
+    const [isLoading, setIsLoading] = useState(false);
+    const { register } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        try {
+            await register(formData);
+            toast.success("Account created successfully!");
+            navigate("/");
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Registration failed");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-[#F9F9F7] flex flex-col justify-center p-6">
+            <div className="max-w-sm mx-auto w-full">
+                <div className="text-center mb-8">
+                    <img 
+                        src="https://customer-assets.emergentagent.com/job_dine-points-app/artifacts/acdjlx1x_mygenie_logo.svg" 
+                        alt="MyGenie Logo" 
+                        className="h-16 mx-auto mb-4"
+                    />
+                    <h1 className="text-3xl font-bold text-[#1A1A1A] font-['Montserrat']">Join MyGenie</h1>
+                    <p className="text-[#52525B] mt-2">Start your loyalty program today</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="restaurant" className="form-label">Restaurant Name</Label>
+                        <Input
+                            id="restaurant"
+                            value={formData.restaurant_name}
+                            onChange={(e) => setFormData({...formData, restaurant_name: e.target.value})}
+                            placeholder="Your Restaurant"
+                            className="h-12 rounded-xl"
+                            required
+                            data-testid="register-restaurant-input"
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="phone" className="form-label">Phone Number</Label>
+                        <Input
+                            id="phone"
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                            placeholder="9876543210"
+                            className="h-12 rounded-xl"
+                            required
+                            data-testid="register-phone-input"
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="email" className="form-label">Email</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            placeholder="owner@restaurant.com"
+                            className="h-12 rounded-xl"
+                            required
+                            data-testid="register-email-input"
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="password" className="form-label">Password</Label>
+                        <Input
+                            id="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={(e) => setFormData({...formData, password: e.target.value})}
+                            placeholder="Create a password"
+                            className="h-12 rounded-xl"
+                            required
+                            data-testid="register-password-input"
+                        />
+                    </div>
+                    <Button 
+                        type="submit" 
+                        className="w-full h-12 rounded-full bg-[#F26B33] hover:bg-[#D85A2A] text-white font-semibold active-scale"
+                        disabled={isLoading}
+                        data-testid="register-submit-btn"
+                    >
+                        {isLoading ? "Creating account..." : "Create Account"}
+                    </Button>
+                </form>
+
+                <p className="text-center mt-6 text-[#52525B]">
+                    Already have an account?{" "}
+                    <button 
+                        onClick={() => navigate("/login")} 
+                        className="text-[#F26B33] font-semibold"
+                        data-testid="goto-login-btn"
+                    >
+                        Sign in
+                    </button>
+                </p>
+            </div>
+        </div>
+    );
+};
+
+// ============ MAIN LAYOUT ============
+
+const MobileLayout = ({ children }) => {
+    const navigate = useNavigate();
+    const location = useLocation();
+    
+    const navItems = [
+        { path: "/", icon: Home, label: "Home" },
+        { path: "/customers", icon: Users, label: "Customers" },
+        { path: "/qr", icon: QrCode, label: "QR Code" },
+        { path: "/feedback", icon: MessageSquare, label: "Feedback" },
+        { path: "/settings", icon: Settings, label: "Settings" }
+    ];
+
+    return (
+        <div className="min-h-screen bg-[#F9F9F7] pb-20">
+            {children}
+            
+            {/* Bottom Navigation */}
+            <nav className="mobile-bottom-nav bottom-nav" data-testid="bottom-nav">
+                <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+                    {navItems.map((item) => {
+                        const isActive = location.pathname === item.path;
+                        const Icon = item.icon;
+                        return (
+                            <button
+                                key={item.path}
+                                onClick={() => navigate(item.path)}
+                                className={`mobile-bottom-nav-item ${isActive ? "active" : ""}`}
+                                data-testid={`nav-${item.label.toLowerCase()}`}
+                            >
+                                <Icon className="w-5 h-5" strokeWidth={1.5} />
+                                <span>{item.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </nav>
+        </div>
+    );
+};
+
+// ============ DASHBOARD ============
+
+const DashboardPage = () => {
+    const { user, api } = useAuth();
+    const navigate = useNavigate();
+    const [stats, setStats] = useState(null);
+    const [recentCustomers, setRecentCustomers] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [statsRes, customersRes] = await Promise.all([
+                    api.get("/analytics/dashboard"),
+                    api.get("/customers?limit=5")
+                ]);
+                setStats(statsRes.data);
+                setRecentCustomers(customersRes.data);
+            } catch (err) {
+                toast.error("Failed to load dashboard");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
+    if (loading) {
+        return (
+            <MobileLayout>
+                <div className="p-4 animate-pulse">
+                    <div className="h-8 bg-gray-200 rounded w-48 mb-4"></div>
+                    <div className="h-32 bg-gray-200 rounded-xl mb-4"></div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="h-24 bg-gray-200 rounded-xl"></div>
+                        <div className="h-24 bg-gray-200 rounded-xl"></div>
+                    </div>
+                </div>
+            </MobileLayout>
+        );
+    }
+
+    return (
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <p className="text-[#52525B] text-sm">Welcome back</p>
+                        <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="restaurant-name">
+                            {user?.restaurant_name}
+                        </h1>
+                    </div>
+                    <Avatar className="w-10 h-10 bg-[#F26B33]">
+                        <AvatarFallback className="bg-[#F26B33] text-white font-semibold">
+                            {user?.restaurant_name?.charAt(0)}
+                        </AvatarFallback>
+                    </Avatar>
+                </div>
+
+                {/* Hero Stats Card */}
+                <Card className="loyalty-card-gradient text-white rounded-2xl mb-4 border-0 shadow-lg" data-testid="hero-stats-card">
+                    <CardContent className="p-5">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-white/80 text-sm">Total Customers</p>
+                                <p className="text-4xl font-bold font-['Montserrat'] mt-1">{stats?.total_customers || 0}</p>
+                            </div>
+                            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                                <Users className="w-8 h-8 text-white" />
+                            </div>
+                        </div>
+                        <div className="flex items-center mt-4 text-sm">
+                            <TrendingUp className="w-4 h-4 mr-1" />
+                            <span className="font-medium">+{stats?.new_customers_7d || 0} this week</span>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="stats-card" data-testid="points-issued-card">
+                        <div className="flex items-center gap-2 text-[#329937] mb-2">
+                            <ArrowUpRight className="w-4 h-4" />
+                            <span className="text-xs font-medium uppercase tracking-wider">Points Issued</span>
+                        </div>
+                        <p className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat'] points-display">
+                            {stats?.total_points_issued?.toLocaleString() || 0}
+                        </p>
+                    </div>
+                    <div className="stats-card" data-testid="points-redeemed-card">
+                        <div className="flex items-center gap-2 text-[#329937] mb-2">
+                            <ArrowDownRight className="w-4 h-4" />
+                            <span className="text-xs font-medium uppercase tracking-wider">Redeemed</span>
+                        </div>
+                        <p className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat'] points-display">
+                            {stats?.total_points_redeemed?.toLocaleString() || 0}
+                        </p>
+                    </div>
+                    <div className="stats-card" data-testid="active-customers-card">
+                        <div className="flex items-center gap-2 text-[#F26B33] mb-2">
+                            <Users className="w-4 h-4" />
+                            <span className="text-xs font-medium uppercase tracking-wider">Active (30d)</span>
+                        </div>
+                        <p className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']">
+                            {stats?.active_customers_30d || 0}
+                        </p>
+                    </div>
+                    <div className="stats-card" data-testid="avg-rating-card">
+                        <div className="flex items-center gap-2 text-[#329937] mb-2">
+                            <Star className="w-4 h-4 fill-current" />
+                            <span className="text-xs font-medium uppercase tracking-wider">Avg Rating</span>
+                        </div>
+                        <p className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']">
+                            {stats?.avg_rating || "N/A"}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Quick Actions */}
+                <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Quick Actions</h2>
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                    <button 
+                        onClick={() => navigate("/customers", { state: { openAddModal: true }})}
+                        className="quick-action-btn"
+                        data-testid="quick-add-customer"
+                    >
+                        <div className="w-12 h-12 rounded-full bg-[#F26B33]/10 flex items-center justify-center mb-2">
+                            <Plus className="w-6 h-6 text-[#F26B33]" />
+                        </div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Add Customer</span>
+                    </button>
+                    <button 
+                        onClick={() => navigate("/qr")}
+                        className="quick-action-btn"
+                        data-testid="quick-qr-code"
+                    >
+                        <div className="w-12 h-12 rounded-full bg-[#329937]/10 flex items-center justify-center mb-2">
+                            <QrCode className="w-6 h-6 text-[#329937]" />
+                        </div>
+                        <span className="text-sm font-medium text-[#1A1A1A]">Show QR</span>
+                    </button>
+                </div>
+
+                {/* Recent Customers */}
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-semibold text-[#1A1A1A] font-['Montserrat']">Recent Customers</h2>
+                    <button 
+                        onClick={() => navigate("/customers")}
+                        className="text-sm text-[#F26B33] font-medium"
+                        data-testid="view-all-customers"
+                    >
+                        View all
+                    </button>
+                </div>
+
+                {recentCustomers.length === 0 ? (
+                    <div className="empty-state">
+                        <Users className="empty-state-icon" />
+                        <p className="text-[#52525B]">No customers yet</p>
+                        <Button 
+                            onClick={() => navigate("/customers", { state: { openAddModal: true }})}
+                            className="mt-4 bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                            data-testid="add-first-customer"
+                        >
+                            Add your first customer
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {recentCustomers.map((customer) => (
+                            <button
+                                key={customer.id}
+                                onClick={() => navigate(`/customers/${customer.id}`)}
+                                className="customer-list-item w-full text-left"
+                                data-testid={`customer-item-${customer.id}`}
+                            >
+                                <Avatar className="w-10 h-10 mr-3">
+                                    <AvatarFallback className="bg-[#329937]/10 text-[#329937] font-semibold">
+                                        {customer.name.charAt(0)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-[#1A1A1A] truncate">{customer.name}</p>
+                                    <p className="text-sm text-[#52525B]">{customer.phone}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-semibold text-[#329937] points-display">{customer.total_points}</p>
+                                    <Badge variant="outline" className={`tier-badge ${customer.tier.toLowerCase()}`}>
+                                        {customer.tier}
+                                    </Badge>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </MobileLayout>
+    );
+};
+
+// ============ CUSTOMERS PAGE ============
+
+const CustomersPage = () => {
+    const { api } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [customers, setCustomers] = useState([]);
+    const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [showAddModal, setShowAddModal] = useState(location.state?.openAddModal || false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [segments, setSegments] = useState(null);
+    const [filters, setFilters] = useState({
+        tier: "all",
+        customer_type: "all",
+        last_visit_days: "all",
+        city: "",
+        sort_by: "created_at",
+        sort_order: "desc"
+    });
+    const [newCustomer, setNewCustomer] = useState({ 
+        name: "", 
+        phone: "", 
+        country_code: "+91",
+        email: "", 
+        notes: "",
+        dob: "",
+        anniversary: "",
+        customer_type: "normal",
+        gst_name: "",
+        gst_number: "",
+        address: "",
+        city: "",
+        pincode: "",
+        allergies: [],
+        custom_field_1: "",
+        custom_field_2: "",
+        custom_field_3: ""
+    });
+    const [submitting, setSubmitting] = useState(false);
+
+    const buildQueryString = () => {
+        const params = new URLSearchParams();
+        if (search) params.append("search", search);
+        if (filters.tier && filters.tier !== "all") params.append("tier", filters.tier);
+        if (filters.customer_type && filters.customer_type !== "all") params.append("customer_type", filters.customer_type);
+        if (filters.last_visit_days && filters.last_visit_days !== "all") params.append("last_visit_days", filters.last_visit_days);
+        if (filters.city) params.append("city", filters.city);
+        if (filters.sort_by) params.append("sort_by", filters.sort_by);
+        if (filters.sort_order) params.append("sort_order", filters.sort_order);
+        return params.toString();
+    };
+
+    const fetchCustomers = async () => {
+        try {
+            const queryString = buildQueryString();
+            const res = await api.get(`/customers${queryString ? `?${queryString}` : ""}`);
+            setCustomers(res.data);
+        } catch (err) {
+            toast.error("Failed to load customers");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchSegments = async () => {
+        try {
+            const res = await api.get("/customers/segments/stats");
+            setSegments(res.data);
+        } catch (err) {
+            console.error("Failed to load segments");
+        }
+    };
+
+    useEffect(() => {
+        fetchCustomers();
+        fetchSegments();
+    }, [search, filters]);
+
+    const handleAddCustomer = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            const customerData = {
+                name: newCustomer.name,
+                phone: newCustomer.phone,
+                country_code: newCustomer.country_code,
+                email: newCustomer.email || null,
+                notes: newCustomer.notes || null,
+                dob: newCustomer.dob || null,
+                anniversary: newCustomer.anniversary || null,
+                customer_type: newCustomer.customer_type,
+                gst_name: newCustomer.customer_type === "corporate" ? newCustomer.gst_name || null : null,
+                gst_number: newCustomer.customer_type === "corporate" ? newCustomer.gst_number || null : null,
+                address: newCustomer.address || null,
+                city: newCustomer.city || null,
+                pincode: newCustomer.pincode || null,
+                allergies: newCustomer.allergies.length > 0 ? newCustomer.allergies : null,
+                custom_field_1: newCustomer.custom_field_1 || null,
+                custom_field_2: newCustomer.custom_field_2 || null,
+                custom_field_3: newCustomer.custom_field_3 || null
+            };
+            await api.post("/customers", customerData);
+            toast.success("Customer added!");
+            setShowAddModal(false);
+            resetForm();
+            fetchCustomers();
+            fetchSegments();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to add customer");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const resetForm = () => {
+        setNewCustomer({ 
+            name: "", phone: "", country_code: "+91", email: "", notes: "",
+            dob: "", anniversary: "", customer_type: "normal",
+            gst_name: "", gst_number: "",
+            address: "", city: "", pincode: "",
+            allergies: [],
+            custom_field_1: "", custom_field_2: "", custom_field_3: ""
+        });
+    };
+
+    const clearFilters = () => {
+        setFilters({
+            tier: "all",
+            customer_type: "all",
+            last_visit_days: "all",
+            city: "",
+            sort_by: "created_at",
+            sort_order: "desc"
+        });
+    };
+
+    const activeFiltersCount = [
+        filters.tier !== "all" ? 1 : 0,
+        filters.customer_type !== "all" ? 1 : 0,
+        filters.last_visit_days !== "all" ? 1 : 0,
+        filters.city ? 1 : 0
+    ].reduce((a, b) => a + b, 0);
+
+    const toggleAllergy = (allergy) => {
+        if (newCustomer.allergies.includes(allergy)) {
+            setNewCustomer({...newCustomer, allergies: newCustomer.allergies.filter(a => a !== allergy)});
+        } else {
+            setNewCustomer({...newCustomer, allergies: [...newCustomer.allergies, allergy]});
+        }
+    };
+
+    return (
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="customers-title">
+                        Customers
+                    </h1>
+                    <Button 
+                        onClick={() => setShowAddModal(true)}
+                        className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full h-10 px-4"
+                        data-testid="add-customer-btn"
+                    >
+                        <Plus className="w-4 h-4 mr-1" /> Add
+                    </Button>
+                </div>
+
+                {/* Search & Filter Row */}
+                <div className="flex gap-2 mb-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A1A1AA]" />
+                        <Input
+                            type="text"
+                            placeholder="Search by name or phone..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="search-input pl-12"
+                            data-testid="customer-search-input"
+                        />
+                    </div>
+                    <Popover open={showFilters} onOpenChange={setShowFilters}>
+                        <PopoverTrigger asChild>
+                            <Button 
+                                variant="outline" 
+                                className={`h-12 px-3 rounded-xl relative ${activeFiltersCount > 0 ? 'border-[#F26B33] text-[#F26B33]' : ''}`}
+                                data-testid="filter-btn"
+                            >
+                                <Filter className="w-5 h-5" />
+                                {activeFiltersCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#F26B33] text-white text-xs rounded-full flex items-center justify-center">
+                                        {activeFiltersCount}
+                                    </span>
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-80 p-4" align="end">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="font-semibold text-[#1A1A1A]">Filters</h3>
+                                    {activeFiltersCount > 0 && (
+                                        <button onClick={clearFilters} className="text-sm text-[#F26B33]">Clear all</button>
+                                    )}
+                                </div>
+                                
+                                <div>
+                                    <Label className="text-xs text-[#52525B]">Tier</Label>
+                                    <Select value={filters.tier} onValueChange={(v) => setFilters({...filters, tier: v})}>
+                                        <SelectTrigger className="h-10 mt-1">
+                                            <SelectValue placeholder="All tiers" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All tiers</SelectItem>
+                                            <SelectItem value="Bronze">Bronze</SelectItem>
+                                            <SelectItem value="Silver">Silver</SelectItem>
+                                            <SelectItem value="Gold">Gold</SelectItem>
+                                            <SelectItem value="Platinum">Platinum</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs text-[#52525B]">Customer Type</Label>
+                                    <Select value={filters.customer_type} onValueChange={(v) => setFilters({...filters, customer_type: v})}>
+                                        <SelectTrigger className="h-10 mt-1">
+                                            <SelectValue placeholder="All types" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All types</SelectItem>
+                                            <SelectItem value="normal">Normal</SelectItem>
+                                            <SelectItem value="corporate">Corporate</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs text-[#52525B]">Inactive For (Win-back)</Label>
+                                    <Select value={filters.last_visit_days} onValueChange={(v) => setFilters({...filters, last_visit_days: v})}>
+                                        <SelectTrigger className="h-10 mt-1">
+                                            <SelectValue placeholder="All customers" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All customers</SelectItem>
+                                            <SelectItem value="7">7+ days</SelectItem>
+                                            <SelectItem value="14">14+ days</SelectItem>
+                                            <SelectItem value="30">30+ days</SelectItem>
+                                            <SelectItem value="60">60+ days</SelectItem>
+                                            <SelectItem value="90">90+ days</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="text-xs text-[#52525B]">Sort By</Label>
+                                    <Select value={filters.sort_by} onValueChange={(v) => setFilters({...filters, sort_by: v})}>
+                                        <SelectTrigger className="h-10 mt-1">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="created_at">Date Added</SelectItem>
+                                            <SelectItem value="last_visit">Last Visit</SelectItem>
+                                            <SelectItem value="total_spent">Total Spent</SelectItem>
+                                            <SelectItem value="total_points">Points</SelectItem>
+                                            <SelectItem value="name">Name</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {segments && (
+                                    <div className="pt-2 border-t">
+                                        <p className="text-xs font-semibold text-[#52525B] mb-2">Quick Segments</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            <Badge 
+                                                variant="outline" 
+                                                className="cursor-pointer hover:bg-[#F26B33]/10"
+                                                onClick={() => setFilters({...filters, last_visit_days: "30"})}
+                                            >
+                                                <Clock className="w-3 h-3 mr-1" /> Inactive 30d ({segments.inactive_30_days})
+                                            </Badge>
+                                            <Badge 
+                                                variant="outline" 
+                                                className="cursor-pointer hover:bg-[#F26B33]/10"
+                                                onClick={() => setFilters({...filters, tier: "Gold"})}
+                                            >
+                                                Gold ({segments.by_tier?.gold || 0})
+                                            </Badge>
+                                            <Badge 
+                                                variant="outline" 
+                                                className="cursor-pointer hover:bg-[#F26B33]/10"
+                                                onClick={() => setFilters({...filters, customer_type: "corporate"})}
+                                            >
+                                                <Building2 className="w-3 h-3 mr-1" /> Corporate ({segments.by_type?.corporate || 0})
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                </div>
+
+                {/* Segment Stats Bar */}
+                {segments && (
+                    <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                        <div className="flex-shrink-0 px-3 py-1.5 bg-gray-100 rounded-full text-xs font-medium text-[#52525B]">
+                            Total: {segments.total}
+                        </div>
+                        <div className="flex-shrink-0 px-3 py-1.5 bg-amber-50 rounded-full text-xs font-medium text-amber-700">
+                            Bronze: {segments.by_tier?.bronze || 0}
+                        </div>
+                        <div className="flex-shrink-0 px-3 py-1.5 bg-gray-200 rounded-full text-xs font-medium text-gray-700">
+                            Silver: {segments.by_tier?.silver || 0}
+                        </div>
+                        <div className="flex-shrink-0 px-3 py-1.5 bg-yellow-50 rounded-full text-xs font-medium text-yellow-700">
+                            Gold: {segments.by_tier?.gold || 0}
+                        </div>
+                    </div>
+                )}
+
+                {/* Customer List */}
+                {loading ? (
+                    <div className="space-y-3">
+                        {[1,2,3].map(i => (
+                            <div key={i} className="customer-list-item animate-pulse">
+                                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
+                                <div className="flex-1">
+                                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                                    <div className="h-3 bg-gray-200 rounded w-20"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : customers.length === 0 ? (
+                    <div className="empty-state">
+                        <Users className="empty-state-icon" />
+                        <p className="text-[#52525B]">{search || activeFiltersCount > 0 ? "No customers found" : "No customers yet"}</p>
+                        {!search && activeFiltersCount === 0 && (
+                            <Button 
+                                onClick={() => setShowAddModal(true)}
+                                className="mt-4 bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                            >
+                                Add your first customer
+                            </Button>
+                        )}
+                        {activeFiltersCount > 0 && (
+                            <Button 
+                                onClick={clearFilters}
+                                variant="outline"
+                                className="mt-4 rounded-full"
+                            >
+                                Clear filters
+                            </Button>
+                        )}
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {customers.map((customer) => (
+                            <button
+                                key={customer.id}
+                                onClick={() => navigate(`/customers/${customer.id}`)}
+                                className="customer-list-item w-full text-left"
+                                data-testid={`customer-row-${customer.id}`}
+                            >
+                                <Avatar className="w-10 h-10 mr-3">
+                                    <AvatarFallback className={`font-semibold ${
+                                        customer.customer_type === "corporate" 
+                                            ? "bg-[#F26B33]/10 text-[#F26B33]" 
+                                            : "bg-[#329937]/10 text-[#329937]"
+                                    }`}>
+                                        {customer.customer_type === "corporate" ? <Building2 className="w-5 h-5" /> : customer.name.charAt(0)}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium text-[#1A1A1A] truncate">{customer.name}</p>
+                                    <p className="text-sm text-[#52525B]">{customer.country_code || '+91'} {customer.phone}</p>
+                                </div>
+                                <div className="text-right flex items-center gap-2">
+                                    <div>
+                                        <p className="font-semibold text-[#329937] points-display">{customer.total_points}</p>
+                                        <Badge variant="outline" className={`tier-badge ${customer.tier.toLowerCase()}`}>
+                                            {customer.tier}
+                                        </Badge>
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-[#A1A1AA]" />
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Add Customer Modal */}
+            <Dialog open={showAddModal} onOpenChange={(open) => { setShowAddModal(open); if (!open) resetForm(); }}>
+                <DialogContent className="max-w-md mx-4 rounded-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                    <DialogHeader>
+                        <DialogTitle className="font-['Montserrat']">Add New Customer</DialogTitle>
+                        <DialogDescription>Enter customer details to start their loyalty journey.</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleAddCustomer} className="flex-1 overflow-hidden">
+                        <ScrollArea className="h-[calc(90vh-200px)] pr-4">
+                            <div className="space-y-4 py-4">
+                                {/* Basic Info */}
+                                <div>
+                                    <Label htmlFor="name" className="form-label">Name *</Label>
+                                    <Input
+                                        id="name"
+                                        value={newCustomer.name}
+                                        onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                                        placeholder="Customer name"
+                                        className="h-12 rounded-xl"
+                                        required
+                                        data-testid="new-customer-name"
+                                    />
+                                </div>
+                                
+                                {/* Phone with Country Code */}
+                                <div>
+                                    <Label htmlFor="phone" className="form-label">Phone *</Label>
+                                    <div className="flex gap-2">
+                                        <Select 
+                                            value={newCustomer.country_code} 
+                                            onValueChange={(v) => setNewCustomer({...newCustomer, country_code: v})}
+                                        >
+                                            <SelectTrigger className="w-28 h-12 rounded-xl" data-testid="country-code-select">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {COUNTRY_CODES.map(cc => (
+                                                    <SelectItem key={cc.code} value={cc.code}>
+                                                        {cc.flag} {cc.code}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Input
+                                            id="phone"
+                                            type="tel"
+                                            value={newCustomer.phone}
+                                            onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value.replace(/\D/g, '')})}
+                                            placeholder="9876543210"
+                                            className="h-12 rounded-xl flex-1"
+                                            required
+                                            maxLength={10}
+                                            data-testid="new-customer-phone"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="email" className="form-label">Email</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        value={newCustomer.email}
+                                        onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                                        placeholder="customer@email.com"
+                                        className="h-12 rounded-xl"
+                                        data-testid="new-customer-email"
+                                    />
+                                </div>
+
+                                {/* Date Fields */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label htmlFor="dob" className="form-label flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5" /> Date of Birth
+                                        </Label>
+                                        <Input
+                                            id="dob"
+                                            type="date"
+                                            value={newCustomer.dob}
+                                            onChange={(e) => setNewCustomer({...newCustomer, dob: e.target.value})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="new-customer-dob"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="anniversary" className="form-label flex items-center gap-1">
+                                            <Calendar className="w-3.5 h-3.5" /> Anniversary
+                                        </Label>
+                                        <Input
+                                            id="anniversary"
+                                            type="date"
+                                            value={newCustomer.anniversary}
+                                            onChange={(e) => setNewCustomer({...newCustomer, anniversary: e.target.value})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="new-customer-anniversary"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Customer Type */}
+                                <div>
+                                    <Label className="form-label">Customer Type</Label>
+                                    <div className="flex gap-2 mt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewCustomer({...newCustomer, customer_type: "normal", gst_name: "", gst_number: ""})}
+                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
+                                                newCustomer.customer_type === "normal"
+                                                    ? "bg-[#329937] text-white border-[#329937]"
+                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-[#329937]"
+                                            }`}
+                                            data-testid="customer-type-normal"
+                                        >
+                                            <User className="w-4 h-4" /> Normal
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewCustomer({...newCustomer, customer_type: "corporate"})}
+                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
+                                                newCustomer.customer_type === "corporate"
+                                                    ? "bg-[#F26B33] text-white border-[#F26B33]"
+                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-[#F26B33]"
+                                            }`}
+                                            data-testid="customer-type-corporate"
+                                        >
+                                            <Building2 className="w-4 h-4" /> Corporate
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* GST Fields (for Corporate) */}
+                                {newCustomer.customer_type === "corporate" && (
+                                    <div className="space-y-4 p-4 bg-[#F26B33]/5 rounded-xl border border-[#F26B33]/20">
+                                        <p className="text-xs font-semibold text-[#F26B33] uppercase tracking-wider">GST Details</p>
+                                        <div>
+                                            <Label htmlFor="gst_name" className="form-label">GST Name</Label>
+                                            <Input
+                                                id="gst_name"
+                                                value={newCustomer.gst_name}
+                                                onChange={(e) => setNewCustomer({...newCustomer, gst_name: e.target.value})}
+                                                placeholder="Company/Business name"
+                                                className="h-12 rounded-xl"
+                                                data-testid="new-customer-gst-name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="gst_number" className="form-label">GST Number</Label>
+                                            <Input
+                                                id="gst_number"
+                                                value={newCustomer.gst_number}
+                                                onChange={(e) => setNewCustomer({...newCustomer, gst_number: e.target.value.toUpperCase()})}
+                                                placeholder="22AAAAA0000A1Z5"
+                                                className="h-12 rounded-xl font-mono"
+                                                maxLength={15}
+                                                data-testid="new-customer-gst-number"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Allergies */}
+                                <div>
+                                    <Label className="form-label flex items-center gap-1">
+                                        <AlertTriangle className="w-3.5 h-3.5" /> Allergies
+                                    </Label>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                        {COMMON_ALLERGIES.map((allergy) => (
+                                            <button
+                                                key={allergy}
+                                                type="button"
+                                                onClick={() => toggleAllergy(allergy)}
+                                                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                                                    newCustomer.allergies.includes(allergy)
+                                                        ? "bg-red-500 text-white border-red-500"
+                                                        : "bg-white text-[#52525B] border-gray-200 hover:border-red-300"
+                                                }`}
+                                                data-testid={`allergy-${allergy.toLowerCase()}`}
+                                            >
+                                                {allergy}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Delivery Address Section */}
+                                <div className="space-y-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider flex items-center gap-1">
+                                        <MapPin className="w-3.5 h-3.5" /> Delivery Address (Optional)
+                                    </p>
+                                    <div>
+                                        <Label htmlFor="address" className="form-label">Address</Label>
+                                        <Textarea
+                                            id="address"
+                                            value={newCustomer.address}
+                                            onChange={(e) => setNewCustomer({...newCustomer, address: e.target.value})}
+                                            placeholder="House/Flat No., Building, Street..."
+                                            className="rounded-xl resize-none"
+                                            rows={2}
+                                            data-testid="new-customer-address"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <Label htmlFor="city" className="form-label">City</Label>
+                                            <Input
+                                                id="city"
+                                                value={newCustomer.city}
+                                                onChange={(e) => setNewCustomer({...newCustomer, city: e.target.value})}
+                                                placeholder="City"
+                                                className="h-10 rounded-lg"
+                                                data-testid="new-customer-city"
+                                            />
+                                        </div>
+                                        <div>
+                                            <Label htmlFor="pincode" className="form-label">Pincode</Label>
+                                            <Input
+                                                id="pincode"
+                                                value={newCustomer.pincode}
+                                                onChange={(e) => setNewCustomer({...newCustomer, pincode: e.target.value.replace(/\D/g, '')})}
+                                                placeholder="400001"
+                                                className="h-10 rounded-lg"
+                                                maxLength={6}
+                                                data-testid="new-customer-pincode"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Custom Fields - Always show 3 fields */}
+                                <div className="space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Additional Information</p>
+                                    
+                                    {/* Custom Field 1 - Dropdown */}
+                                    <div>
+                                        <Label className="form-label">Preference Type</Label>
+                                        <Select 
+                                            value={newCustomer.custom_field_1} 
+                                            onValueChange={(v) => setNewCustomer({...newCustomer, custom_field_1: v})}
+                                        >
+                                            <SelectTrigger className="h-12 rounded-xl" data-testid="new-customer-custom-1">
+                                                <SelectValue placeholder="Select preference" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {CUSTOM_FIELD_1_OPTIONS.map(opt => (
+                                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* Custom Field 2 - Text */}
+                                    <div>
+                                        <Label htmlFor="custom2" className="form-label">Department / Table</Label>
+                                        <Input
+                                            id="custom2"
+                                            value={newCustomer.custom_field_2}
+                                            onChange={(e) => setNewCustomer({...newCustomer, custom_field_2: e.target.value})}
+                                            placeholder="e.g., HR, Table 5, VIP Section"
+                                            className="h-12 rounded-xl"
+                                            data-testid="new-customer-custom-2"
+                                        />
+                                    </div>
+
+                                    {/* Custom Field 3 - Text */}
+                                    <div>
+                                        <Label htmlFor="custom3" className="form-label">Special Instructions</Label>
+                                        <Input
+                                            id="custom3"
+                                            value={newCustomer.custom_field_3}
+                                            onChange={(e) => setNewCustomer({...newCustomer, custom_field_3: e.target.value})}
+                                            placeholder="Any special requests..."
+                                            className="h-12 rounded-xl"
+                                            data-testid="new-customer-custom-3"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Notes */}
+                                <div>
+                                    <Label htmlFor="notes" className="form-label">Notes</Label>
+                                    <Textarea
+                                        id="notes"
+                                        value={newCustomer.notes}
+                                        onChange={(e) => setNewCustomer({...newCustomer, notes: e.target.value})}
+                                        placeholder="Any special notes..."
+                                        className="rounded-xl resize-none"
+                                        rows={2}
+                                        data-testid="new-customer-notes"
+                                    />
+                                </div>
+                            </div>
+                        </ScrollArea>
+                        <DialogFooter className="gap-2 pt-4 border-t">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => { setShowAddModal(false); resetForm(); }}
+                                className="rounded-full"
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                                disabled={submitting}
+                                data-testid="submit-new-customer"
+                            >
+                                {submitting ? "Adding..." : "Add Customer"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </MobileLayout>
+    );
+};
+
+// ============ CUSTOMER DETAIL PAGE ============
+
+const CustomerDetailPage = () => {
+    const { id } = useParams();
+    const { api } = useAuth();
+    const navigate = useNavigate();
+    const [customer, setCustomer] = useState(null);
+    const [transactions, setTransactions] = useState([]);
+    const [walletTransactions, setWalletTransactions] = useState([]);
+    const [expiringPoints, setExpiringPoints] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState("points");
+    const [showPointsModal, setShowPointsModal] = useState(false);
+    const [showWalletModal, setShowWalletModal] = useState(false);
+    const [pointsAction, setPointsAction] = useState("earn");
+    const [walletAction, setWalletAction] = useState("credit");
+    const [pointsData, setPointsData] = useState({ points: "", bill_amount: "", description: "" });
+    const [walletData, setWalletData] = useState({ amount: "", description: "", payment_method: "cash" });
+    const [submitting, setSubmitting] = useState(false);
+
+    const fetchData = async () => {
+        try {
+            const [customerRes, txRes, walletTxRes, expiringRes] = await Promise.all([
+                api.get(`/customers/${id}`),
+                api.get(`/points/transactions/${id}`),
+                api.get(`/wallet/transactions/${id}`),
+                api.get(`/points/expiring/${id}`)
+            ]);
+            setCustomer(customerRes.data);
+            setTransactions(txRes.data);
+            setWalletTransactions(walletTxRes.data);
+            setExpiringPoints(expiringRes.data);
+        } catch (err) {
+            toast.error("Customer not found");
+            navigate("/customers");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [id]);
+
+    const handlePointsTransaction = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await api.post("/points/transaction", {
+                customer_id: id,
+                points: parseInt(pointsData.points),
+                transaction_type: pointsAction,
+                description: pointsData.description || `${pointsAction === "earn" ? "Points earned" : "Points redeemed"}`,
+                bill_amount: pointsData.bill_amount ? parseFloat(pointsData.bill_amount) : null
+            });
+            toast.success(`Points ${pointsAction === "earn" ? "added" : "redeemed"} successfully!`);
+            setShowPointsModal(false);
+            setPointsData({ points: "", bill_amount: "", description: "" });
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Transaction failed");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleWalletTransaction = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await api.post("/wallet/transaction", {
+                customer_id: id,
+                amount: parseFloat(walletData.amount),
+                transaction_type: walletAction,
+                description: walletData.description || `${walletAction === "credit" ? "Money added" : "Payment made"}`,
+                payment_method: walletData.payment_method
+            });
+            toast.success(`₹${walletData.amount} ${walletAction === "credit" ? "added to" : "deducted from"} wallet!`);
+            setShowWalletModal(false);
+            setWalletData({ amount: "", description: "", payment_method: "cash" });
+            fetchData();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Transaction failed");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <MobileLayout>
+                <div className="p-4 animate-pulse">
+                    <div className="h-32 bg-gray-200 rounded-xl mb-4"></div>
+                    <div className="h-24 bg-gray-200 rounded-xl"></div>
+                </div>
+            </MobileLayout>
+        );
+    }
+
+    return (
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto">
+                {/* Back Button */}
+                <button 
+                    onClick={() => navigate("/customers")}
+                    className="flex items-center text-[#52525B] mb-4"
+                    data-testid="back-to-customers"
+                >
+                    <ChevronRight className="w-5 h-5 rotate-180 mr-1" />
+                    Back to Customers
+                </button>
+
+                {/* Customer Card */}
+                <Card className="rounded-2xl mb-4 overflow-hidden border-0 shadow-md" data-testid="customer-profile-card">
+                    <div className="loyalty-card-gradient p-5 text-white">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <h1 className="text-2xl font-bold font-['Montserrat']">{customer.name}</h1>
+                                <div className="flex items-center gap-2 mt-1 text-white/80">
+                                    <Phone className="w-4 h-4" />
+                                    <span>{customer.phone}</span>
+                                </div>
+                                {customer.email && (
+                                    <div className="flex items-center gap-2 mt-1 text-white/80">
+                                        <Mail className="w-4 h-4" />
+                                        <span>{customer.email}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <Badge className={`tier-badge ${customer.tier.toLowerCase()} bg-white/20 border-0`}>
+                                {customer.tier}
+                            </Badge>
+                        </div>
+                    </div>
+                    
+                    {/* Points & Wallet Summary */}
+                    <CardContent className="p-4 bg-white">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="text-center p-3 bg-[#329937]/10 rounded-xl">
+                                <p className="text-xs text-[#52525B] uppercase tracking-wider">Points</p>
+                                <p className="text-3xl font-bold text-[#329937] font-['Montserrat'] points-display" data-testid="customer-points">
+                                    {customer.total_points.toLocaleString()}
+                                </p>
+                            </div>
+                            <div className="text-center p-3 bg-[#F26B33]/10 rounded-xl">
+                                <p className="text-xs text-[#52525B] uppercase tracking-wider">Wallet</p>
+                                <p className="text-3xl font-bold text-[#F26B33] font-['Montserrat']" data-testid="customer-wallet">
+                                    ₹{customer.wallet_balance?.toLocaleString() || 0}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        {/* Expiring Points Warning */}
+                        {expiringPoints && expiringPoints.expiring_soon > 0 && (
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4" data-testid="expiring-points-warning">
+                                <div className="flex items-start gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <span className="text-white text-xs font-bold">!</span>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-amber-800">
+                                            {expiringPoints.expiring_soon} points expiring soon
+                                        </p>
+                                        <p className="text-xs text-amber-600 mt-0.5">
+                                            {expiringPoints.expiring_date && 
+                                                `Expires on ${new Date(expiringPoints.expiring_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Action Buttons */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <Button 
+                                onClick={() => { setPointsAction("earn"); setShowPointsModal(true); }}
+                                className="h-11 bg-[#329937] hover:bg-[#287A2D] rounded-full text-sm"
+                                data-testid="add-points-btn"
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> Add Points
+                            </Button>
+                            <Button 
+                                onClick={() => { setWalletAction("credit"); setShowWalletModal(true); }}
+                                className="h-11 bg-[#F26B33] hover:bg-[#D85A2A] rounded-full text-sm"
+                                data-testid="add-wallet-btn"
+                            >
+                                <Plus className="w-4 h-4 mr-1" /> Add Money
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3 mt-2">
+                            <Button 
+                                onClick={() => { setPointsAction("redeem"); setShowPointsModal(true); }}
+                                variant="outline"
+                                className="h-11 border-[#329937] text-[#329937] hover:bg-[#329937]/10 rounded-full text-sm"
+                                disabled={customer.total_points === 0}
+                                data-testid="redeem-points-btn"
+                            >
+                                <Gift className="w-4 h-4 mr-1" /> Redeem
+                            </Button>
+                            <Button 
+                                onClick={() => { setWalletAction("debit"); setShowWalletModal(true); }}
+                                variant="outline"
+                                className="h-11 border-[#F26B33] text-[#F26B33] hover:bg-[#F26B33]/10 rounded-full text-sm"
+                                disabled={!customer.wallet_balance || customer.wallet_balance === 0}
+                                data-testid="debit-wallet-btn"
+                            >
+                                <ArrowDownRight className="w-4 h-4 mr-1" /> Use Wallet
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Stats Row */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="stats-card text-center">
+                        <p className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']">{customer.total_visits}</p>
+                        <p className="text-xs text-[#52525B] uppercase tracking-wider">Visits</p>
+                    </div>
+                    <div className="stats-card text-center">
+                        <p className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']">₹{customer.total_spent.toLocaleString()}</p>
+                        <p className="text-xs text-[#52525B] uppercase tracking-wider">Total Spent</p>
+                    </div>
+                    <div className="stats-card text-center">
+                        <p className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']">
+                            {customer.last_visit ? new Date(customer.last_visit).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : "N/A"}
+                        </p>
+                        <p className="text-xs text-[#52525B] uppercase tracking-wider">Last Visit</p>
+                    </div>
+                </div>
+
+                {/* Tabs for Points & Wallet History */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                        <TabsTrigger value="points" data-testid="points-tab">Points History</TabsTrigger>
+                        <TabsTrigger value="wallet" data-testid="wallet-tab">Wallet History</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="points">
+                        {transactions.length === 0 ? (
+                            <div className="stats-card text-center py-8">
+                                <p className="text-[#52525B]">No points transactions yet</p>
+                            </div>
+                        ) : (
+                            <Card className="rounded-xl border-0 shadow-sm">
+                                <CardContent className="p-4">
+                                    {transactions.map((tx, index) => (
+                                        <div key={tx.id} className={`transaction-item ${index === 0 ? "opacity-0 animate-fade-in" : ""}`}>
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                    tx.transaction_type === "redeem" ? "bg-red-100" : "bg-green-100"
+                                                }`}>
+                                                    {tx.transaction_type === "redeem" ? (
+                                                        <ArrowDownRight className="w-4 h-4 text-red-600" />
+                                                    ) : (
+                                                        <ArrowUpRight className="w-4 h-4 text-green-600" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-[#1A1A1A] text-sm">{tx.description}</p>
+                                                    <p className="text-xs text-[#A1A1AA]">
+                                                        {new Date(tx.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <p className={`font-semibold points-display ${
+                                                tx.transaction_type === "redeem" ? "transaction-redeem" : "transaction-earn"
+                                            }`}>
+                                                {tx.transaction_type === "redeem" ? "-" : "+"}{tx.points}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+                    
+                    <TabsContent value="wallet">
+                        {walletTransactions.length === 0 ? (
+                            <div className="stats-card text-center py-8">
+                                <p className="text-[#52525B]">No wallet transactions yet</p>
+                            </div>
+                        ) : (
+                            <Card className="rounded-xl border-0 shadow-sm">
+                                <CardContent className="p-4">
+                                    {walletTransactions.map((tx, index) => (
+                                        <div key={tx.id} className={`transaction-item ${index === 0 ? "opacity-0 animate-fade-in" : ""}`}>
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                    tx.transaction_type === "debit" ? "bg-red-100" : "bg-green-100"
+                                                }`}>
+                                                    {tx.transaction_type === "debit" ? (
+                                                        <ArrowDownRight className="w-4 h-4 text-red-600" />
+                                                    ) : (
+                                                        <ArrowUpRight className="w-4 h-4 text-green-600" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="font-medium text-[#1A1A1A] text-sm">{tx.description}</p>
+                                                    <p className="text-xs text-[#A1A1AA]">
+                                                        {tx.payment_method && <span className="uppercase">{tx.payment_method} • </span>}
+                                                        {new Date(tx.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <p className={`font-semibold ${
+                                                tx.transaction_type === "debit" ? "text-red-600" : "text-green-600"
+                                            }`}>
+                                                {tx.transaction_type === "debit" ? "-" : "+"}₹{tx.amount}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        )}
+                    </TabsContent>
+                </Tabs>
+            </div>
+
+            {/* Points Modal */}
+            <Dialog open={showPointsModal} onOpenChange={setShowPointsModal}>
+                <DialogContent className="max-w-sm mx-4 rounded-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="font-['Montserrat']">
+                            {pointsAction === "earn" ? "Add Points" : "Redeem Points"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {pointsAction === "earn" 
+                                ? "Add points for a purchase" 
+                                : `Available: ${customer?.total_points} points`
+                            }
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handlePointsTransaction}>
+                        <div className="space-y-4 py-4">
+                            <div>
+                                <Label htmlFor="points" className="form-label">Points *</Label>
+                                <Input
+                                    id="points"
+                                    type="number"
+                                    min="1"
+                                    max={pointsAction === "redeem" ? customer?.total_points : undefined}
+                                    value={pointsData.points}
+                                    onChange={(e) => setPointsData({...pointsData, points: e.target.value})}
+                                    placeholder="Enter points"
+                                    className="h-12 rounded-xl"
+                                    required
+                                    data-testid="points-amount-input"
+                                />
+                            </div>
+                            {pointsAction === "earn" && (
+                                <div>
+                                    <Label htmlFor="bill" className="form-label">Bill Amount (₹)</Label>
+                                    <Input
+                                        id="bill"
+                                        type="number"
+                                        min="0"
+                                        value={pointsData.bill_amount}
+                                        onChange={(e) => setPointsData({...pointsData, bill_amount: e.target.value})}
+                                        placeholder="500"
+                                        className="h-12 rounded-xl"
+                                        data-testid="bill-amount-input"
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <Label htmlFor="desc" className="form-label">Description</Label>
+                                <Input
+                                    id="desc"
+                                    value={pointsData.description}
+                                    onChange={(e) => setPointsData({...pointsData, description: e.target.value})}
+                                    placeholder={pointsAction === "earn" ? "Lunch purchase" : "Discount applied"}
+                                    className="h-12 rounded-xl"
+                                    data-testid="points-description-input"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="gap-2">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => setShowPointsModal(false)}
+                                className="rounded-full"
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                className={`rounded-full ${pointsAction === "earn" ? "bg-[#329937] hover:bg-[#287A2D]" : "bg-[#F26B33] hover:bg-[#D85A2A]"}`}
+                                disabled={submitting}
+                                data-testid="submit-points-btn"
+                            >
+                                {submitting ? "Processing..." : pointsAction === "earn" ? "Add Points" : "Redeem"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Wallet Modal */}
+            <Dialog open={showWalletModal} onOpenChange={setShowWalletModal}>
+                <DialogContent className="max-w-sm mx-4 rounded-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="font-['Montserrat']">
+                            {walletAction === "credit" ? "Add Money to Wallet" : "Use Wallet Balance"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            Current balance: ₹{customer?.wallet_balance?.toLocaleString() || 0}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleWalletTransaction}>
+                        <div className="space-y-4 py-4">
+                            <div>
+                                <Label htmlFor="amount" className="form-label">Amount (₹) *</Label>
+                                <Input
+                                    id="amount"
+                                    type="number"
+                                    min="1"
+                                    max={walletAction === "debit" ? customer?.wallet_balance : undefined}
+                                    value={walletData.amount}
+                                    onChange={(e) => setWalletData({...walletData, amount: e.target.value})}
+                                    placeholder="Enter amount"
+                                    className="h-12 rounded-xl"
+                                    required
+                                    data-testid="wallet-amount-input"
+                                />
+                            </div>
+                            {walletAction === "credit" && (
+                                <div>
+                                    <Label className="form-label">Payment Method</Label>
+                                    <div className="flex gap-2 mt-2">
+                                        {["cash", "upi", "card"].map((method) => (
+                                            <button
+                                                key={method}
+                                                type="button"
+                                                onClick={() => setWalletData({...walletData, payment_method: method})}
+                                                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${
+                                                    walletData.payment_method === method 
+                                                        ? "bg-[#F26B33] text-white border-[#F26B33]" 
+                                                        : "bg-white text-[#52525B] border-gray-200 hover:border-[#F26B33]"
+                                                }`}
+                                                data-testid={`payment-method-${method}`}
+                                            >
+                                                {method.toUpperCase()}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            <div>
+                                <Label htmlFor="wallet-desc" className="form-label">Description</Label>
+                                <Input
+                                    id="wallet-desc"
+                                    value={walletData.description}
+                                    onChange={(e) => setWalletData({...walletData, description: e.target.value})}
+                                    placeholder={walletAction === "credit" ? "Wallet recharge" : "Bill payment"}
+                                    className="h-12 rounded-xl"
+                                    data-testid="wallet-description-input"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="gap-2">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={() => setShowWalletModal(false)}
+                                className="rounded-full"
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                className={`rounded-full ${walletAction === "credit" ? "bg-[#329937] hover:bg-[#287A2D]" : "bg-[#F26B33] hover:bg-[#D85A2A]"}`}
+                                disabled={submitting}
+                                data-testid="submit-wallet-btn"
+                            >
+                                {submitting ? "Processing..." : walletAction === "credit" ? "Add Money" : "Use Balance"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </MobileLayout>
+    );
+};
+
+// ============ QR CODE PAGE ============
+
+const QRCodePage = () => {
+    const { api, user } = useAuth();
+    const [qrData, setQrData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        const fetchQR = async () => {
+            try {
+                const res = await api.get("/qr/generate");
+                setQrData(res.data);
+            } catch (err) {
+                toast.error("Failed to generate QR code");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchQR();
+    }, []);
+
+    const copyLink = () => {
+        navigator.clipboard.writeText(qrData.registration_url);
+        setCopied(true);
+        toast.success("Link copied!");
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    const downloadQR = () => {
+        const link = document.createElement("a");
+        link.download = `${user?.restaurant_name}-qr.png`;
+        link.href = qrData.qr_code;
+        link.click();
+        toast.success("QR Code downloaded!");
+    };
+
+    return (
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto">
+                <h1 className="text-2xl font-bold text-[#1A1A1A] mb-2 font-['Montserrat']" data-testid="qr-page-title">
+                    Customer QR Code
+                </h1>
+                <p className="text-[#52525B] mb-6">Let customers scan to join your loyalty program</p>
+
+                {loading ? (
+                    <div className="qr-container animate-pulse flex items-center justify-center" style={{height: 300}}>
+                        <div className="w-48 h-48 bg-gray-200 rounded-xl"></div>
+                    </div>
+                ) : qrData ? (
+                    <div className="space-y-4">
+                        <div className="qr-container text-center" data-testid="qr-code-container">
+                            <p className="text-lg font-semibold text-[#1A1A1A] mb-4 font-['Montserrat']">{user?.restaurant_name}</p>
+                            <img 
+                                src={qrData.qr_code} 
+                                alt="QR Code" 
+                                className="mx-auto w-48 h-48"
+                                data-testid="qr-code-image"
+                            />
+                            <p className="text-sm text-[#52525B] mt-4">Scan to join our loyalty program</p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <Button 
+                                onClick={copyLink}
+                                variant="outline"
+                                className="flex-1 h-12 rounded-full"
+                                data-testid="copy-qr-link-btn"
+                            >
+                                {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                                {copied ? "Copied!" : "Copy Link"}
+                            </Button>
+                            <Button 
+                                onClick={downloadQR}
+                                className="flex-1 h-12 bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                                data-testid="download-qr-btn"
+                            >
+                                <Download className="w-4 h-4 mr-2" /> Download
+                            </Button>
+                        </div>
+
+                        <Card className="rounded-xl border-0 shadow-sm bg-[#FEF3C7]">
+                            <CardContent className="p-4">
+                                <p className="text-sm text-[#92400E]">
+                                    <strong>Tip:</strong> Print this QR code and place it at your billing counter for easy customer sign-ups!
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                ) : (
+                    <div className="text-center py-8">
+                        <p className="text-[#52525B]">Failed to generate QR code</p>
+                    </div>
+                )}
+            </div>
+        </MobileLayout>
+    );
+};
+
+// ============ FEEDBACK PAGE ============
+
+const FeedbackPage = () => {
+    const { api } = useAuth();
+    const [feedbackList, setFeedbackList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [newFeedback, setNewFeedback] = useState({ customer_name: "", customer_phone: "", rating: 5, message: "" });
+    const [submitting, setSubmitting] = useState(false);
+
+    const fetchFeedback = async () => {
+        try {
+            const res = await api.get("/feedback");
+            setFeedbackList(res.data);
+        } catch (err) {
+            toast.error("Failed to load feedback");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFeedback();
+    }, []);
+
+    const handleAddFeedback = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await api.post("/feedback", newFeedback);
+            toast.success("Feedback recorded!");
+            setShowAddModal(false);
+            setNewFeedback({ customer_name: "", customer_phone: "", rating: 5, message: "" });
+            fetchFeedback();
+        } catch (err) {
+            toast.error("Failed to add feedback");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleResolve = async (feedbackId) => {
+        try {
+            await api.put(`/feedback/${feedbackId}/resolve`);
+            toast.success("Feedback resolved");
+            fetchFeedback();
+        } catch (err) {
+            toast.error("Failed to resolve");
+        }
+    };
+
+    const StarRating = ({ rating, onChange, readonly = false }) => (
+        <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                    key={star}
+                    type="button"
+                    disabled={readonly}
+                    onClick={() => onChange && onChange(star)}
+                    className={`${readonly ? "" : "active-scale"}`}
+                >
+                    <Star 
+                        className={`w-6 h-6 ${star <= rating ? "fill-[#329937] text-[#329937]" : "text-gray-300"}`} 
+                    />
+                </button>
+            ))}
+        </div>
+    );
+
+    return (
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto">
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="feedback-title">
+                        Feedback
+                    </h1>
+                    <Button 
+                        onClick={() => setShowAddModal(true)}
+                        className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full h-10 px-4"
+                        data-testid="add-feedback-btn"
+                    >
+                        <Plus className="w-4 h-4 mr-1" /> Add
+                    </Button>
+                </div>
+
+                {loading ? (
+                    <div className="space-y-3">
+                        {[1,2,3].map(i => (
+                            <div key={i} className="stats-card animate-pulse">
+                                <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                                <div className="h-3 bg-gray-200 rounded w-full"></div>
+                            </div>
+                        ))}
+                    </div>
+                ) : feedbackList.length === 0 ? (
+                    <div className="empty-state">
+                        <MessageSquare className="empty-state-icon" />
+                        <p className="text-[#52525B]">No feedback yet</p>
+                        <Button 
+                            onClick={() => setShowAddModal(true)}
+                            className="mt-4 bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                        >
+                            Record first feedback
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {feedbackList.map((fb) => (
+                            <Card key={fb.id} className="rounded-xl border-0 shadow-sm" data-testid={`feedback-item-${fb.id}`}>
+                                <CardContent className="p-4">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div>
+                                            <p className="font-medium text-[#1A1A1A]">{fb.customer_name}</p>
+                                            <p className="text-sm text-[#52525B]">{fb.customer_phone}</p>
+                                        </div>
+                                        <Badge variant={fb.status === "resolved" ? "outline" : "default"} 
+                                            className={fb.status === "pending" ? "bg-[#329937]" : ""}>
+                                            {fb.status}
+                                        </Badge>
+                                    </div>
+                                    <StarRating rating={fb.rating} readonly />
+                                    {fb.message && (
+                                        <p className="text-[#52525B] mt-2 text-sm">{fb.message}</p>
+                                    )}
+                                    <div className="flex items-center justify-between mt-3 pt-3 border-t">
+                                        <p className="text-xs text-[#A1A1AA]">
+                                            {new Date(fb.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        </p>
+                                        {fb.status === "pending" && (
+                                            <Button 
+                                                size="sm" 
+                                                variant="outline"
+                                                onClick={() => handleResolve(fb.id)}
+                                                className="h-8 rounded-full text-xs"
+                                                data-testid={`resolve-feedback-${fb.id}`}
+                                            >
+                                                <Check className="w-3 h-3 mr-1" /> Resolve
+                                            </Button>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Add Feedback Modal */}
+            <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
+                <DialogContent className="max-w-sm mx-4 rounded-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="font-['Montserrat']">Record Feedback</DialogTitle>
+                        <DialogDescription>Capture customer feedback</DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleAddFeedback}>
+                        <div className="space-y-4 py-4">
+                            <div>
+                                <Label className="form-label">Name *</Label>
+                                <Input
+                                    value={newFeedback.customer_name}
+                                    onChange={(e) => setNewFeedback({...newFeedback, customer_name: e.target.value})}
+                                    placeholder="Customer name"
+                                    className="h-12 rounded-xl"
+                                    required
+                                    data-testid="feedback-customer-name"
+                                />
+                            </div>
+                            <div>
+                                <Label className="form-label">Phone *</Label>
+                                <Input
+                                    type="tel"
+                                    value={newFeedback.customer_phone}
+                                    onChange={(e) => setNewFeedback({...newFeedback, customer_phone: e.target.value})}
+                                    placeholder="9876543210"
+                                    className="h-12 rounded-xl"
+                                    required
+                                    data-testid="feedback-customer-phone"
+                                />
+                            </div>
+                            <div>
+                                <Label className="form-label">Rating *</Label>
+                                <div className="mt-2">
+                                    <StarRating 
+                                        rating={newFeedback.rating} 
+                                        onChange={(r) => setNewFeedback({...newFeedback, rating: r})}
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <Label className="form-label">Message</Label>
+                                <Textarea
+                                    value={newFeedback.message}
+                                    onChange={(e) => setNewFeedback({...newFeedback, message: e.target.value})}
+                                    placeholder="Customer feedback..."
+                                    className="rounded-xl resize-none"
+                                    rows={3}
+                                    data-testid="feedback-message"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="gap-2">
+                            <Button type="button" variant="outline" onClick={() => setShowAddModal(false)} className="rounded-full">
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                                disabled={submitting}
+                                data-testid="submit-feedback-btn"
+                            >
+                                {submitting ? "Saving..." : "Save Feedback"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </MobileLayout>
+    );
+};
+
+// ============ COUPONS PAGE ============
+
+const CouponsPage = () => {
+    const { api } = useAuth();
+    const navigate = useNavigate();
+    const [coupons, setCoupons] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [editingCoupon, setEditingCoupon] = useState(null);
+    const [customers, setCustomers] = useState([]);
+    const [submitting, setSubmitting] = useState(false);
+    const [newCoupon, setNewCoupon] = useState({
+        code: "",
+        discount_type: "percentage",
+        discount_value: "",
+        start_date: "",
+        end_date: "",
+        usage_limit: "",
+        per_user_limit: "1",
+        min_order_value: "0",
+        max_discount: "",
+        specific_users: [],
+        applicable_channels: ["delivery", "takeaway", "dine_in"],
+        description: ""
+    });
+    const [showSpecificUsers, setShowSpecificUsers] = useState(false);
+
+    const fetchCoupons = async () => {
+        try {
+            const res = await api.get("/coupons");
+            setCoupons(res.data);
+        } catch (err) {
+            toast.error("Failed to load coupons");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCustomers = async () => {
+        try {
+            const res = await api.get("/customers?limit=500");
+            setCustomers(res.data);
+        } catch (err) {
+            console.error("Failed to load customers");
+        }
+    };
+
+    useEffect(() => {
+        fetchCoupons();
+        fetchCustomers();
+    }, []);
+
+    const resetForm = () => {
+        setNewCoupon({
+            code: "",
+            discount_type: "percentage",
+            discount_value: "",
+            start_date: "",
+            end_date: "",
+            usage_limit: "",
+            per_user_limit: "1",
+            min_order_value: "0",
+            max_discount: "",
+            specific_users: [],
+            applicable_channels: ["delivery", "takeaway", "dine_in"],
+            description: ""
+        });
+        setShowSpecificUsers(false);
+        setEditingCoupon(null);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            const couponData = {
+                code: newCoupon.code,
+                discount_type: newCoupon.discount_type,
+                discount_value: parseFloat(newCoupon.discount_value),
+                start_date: newCoupon.start_date,
+                end_date: newCoupon.end_date,
+                usage_limit: newCoupon.usage_limit ? parseInt(newCoupon.usage_limit) : null,
+                per_user_limit: parseInt(newCoupon.per_user_limit) || 1,
+                min_order_value: parseFloat(newCoupon.min_order_value) || 0,
+                max_discount: newCoupon.max_discount ? parseFloat(newCoupon.max_discount) : null,
+                specific_users: showSpecificUsers && newCoupon.specific_users.length > 0 ? newCoupon.specific_users : null,
+                applicable_channels: newCoupon.applicable_channels,
+                description: newCoupon.description || null
+            };
+
+            if (editingCoupon) {
+                await api.put(`/coupons/${editingCoupon.id}`, couponData);
+                toast.success("Coupon updated!");
+            } else {
+                await api.post("/coupons", couponData);
+                toast.success("Coupon created!");
+            }
+            setShowAddModal(false);
+            resetForm();
+            fetchCoupons();
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to save coupon");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    const handleEdit = (coupon) => {
+        setEditingCoupon(coupon);
+        setNewCoupon({
+            code: coupon.code,
+            discount_type: coupon.discount_type,
+            discount_value: coupon.discount_value.toString(),
+            start_date: coupon.start_date.split("T")[0],
+            end_date: coupon.end_date.split("T")[0],
+            usage_limit: coupon.usage_limit?.toString() || "",
+            per_user_limit: coupon.per_user_limit.toString(),
+            min_order_value: coupon.min_order_value.toString(),
+            max_discount: coupon.max_discount?.toString() || "",
+            specific_users: coupon.specific_users || [],
+            applicable_channels: coupon.applicable_channels,
+            description: coupon.description || ""
+        });
+        setShowSpecificUsers(coupon.specific_users && coupon.specific_users.length > 0);
+        setShowAddModal(true);
+    };
+
+    const handleDelete = async (couponId) => {
+        if (!confirm("Are you sure you want to delete this coupon?")) return;
+        try {
+            await api.delete(`/coupons/${couponId}`);
+            toast.success("Coupon deleted");
+            fetchCoupons();
+        } catch (err) {
+            toast.error("Failed to delete coupon");
+        }
+    };
+
+    const toggleChannel = (channel) => {
+        if (newCoupon.applicable_channels.includes(channel)) {
+            setNewCoupon({
+                ...newCoupon,
+                applicable_channels: newCoupon.applicable_channels.filter(c => c !== channel)
+            });
+        } else {
+            setNewCoupon({
+                ...newCoupon,
+                applicable_channels: [...newCoupon.applicable_channels, channel]
+            });
+        }
+    };
+
+    const toggleUser = (userId) => {
+        if (newCoupon.specific_users.includes(userId)) {
+            setNewCoupon({
+                ...newCoupon,
+                specific_users: newCoupon.specific_users.filter(id => id !== userId)
+            });
+        } else {
+            setNewCoupon({
+                ...newCoupon,
+                specific_users: [...newCoupon.specific_users, userId]
+            });
+        }
+    };
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "";
+        const date = new Date(dateStr);
+        return date.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    };
+
+    const isCouponActive = (coupon) => {
+        const now = new Date();
+        const start = new Date(coupon.start_date);
+        const end = new Date(coupon.end_date);
+        return coupon.is_active && now >= start && now <= end;
+    };
+
+    return (
+        <div className="min-h-screen bg-[#F9F9F7]">
+            {/* Header */}
+            <div className="bg-[#FFF5F0] px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+                <div className="flex items-center gap-3">
+                    <button onClick={() => navigate("/settings")} className="text-[#329937]">
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <h1 className="text-xl font-bold text-[#329937] font-['Montserrat']" data-testid="coupons-title">
+                        Coupons
+                    </h1>
+                </div>
+                <Button
+                    onClick={() => { resetForm(); setShowAddModal(true); }}
+                    className="w-10 h-10 rounded-full bg-[#F26B33] hover:bg-[#D85A2A] p-0"
+                    data-testid="add-coupon-btn"
+                >
+                    <Plus className="w-5 h-5" />
+                </Button>
+            </div>
+
+            {/* Content */}
+            <div className="p-4 max-w-lg mx-auto pb-8">
+                {loading ? (
+                    <div className="space-y-3">
+                        {[1,2,3].map(i => (
+                            <div key={i} className="bg-blue-50 rounded-xl p-4 animate-pulse">
+                                <div className="h-5 bg-blue-100 rounded w-32 mb-2"></div>
+                                <div className="h-4 bg-blue-100 rounded w-40"></div>
+                            </div>
+                        ))}
+                    </div>
+                ) : coupons.length === 0 ? (
+                    <div className="text-center py-12">
+                        <Tag className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                        <p className="text-[#52525B] mb-4">No coupons yet</p>
+                        <Button 
+                            onClick={() => setShowAddModal(true)}
+                            className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                        >
+                            Create your first coupon
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {coupons.map((coupon) => (
+                            <div 
+                                key={coupon.id}
+                                className={`rounded-xl p-4 ${isCouponActive(coupon) ? 'bg-blue-50' : 'bg-gray-100'}`}
+                                data-testid={`coupon-card-${coupon.id}`}
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold text-[#1A1A1A] text-lg">{coupon.code}</p>
+                                            {!coupon.is_active && (
+                                                <Badge variant="outline" className="text-xs text-gray-500">Inactive</Badge>
+                                            )}
+                                            {coupon.is_active && new Date(coupon.end_date) < new Date() && (
+                                                <Badge variant="outline" className="text-xs text-red-500">Expired</Badge>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-[#52525B] mt-1">
+                                            {coupon.discount_type === "percentage" 
+                                                ? `${coupon.discount_value}% off` 
+                                                : `₹${coupon.discount_value} off`}
+                                            {coupon.max_discount && coupon.discount_type === "percentage" && 
+                                                ` (max ₹${coupon.max_discount})`}
+                                        </p>
+                                        <p className="text-xs text-[#A1A1AA] mt-1">
+                                            {formatDate(coupon.start_date)} - {formatDate(coupon.end_date)}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className="text-xs text-[#52525B]">
+                                                Used: {coupon.total_used}{coupon.usage_limit ? `/${coupon.usage_limit}` : ''}
+                                            </span>
+                                            <div className="flex gap-1">
+                                                {coupon.applicable_channels.map(ch => (
+                                                    <Badge key={ch} variant="outline" className="text-xs capitalize">
+                                                        {ch.replace("_", " ")}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => handleEdit(coupon)}
+                                            className="p-2 text-blue-500 hover:bg-blue-100 rounded-lg"
+                                            data-testid={`edit-coupon-${coupon.id}`}
+                                        >
+                                            <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDelete(coupon.id)}
+                                            className="p-2 text-red-500 hover:bg-red-100 rounded-lg"
+                                            data-testid={`delete-coupon-${coupon.id}`}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Add/Edit Coupon Modal */}
+            <Dialog open={showAddModal} onOpenChange={(open) => { setShowAddModal(open); if (!open) resetForm(); }}>
+                <DialogContent className="max-w-md mx-4 rounded-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                    <DialogHeader className="bg-[#FFF5F0] -mx-6 -mt-6 px-6 py-4 mb-4">
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => { setShowAddModal(false); resetForm(); }} className="text-[#329937]">
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <DialogTitle className="text-[#329937] font-['Montserrat']">
+                                {editingCoupon ? "Edit Coupon" : "Add Coupon"}
+                            </DialogTitle>
+                        </div>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit} className="flex-1 overflow-hidden">
+                        <ScrollArea className="h-[calc(90vh-200px)] pr-4">
+                            <div className="space-y-4">
+                                <p className="text-sm font-semibold text-[#1A1A1A] border-b pb-2">Coupon</p>
+                                
+                                <div>
+                                    <Label className="form-label">Coupon Code</Label>
+                                    <Input
+                                        value={newCoupon.code}
+                                        onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})}
+                                        placeholder="e.g., SAVE10, WELCOME20"
+                                        className="h-12 rounded-xl uppercase"
+                                        required
+                                        data-testid="coupon-code-input"
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label className="form-label">Discount Type</Label>
+                                    <Select 
+                                        value={newCoupon.discount_type} 
+                                        onValueChange={(v) => setNewCoupon({...newCoupon, discount_type: v})}
+                                    >
+                                        <SelectTrigger className="h-12 rounded-xl" data-testid="discount-type-select">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="percentage">Percentage (%)</SelectItem>
+                                            <SelectItem value="fixed">Fixed Amount (₹)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="form-label">Discount Value</Label>
+                                    <Input
+                                        type="number"
+                                        value={newCoupon.discount_value}
+                                        onChange={(e) => setNewCoupon({...newCoupon, discount_value: e.target.value})}
+                                        placeholder={newCoupon.discount_type === "percentage" ? "10" : "100"}
+                                        className="h-12 rounded-xl"
+                                        required
+                                        min="0"
+                                        max={newCoupon.discount_type === "percentage" ? "100" : undefined}
+                                        data-testid="discount-value-input"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label className="form-label">Start Date</Label>
+                                        <Input
+                                            type="date"
+                                            value={newCoupon.start_date}
+                                            onChange={(e) => setNewCoupon({...newCoupon, start_date: e.target.value})}
+                                            className="h-12 rounded-xl"
+                                            required
+                                            data-testid="start-date-input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label">End Date</Label>
+                                        <Input
+                                            type="date"
+                                            value={newCoupon.end_date}
+                                            onChange={(e) => setNewCoupon({...newCoupon, end_date: e.target.value})}
+                                            className="h-12 rounded-xl"
+                                            required
+                                            data-testid="end-date-input"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label className="form-label">Usage Limit</Label>
+                                        <Input
+                                            type="number"
+                                            value={newCoupon.usage_limit}
+                                            onChange={(e) => setNewCoupon({...newCoupon, usage_limit: e.target.value})}
+                                            placeholder="Unlimited"
+                                            className="h-12 rounded-xl"
+                                            min="1"
+                                            data-testid="usage-limit-input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label">Per User Limit</Label>
+                                        <Input
+                                            type="number"
+                                            value={newCoupon.per_user_limit}
+                                            onChange={(e) => setNewCoupon({...newCoupon, per_user_limit: e.target.value})}
+                                            placeholder="1"
+                                            className="h-12 rounded-xl"
+                                            min="1"
+                                            data-testid="per-user-limit-input"
+                                        />
+                                    </div>
+                                </div>
+
+                                {newCoupon.discount_type === "percentage" && (
+                                    <div>
+                                        <Label className="form-label">Max Discount (₹)</Label>
+                                        <Input
+                                            type="number"
+                                            value={newCoupon.max_discount}
+                                            onChange={(e) => setNewCoupon({...newCoupon, max_discount: e.target.value})}
+                                            placeholder="No limit"
+                                            className="h-12 rounded-xl"
+                                            min="0"
+                                            data-testid="max-discount-input"
+                                        />
+                                    </div>
+                                )}
+
+                                <div>
+                                    <Label className="form-label">Min Order Value (₹)</Label>
+                                    <Input
+                                        type="number"
+                                        value={newCoupon.min_order_value}
+                                        onChange={(e) => setNewCoupon({...newCoupon, min_order_value: e.target.value})}
+                                        placeholder="0"
+                                        className="h-12 rounded-xl"
+                                        min="0"
+                                        data-testid="min-order-input"
+                                    />
+                                </div>
+
+                                {/* Specific Users */}
+                                <div className="flex items-center justify-between py-2">
+                                    <Label className="form-label mb-0">Select Specific Users</Label>
+                                    <Checkbox
+                                        checked={showSpecificUsers}
+                                        onCheckedChange={setShowSpecificUsers}
+                                        data-testid="specific-users-checkbox"
+                                    />
+                                </div>
+
+                                {showSpecificUsers && (
+                                    <div className="max-h-40 overflow-y-auto border rounded-xl p-3 space-y-2">
+                                        {customers.length === 0 ? (
+                                            <p className="text-sm text-[#52525B]">No customers found</p>
+                                        ) : (
+                                            customers.map(customer => (
+                                                <label key={customer.id} className="flex items-center gap-2 cursor-pointer">
+                                                    <Checkbox
+                                                        checked={newCoupon.specific_users.includes(customer.id)}
+                                                        onCheckedChange={() => toggleUser(customer.id)}
+                                                    />
+                                                    <span className="text-sm">{customer.name} ({customer.phone})</span>
+                                                </label>
+                                            ))
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Applicable Channels */}
+                                <div className="space-y-3 border-t pt-4">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-semibold text-[#1A1A1A]">Applicable Channels</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setNewCoupon({
+                                                ...newCoupon, 
+                                                applicable_channels: newCoupon.applicable_channels.length === 3 
+                                                    ? [] 
+                                                    : ["delivery", "takeaway", "dine_in"]
+                                            })}
+                                            className="text-xs text-[#F26B33]"
+                                        >
+                                            {newCoupon.applicable_channels.length === 3 ? "Deselect All" : "Select All"}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-[#52525B]">Channel Name</p>
+                                    {[
+                                        { id: "delivery", label: "Delivery" },
+                                        { id: "takeaway", label: "Takeaway" },
+                                        { id: "dine_in", label: "Dine In" }
+                                    ].map(channel => (
+                                        <label key={channel.id} className="flex items-center justify-between py-2">
+                                            <span className="text-sm text-[#52525B]">{channel.label}</span>
+                                            <Checkbox
+                                                checked={newCoupon.applicable_channels.includes(channel.id)}
+                                                onCheckedChange={() => toggleChannel(channel.id)}
+                                                data-testid={`channel-${channel.id}`}
+                                            />
+                                        </label>
+                                    ))}
+                                </div>
+
+                                {/* Description */}
+                                <div>
+                                    <Label className="form-label">Description (Optional)</Label>
+                                    <Textarea
+                                        value={newCoupon.description}
+                                        onChange={(e) => setNewCoupon({...newCoupon, description: e.target.value})}
+                                        placeholder="Internal note about this coupon..."
+                                        className="rounded-xl resize-none"
+                                        rows={2}
+                                        data-testid="coupon-description"
+                                    />
+                                </div>
+                            </div>
+                        </ScrollArea>
+                        <DialogFooter className="pt-4 border-t">
+                            <Button 
+                                type="submit" 
+                                className="w-full h-12 bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                                disabled={submitting}
+                                data-testid="save-coupon-btn"
+                            >
+                                {submitting ? "Saving..." : (editingCoupon ? "Update Coupon" : "Create Coupon")}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
+};
+
+// ============ SETTINGS PAGE ============
+
+const SettingsPage = () => {
+    const { user, api, logout } = useAuth();
+    const navigate = useNavigate();
+    const [settings, setSettings] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await api.get("/loyalty/settings");
+                setSettings(res.data);
+            } catch (err) {
+                toast.error("Failed to load settings");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            await api.put("/loyalty/settings", settings);
+            toast.success("Settings saved!");
+        } catch (err) {
+            toast.error("Failed to save settings");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+        toast.success("Logged out successfully");
+    };
+
+    return (
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto">
+                <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6 font-['Montserrat']" data-testid="settings-title">
+                    Settings
+                </h1>
+
+                {/* Profile Section */}
+                <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="profile-card">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                            <Avatar className="w-14 h-14 bg-[#F26B33]">
+                                <AvatarFallback className="bg-[#F26B33] text-white text-xl font-semibold">
+                                    {user?.restaurant_name?.charAt(0)}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold text-[#1A1A1A] text-lg">{user?.restaurant_name}</p>
+                                <p className="text-sm text-[#52525B]">{user?.email}</p>
+                                <p className="text-sm text-[#52525B]">{user?.phone}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <button 
+                        onClick={() => navigate("/coupons")}
+                        className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                        data-testid="go-to-coupons"
+                    >
+                        <div className="w-10 h-10 rounded-full bg-[#F26B33]/10 flex items-center justify-center">
+                            <Tag className="w-5 h-5 text-[#F26B33]" />
+                        </div>
+                        <div className="text-left">
+                            <p className="font-medium text-[#1A1A1A]">Coupons</p>
+                            <p className="text-xs text-[#52525B]">Manage discounts</p>
+                        </div>
+                    </button>
+                    <button 
+                        onClick={() => toast.info("Wallet settings coming soon!")}
+                        className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
+                        data-testid="go-to-wallet-settings"
+                    >
+                        <div className="w-10 h-10 rounded-full bg-[#329937]/10 flex items-center justify-center">
+                            <Gift className="w-5 h-5 text-[#329937]" />
+                        </div>
+                        <div className="text-left">
+                            <p className="font-medium text-[#1A1A1A]">Wallet</p>
+                            <p className="text-xs text-[#52525B]">Manage balance</p>
+                        </div>
+                    </button>
+                </div>
+
+                {loading ? (
+                    <div className="stats-card animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-32 mb-4"></div>
+                        <div className="h-12 bg-gray-200 rounded-xl"></div>
+                    </div>
+                ) : settings && (
+                    <>
+                        {/* Points Earning Settings */}
+                        <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Points Earning</h2>
+                        <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="earning-settings-card">
+                            <CardContent className="p-4 space-y-4">
+                                <div>
+                                    <Label className="form-label">Minimum Order Value (₹)</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        value={settings.min_order_value}
+                                        onChange={(e) => setSettings({...settings, min_order_value: parseFloat(e.target.value)})}
+                                        className="h-12 rounded-xl"
+                                        data-testid="min-order-value-input"
+                                    />
+                                    <p className="text-xs text-[#52525B] mt-1">Customer must spend at least this amount to earn points</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Tier-wise Earning Rates */}
+                        <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Earning % by Tier</h2>
+                        <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="tier-earning-card">
+                            <CardContent className="p-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label className="form-label flex items-center gap-2">
+                                            <span className="w-3 h-3 rounded-full bg-amber-600"></span>
+                                            Bronze (%)
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            max="100"
+                                            value={settings.bronze_earn_percent}
+                                            onChange={(e) => setSettings({...settings, bronze_earn_percent: parseFloat(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="bronze-percent-input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label flex items-center gap-2">
+                                            <span className="w-3 h-3 rounded-full bg-gray-400"></span>
+                                            Silver (%)
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            max="100"
+                                            value={settings.silver_earn_percent}
+                                            onChange={(e) => setSettings({...settings, silver_earn_percent: parseFloat(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="silver-percent-input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label flex items-center gap-2">
+                                            <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                            Gold (%)
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            max="100"
+                                            value={settings.gold_earn_percent}
+                                            onChange={(e) => setSettings({...settings, gold_earn_percent: parseFloat(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="gold-percent-input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label flex items-center gap-2">
+                                            <span className="w-3 h-3 rounded-full bg-purple-500"></span>
+                                            Platinum (%)
+                                        </Label>
+                                        <Input
+                                            type="number"
+                                            step="0.5"
+                                            min="0"
+                                            max="100"
+                                            value={settings.platinum_earn_percent}
+                                            onChange={(e) => setSettings({...settings, platinum_earn_percent: parseFloat(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="platinum-percent-input"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-xs text-[#52525B] mt-3">Higher tier customers earn more points per order</p>
+                            </CardContent>
+                        </Card>
+
+                        {/* Redemption Settings */}
+                        <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Points Redemption</h2>
+                        <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="redemption-settings-card">
+                            <CardContent className="p-4 space-y-4">
+                                <div className="bg-[#329937]/10 p-3 rounded-lg">
+                                    <p className="text-sm text-[#329937] font-medium">1 Point = ₹{settings.redemption_value}</p>
+                                    <p className="text-xs text-[#52525B] mt-1">
+                                        Example: {settings.bronze_earn_percent}% on ₹1000 = {Math.round(1000 * settings.bronze_earn_percent / 100)} points = ₹{Math.round(1000 * settings.bronze_earn_percent / 100 * settings.redemption_value)} discount
+                                    </p>
+                                </div>
+                                <div>
+                                    <Label className="form-label">Point Value (₹ per point)</Label>
+                                    <Input
+                                        type="number"
+                                        step="0.5"
+                                        min="0.5"
+                                        value={settings.redemption_value}
+                                        onChange={(e) => setSettings({...settings, redemption_value: parseFloat(e.target.value)})}
+                                        className="h-12 rounded-xl"
+                                        data-testid="redemption-value-input"
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="form-label">Minimum Points to Redeem</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        value={settings.min_redemption_points}
+                                        onChange={(e) => setSettings({...settings, min_redemption_points: parseInt(e.target.value)})}
+                                        className="h-12 rounded-xl"
+                                        data-testid="min-redemption-input"
+                                    />
+                                    <p className="text-xs text-[#52525B] mt-1">Customer needs at least ₹{settings.min_redemption_points} worth points</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label className="form-label">Max % of Bill</Label>
+                                        <Input
+                                            type="number"
+                                            min="1"
+                                            max="100"
+                                            value={settings.max_redemption_percent || 50}
+                                            onChange={(e) => setSettings({...settings, max_redemption_percent: parseFloat(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="max-redemption-percent-input"
+                                        />
+                                        <p className="text-xs text-[#52525B] mt-1">Max {settings.max_redemption_percent || 50}% of bill</p>
+                                    </div>
+                                    <div>
+                                        <Label className="form-label">Max ₹ Amount</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={settings.max_redemption_amount || 500}
+                                            onChange={(e) => setSettings({...settings, max_redemption_amount: parseFloat(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="max-redemption-amount-input"
+                                        />
+                                        <p className="text-xs text-[#52525B] mt-1">Max ₹{settings.max_redemption_amount || 500} per order</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Points Expiry Settings */}
+                        <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Points Expiry</h2>
+                        <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="expiry-settings-card">
+                            <CardContent className="p-4 space-y-4">
+                                <div className={`p-3 rounded-lg ${settings.points_expiry_months === 0 ? 'bg-gray-100' : 'bg-[#F26B33]/10'}`}>
+                                    <p className="text-sm font-medium" style={{color: settings.points_expiry_months === 0 ? '#52525B' : '#F26B33'}}>
+                                        {settings.points_expiry_months === 0 
+                                            ? "Points Never Expire" 
+                                            : `Points expire after ${settings.points_expiry_months} months`
+                                        }
+                                    </p>
+                                    {settings.points_expiry_months > 0 && (
+                                        <p className="text-xs text-[#52525B] mt-1">
+                                            Customers will be reminded {settings.expiry_reminder_days || 30} days before expiry
+                                        </p>
+                                    )}
+                                </div>
+                                <div>
+                                    <Label className="form-label">Expiry Period (months)</Label>
+                                    <Input
+                                        type="number"
+                                        min="0"
+                                        max="24"
+                                        value={settings.points_expiry_months ?? 6}
+                                        onChange={(e) => setSettings({...settings, points_expiry_months: parseInt(e.target.value)})}
+                                        className="h-12 rounded-xl"
+                                        data-testid="expiry-months-input"
+                                    />
+                                    <p className="text-xs text-[#52525B] mt-1">Set to 0 for no expiry</p>
+                                </div>
+                                {(settings.points_expiry_months ?? 6) > 0 && (
+                                    <div>
+                                        <Label className="form-label">Reminder Before (days)</Label>
+                                        <Input
+                                            type="number"
+                                            min="7"
+                                            max="90"
+                                            value={settings.expiry_reminder_days || 30}
+                                            onChange={(e) => setSettings({...settings, expiry_reminder_days: parseInt(e.target.value)})}
+                                            className="h-12 rounded-xl"
+                                            data-testid="expiry-reminder-input"
+                                        />
+                                        <p className="text-xs text-[#52525B] mt-1">Send reminder X days before points expire</p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+                        {/* Tier Thresholds */}
+                        <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Tier Thresholds</h2>
+                        <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="tier-settings-card">
+                            <CardContent className="p-4">
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <Label className="form-label text-xs">Silver</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={settings.tier_silver_min}
+                                            onChange={(e) => setSettings({...settings, tier_silver_min: parseInt(e.target.value)})}
+                                            className="h-10 rounded-lg text-sm"
+                                            data-testid="tier-silver-input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label text-xs">Gold</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={settings.tier_gold_min}
+                                            onChange={(e) => setSettings({...settings, tier_gold_min: parseInt(e.target.value)})}
+                                            className="h-10 rounded-lg text-sm"
+                                            data-testid="tier-gold-input"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label text-xs">Platinum</Label>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            value={settings.tier_platinum_min}
+                                            onChange={(e) => setSettings({...settings, tier_platinum_min: parseInt(e.target.value)})}
+                                            className="h-10 rounded-lg text-sm"
+                                            data-testid="tier-platinum-input"
+                                        />
+                                    </div>
+                                </div>
+                                <p className="text-xs text-[#52525B] mt-3">Points needed to upgrade customer tier</p>
+                            </CardContent>
+                        </Card>
+
+                        {/* Save Button */}
+                        <Button 
+                            onClick={handleSave}
+                            className="w-full h-12 bg-[#F26B33] hover:bg-[#D85A2A] rounded-full mb-4"
+                            disabled={saving}
+                            data-testid="save-settings-btn"
+                        >
+                            {saving ? "Saving..." : "Save All Settings"}
+                        </Button>
+                    </>
+                )}
+
+                {/* Logout */}
+                <Button 
+                    onClick={handleLogout}
+                    variant="outline"
+                    className="w-full h-12 rounded-full border-red-500 text-red-500 hover:bg-red-50"
+                    data-testid="logout-btn"
+                >
+                    <LogOut className="w-4 h-4 mr-2" /> Logout
+                </Button>
+            </div>
+        </MobileLayout>
+    );
+};
+
+// ============ PUBLIC CUSTOMER REGISTRATION ============
+
+const CustomerRegistrationPage = () => {
+    const { restaurantId } = useParams();
+    const [formData, setFormData] = useState({ name: "", phone: "", email: "" });
+    const [restaurantName, setRestaurantName] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const [success, setSuccess] = useState(false);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitting(true);
+        try {
+            await axios.post(`${API}/qr/register/${restaurantId}`, formData);
+            setSuccess(true);
+            toast.success("Registration successful!");
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Registration failed");
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    if (success) {
+        return (
+            <div className="min-h-screen bg-[#F9F9F7] flex flex-col items-center justify-center p-6">
+                <div className="w-20 h-20 bg-[#329937] rounded-full flex items-center justify-center mb-6">
+                    <Check className="w-10 h-10 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold text-[#1A1A1A] text-center font-['Montserrat']">Welcome!</h1>
+                <p className="text-[#52525B] text-center mt-2">You're now part of our loyalty program.</p>
+                <p className="text-[#52525B] text-center mt-1">Earn points on every visit!</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-[#F9F9F7] flex flex-col justify-center p-6">
+            <div className="max-w-sm mx-auto w-full">
+                <div className="text-center mb-8">
+                    <img 
+                        src="https://customer-assets.emergentagent.com/job_dine-points-app/artifacts/acdjlx1x_mygenie_logo.svg" 
+                        alt="MyGenie Logo" 
+                        className="h-16 mx-auto mb-4"
+                    />
+                    <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']">Join Our Loyalty Program</h1>
+                    <p className="text-[#52525B] mt-2">Earn points on every purchase</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label className="form-label">Your Name *</Label>
+                        <Input
+                            value={formData.name}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            placeholder="Enter your name"
+                            className="h-12 rounded-xl"
+                            required
+                            data-testid="public-reg-name"
+                        />
+                    </div>
+                    <div>
+                        <Label className="form-label">Phone Number *</Label>
+                        <Input
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                            placeholder="9876543210"
+                            className="h-12 rounded-xl"
+                            required
+                            data-testid="public-reg-phone"
+                        />
+                    </div>
+                    <div>
+                        <Label className="form-label">Email (optional)</Label>
+                        <Input
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => setFormData({...formData, email: e.target.value})}
+                            placeholder="your@email.com"
+                            className="h-12 rounded-xl"
+                            data-testid="public-reg-email"
+                        />
+                    </div>
+                    <Button 
+                        type="submit" 
+                        className="w-full h-12 rounded-full bg-[#F26B33] hover:bg-[#D85A2A] text-white font-semibold active-scale"
+                        disabled={submitting}
+                        data-testid="public-reg-submit"
+                    >
+                        {submitting ? "Joining..." : "Join Now"}
+                    </Button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// ============ MAIN APP ============
+
+function App() {
+    return (
+        <AuthProvider>
+            <div className="App">
+                <Toaster position="top-center" richColors />
+                <BrowserRouter>
+                    <Routes>
+                        {/* Public Routes */}
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/register-customer/:restaurantId" element={<CustomerRegistrationPage />} />
+
+                        {/* Protected Routes */}
+                        <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+                        <Route path="/customers" element={<ProtectedRoute><CustomersPage /></ProtectedRoute>} />
+                        <Route path="/customers/:id" element={<ProtectedRoute><CustomerDetailPage /></ProtectedRoute>} />
+                        <Route path="/qr" element={<ProtectedRoute><QRCodePage /></ProtectedRoute>} />
+                        <Route path="/feedback" element={<ProtectedRoute><FeedbackPage /></ProtectedRoute>} />
+                        <Route path="/coupons" element={<ProtectedRoute><CouponsPage /></ProtectedRoute>} />
+                        <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+
+                        {/* Fallback */}
+                        <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                </BrowserRouter>
+            </div>
+        </AuthProvider>
+    );
+}
+
+export default App;
