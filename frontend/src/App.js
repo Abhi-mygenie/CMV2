@@ -9,7 +9,7 @@ import {
     ArrowUpRight, ArrowDownRight, Gift, Phone, Mail,
     User, LogOut, Copy, Download, Check, X, Edit2, Trash2,
     Eye, EyeOff, Building2, Calendar, MapPin, Filter, Clock,
-    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save
+    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -399,7 +399,7 @@ const MobileLayout = ({ children }) => {
     const navItems = [
         { path: "/", icon: Home, label: "Home" },
         { path: "/customers", icon: Users, label: "Customers" },
-        { path: "/qr", icon: QrCode, label: "QR Code" },
+        { path: "/segments", icon: Layers, label: "Segments" },
         { path: "/feedback", icon: MessageSquare, label: "Feedback" },
         { path: "/settings", icon: Settings, label: "Settings" }
     ];
