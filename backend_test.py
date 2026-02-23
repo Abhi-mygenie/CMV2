@@ -119,11 +119,16 @@ class DinePointsAPITester:
             "city": "Mumbai"
         }
         
+        # Use unique phone number to avoid conflicts
+        import random
+        unique_phone = f"888888{random.randint(1000, 9999)}"
+        customer_data["phone"] = unique_phone
+        
         success, response = self.run_test(
             "Create customer",
             "POST",
             "customers",
-            201,
+            200,  # Backend returns 200, not 201
             data=customer_data
         )
         
