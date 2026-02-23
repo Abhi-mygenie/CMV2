@@ -1700,11 +1700,11 @@ const CustomerDetailPage = () => {
                         {/* Action Buttons */}
                         <div className="grid grid-cols-2 gap-3">
                             <Button 
-                                onClick={() => { setPointsAction("earn"); setShowPointsModal(true); }}
+                                onClick={() => { setPointsAction("bonus"); setShowPointsModal(true); }}
                                 className="h-11 bg-[#329937] hover:bg-[#287A2D] rounded-full text-sm"
                                 data-testid="add-points-btn"
                             >
-                                <Plus className="w-4 h-4 mr-1" /> Add Points
+                                <Gift className="w-4 h-4 mr-1" /> Give Bonus
                             </Button>
                             <Button 
                                 onClick={() => { setWalletAction("credit"); setShowWalletModal(true); }}
