@@ -503,21 +503,14 @@ def check_anniversary_bonus(customer: dict, settings: dict) -> tuple[bool, int, 
 
 def check_first_visit_bonus(customer: dict, settings: dict) -> tuple[bool, int, str]:
     """Check if customer is eligible for first visit bonus"""
-    print(f"[DEBUG] Checking first visit bonus for customer: {customer.get('name')}")
-    print(f"[DEBUG] First visit bonus enabled: {settings.get('first_visit_bonus_enabled', False)}")
-    print(f"[DEBUG] Customer total_visits: {customer.get('total_visits', 0)}")
-    
     if not settings.get('first_visit_bonus_enabled', False):
-        print("[DEBUG] First visit bonus is disabled")
         return False, 0, ""
     
     # First visit means total_visits is currently 0 (before incrementing)
     if customer.get('total_visits', 0) == 0:
         bonus_points = settings.get('first_visit_bonus_points', 50)
-        print(f"[DEBUG] First visit bonus TRIGGERED! {bonus_points} points")
         return True, bonus_points, "Welcome bonus! Thanks for your first visit 🎁"
     
-    print("[DEBUG] Not first visit")
     return False, 0, ""
 
 def check_off_peak_bonus(settings: dict) -> tuple[bool, float, str, str]:
