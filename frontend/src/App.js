@@ -2730,20 +2730,17 @@ const CouponsPage = () => {
             {/* Add/Edit Coupon Modal */}
             <Dialog open={showAddModal} onOpenChange={(open) => { setShowAddModal(open); if (!open) resetForm(); }}>
                 <DialogContent className="max-w-md mx-4 rounded-2xl max-h-[90vh] overflow-hidden flex flex-col">
-                    <DialogHeader className="bg-[#FFF5F0] -mx-6 -mt-6 px-6 py-4 mb-4">
-                        <div className="flex items-center gap-2">
-                            <button onClick={() => { setShowAddModal(false); resetForm(); }} className="text-[#329937]">
-                                <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <DialogTitle className="text-[#329937] font-['Montserrat']">
-                                {editingCoupon ? "Edit Coupon" : "Add Coupon"}
-                            </DialogTitle>
-                        </div>
+                    <DialogHeader>
+                        <DialogTitle className="font-['Montserrat']">
+                            {editingCoupon ? "Edit Coupon" : "Create Coupon"}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {editingCoupon ? "Update coupon details" : "Add a new promotional coupon"}
+                        </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="flex-1 overflow-hidden">
                         <ScrollArea className="h-[calc(90vh-200px)] pr-4">
                             <div className="space-y-4">
-                                <p className="text-sm font-semibold text-[#1A1A1A] border-b pb-2">Coupon</p>
                                 
                                 <div>
                                     <Label className="form-label">Coupon Code</Label>
