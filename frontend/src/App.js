@@ -3653,16 +3653,16 @@ const SettingsPage = () => {
                         </div>
                     </button>
                     <button 
-                        onClick={() => toast.info("Wallet settings coming soon!")}
+                        onClick={() => document.getElementById('loyalty-settings')?.scrollIntoView({ behavior: 'smooth' })}
                         className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                        data-testid="go-to-wallet-settings"
+                        data-testid="go-to-loyalty-settings"
                     >
                         <div className="w-10 h-10 rounded-full bg-[#329937]/10 flex items-center justify-center">
                             <Gift className="w-5 h-5 text-[#329937]" />
                         </div>
                         <div className="text-left">
-                            <p className="font-medium text-[#1A1A1A]">Wallet</p>
-                            <p className="text-xs text-[#52525B]">Manage balance</p>
+                            <p className="font-medium text-[#1A1A1A]">Loyalty</p>
+                            <p className="text-xs text-[#52525B]">Points & tiers</p>
                         </div>
                     </button>
                 </div>
