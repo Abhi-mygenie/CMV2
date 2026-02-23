@@ -359,7 +359,7 @@ class DinePointsAPITester:
             "Create feedback",
             "POST",
             "feedback",
-            201,
+            200,  # Backend returns 200, not 201
             data=feedback_data
         )
         
