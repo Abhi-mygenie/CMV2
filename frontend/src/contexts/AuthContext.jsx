@@ -1,5 +1,7 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import axios from "axios";
+import { useDemoMode } from "./DemoContext";
+import { createMockApiClient } from "../services/mockApi";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -29,11 +31,39 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("token"));
     const [loading, setLoading] = useState(true);
+    const demoMode = useDemoMode();
 
-    const api = createApiClient(token);
+    // Create API client based on demo mode
+    const api = demoMode.isDemoMode && demoMode.demoData
+        ? createMockApiClient(demoMode.demoData, {
+            addCustomer: demoMode.addCustomer,
+            updateCustomer: demoMode.updateCustomer,
+            deleteCustomer: demoMode.deleteCustomer,
+            addPointsTransaction: demoMode.addPointsTransaction,
+            addWalletTransaction: demoMode.addWalletTransaction,
+            addCoupon: demoMode.addCoupon,
+            updateCoupon: demoMode.updateCoupon,
+            deleteCoupon: demoMode.deleteCoupon,
+            addSegment: demoMode.addSegment,
+            deleteSegment: demoMode.deleteSegment,
+            addFeedback: demoMode.addFeedback,
+            addWhatsAppTemplate: demoMode.addWhatsAppTemplate,
+            updateWhatsAppTemplate: demoMode.updateWhatsAppTemplate,
+            deleteWhatsAppTemplate: demoMode.deleteWhatsAppTemplate,
+            addAutomationRule: demoMode.addAutomationRule,
+            updateAutomationRule: demoMode.updateAutomationRule,
+            deleteAutomationRule: demoMode.deleteAutomationRule,
+            updateLoyaltySettings: demoMode.updateLoyaltySettings
+        })
+        : createApiClient(token);
 
     useEffect(() => {
-        if (token) {
+        if (demoMode.isDemoMode && demoMode.demoData) {
+            // In demo mode, set user immediately
+            setUser(demoMode.demoData.user);
+            setLoading(false);
+        } else if (token) {
+            // In normal mode, fetch user from API
             api.get("/auth/me")
                 .then(res => setUser(res.data))
                 .catch(() => {
@@ -44,7 +74,7 @@ export const AuthProvider = ({ children }) => {
         } else {
             setLoading(false);
         }
-    }, [token]);
+    }, [token, demoMode.isDemoMode, demoMode.demoData]);
 
     const login = async (email, password) => {
         const res = await axios.post(`${API}/auth/login`, { email, password });
@@ -66,6 +96,9 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
         setToken(null);
         setUser(null);
+        if (demoMode.isDemoMode) {
+            demoMode.disableDemoMode();
+        }
     };
 
     return (
