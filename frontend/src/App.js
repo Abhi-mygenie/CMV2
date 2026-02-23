@@ -2843,6 +2843,7 @@ const CouponsPage = () => {
 // ============ SEGMENTS PAGE ============
 const SegmentsPage = () => {
     const { api } = useAuth();
+    const navigate = useNavigate();
     const [segments, setSegments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedSegment, setSelectedSegment] = useState(null);
@@ -2911,72 +2912,100 @@ const SegmentsPage = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-[#FFF5F0] to-[#FFF0E5] p-6">
-                <div className="flex items-center justify-center h-64">
-                    <p className="text-[#52525B]">Loading segments...</p>
+            <MobileLayout>
+                <div className="p-4 max-w-lg mx-auto">
+                    <div className="flex items-center justify-center h-64">
+                        <p className="text-[#52525B]">Loading segments...</p>
+                    </div>
                 </div>
-            </div>
+            </MobileLayout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#FFF5F0] to-[#FFF0E5] p-6">
-            <div className="max-w-7xl mx-auto">
+        <MobileLayout>
+            <div className="p-4 max-w-lg mx-auto" data-testid="segments-page">
                 {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']">Customer Segments</h1>
-                    <p className="text-sm text-[#52525B] mt-1">Manage your saved customer segments and send targeted campaigns</p>
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="segments-title">
+                            Segments
+                        </h1>
+                        <p className="text-sm text-[#52525B] mt-1">Manage saved customer segments</p>
+                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/customers')}
+                        className="text-[#F26B33] border-[#F26B33]"
+                        data-testid="create-segment-btn"
+                    >
+                        <Plus className="w-4 h-4 mr-1" />
+                        New
+                    </Button>
                 </div>
 
                 {/* Segments List */}
                 {segments.length === 0 ? (
-                    <Card className="p-8 text-center">
+                    <Card className="p-8 text-center rounded-2xl" data-testid="empty-segments">
                         <div className="text-[#52525B]">
-                            <Users className="w-12 h-12 mx-auto mb-4 text-[#F26B33]" />
+                            <Layers className="w-12 h-12 mx-auto mb-4 text-[#F26B33]" />
                             <p className="font-medium mb-2">No segments yet</p>
-                            <p className="text-sm">Go to Customers page and save filtered views as segments</p>
+                            <p className="text-sm mb-4">Create segments from the Customers page by applying filters and saving them</p>
+                            <Button 
+                                onClick={() => navigate('/customers')}
+                                className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full"
+                            >
+                                Go to Customers
+                            </Button>
                         </div>
                     </Card>
                 ) : (
-                    <div className="grid gap-4">
+                    <div className="space-y-3" data-testid="segments-list">
                         {segments.map(segment => (
-                            <Card key={segment.id} className="p-6 hover:shadow-lg transition-shadow">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="text-lg font-semibold text-[#1A1A1A]">{segment.name}</h3>
-                                            <span className="px-3 py-1 bg-[#F26B33]/10 text-[#F26B33] rounded-full text-xs font-medium">
-                                                {segment.customer_count} customers
+                            <Card key={segment.id} className="rounded-xl hover:shadow-md transition-shadow" data-testid={`segment-card-${segment.id}`}>
+                                <CardContent className="p-4">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <h3 className="font-semibold text-[#1A1A1A]" data-testid={`segment-name-${segment.id}`}>{segment.name}</h3>
+                                                <Badge className="bg-[#F26B33]/10 text-[#F26B33] hover:bg-[#F26B33]/20">
+                                                    {segment.customer_count} customers
+                                                </Badge>
+                                            </div>
+                                            <p className="text-xs text-[#52525B]">
+                                                Created {new Date(segment.created_at).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Filter Tags */}
+                                    <div className="flex flex-wrap gap-1.5 mb-3">
+                                        {segment.filters.tier && (
+                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                Tier: {segment.filters.tier}
                                             </span>
-                                        </div>
-                                        
-                                        {/* Filter Tags */}
-                                        <div className="flex flex-wrap gap-2 mb-3">
-                                            {segment.filters.tier && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                                    Tier: {segment.filters.tier}
-                                                </span>
-                                            )}
-                                            {segment.filters.city && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                                    City: {segment.filters.city}
-                                                </span>
-                                            )}
-                                            {segment.filters.customer_type && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                                    Type: {segment.filters.customer_type}
-                                                </span>
-                                            )}
-                                            {segment.filters.last_visit_days && (
-                                                <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                                    Last Visit: {segment.filters.last_visit_days} days
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <p className="text-xs text-[#52525B]">
-                                            Created: {new Date(segment.created_at).toLocaleDateString()}
-                                        </p>
+                                        )}
+                                        {segment.filters.city && (
+                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                City: {segment.filters.city}
+                                            </span>
+                                        )}
+                                        {segment.filters.customer_type && (
+                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                Type: {segment.filters.customer_type}
+                                            </span>
+                                        )}
+                                        {segment.filters.last_visit_days && (
+                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                Inactive: {segment.filters.last_visit_days}+ days
+                                            </span>
+                                        )}
+                                        {segment.filters.search && (
+                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                Search: {segment.filters.search}
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Action Buttons */}
@@ -2985,7 +3014,8 @@ const SegmentsPage = () => {
                                             variant="outline"
                                             size="sm"
                                             onClick={() => viewSegmentCustomers(segment)}
-                                            className="h-9"
+                                            className="flex-1 h-9"
+                                            data-testid={`view-segment-${segment.id}`}
                                         >
                                             <Eye className="w-4 h-4 mr-1" />
                                             View
@@ -2999,9 +3029,9 @@ const SegmentsPage = () => {
                                                 setShowEditDialog(true);
                                             }}
                                             className="h-9"
+                                            data-testid={`edit-segment-${segment.id}`}
                                         >
-                                            <Edit2 className="w-4 h-4 mr-1" />
-                                            Edit
+                                            <Edit2 className="w-4 h-4" />
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -3011,20 +3041,21 @@ const SegmentsPage = () => {
                                                 setShowSendMessage(true);
                                             }}
                                             className="h-9 bg-[#F26B33] text-white hover:bg-[#D85A2A] border-[#F26B33]"
+                                            data-testid={`message-segment-${segment.id}`}
                                         >
-                                            <MessageSquare className="w-4 h-4 mr-1" />
-                                            Send Message
+                                            <MessageSquare className="w-4 h-4" />
                                         </Button>
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             onClick={() => deleteSegment(segment.id)}
                                             className="h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            data-testid={`delete-segment-${segment.id}`}
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </Button>
                                     </div>
-                                </div>
+                                </CardContent>
                             </Card>
                         ))}
                     </div>
@@ -3032,156 +3063,175 @@ const SegmentsPage = () => {
 
                 {/* View Customers Modal */}
                 {selectedSegment && !showSendMessage && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedSegment(null)}>
-                        <div className="bg-white rounded-2xl p-6 w-full max-w-4xl max-h-[80vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl font-semibold">Customers in "{selectedSegment.name}"</h3>
-                                <button onClick={() => setSelectedSegment(null)} className="text-[#52525B] hover:text-[#1A1A1A]">
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
-                            
-                            {selectedSegment.customers ? (
-                                <div className="space-y-2">
-                                    {selectedSegment.customers.map(customer => (
-                                        <div key={customer.id} className="p-4 bg-gray-50 rounded-lg flex items-center justify-between">
-                                            <div>
-                                                <p className="font-medium text-[#1A1A1A]">{customer.name}</p>
-                                                <p className="text-sm text-[#52525B]">{customer.phone} • {customer.tier}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-sm font-medium text-[#F26B33]">{customer.total_points} points</p>
-                                                <p className="text-xs text-[#52525B]">{customer.total_visits} visits</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-center text-[#52525B] py-8">Loading customers...</p>
-                            )}
-                        </div>
-                    </div>
+                    <Dialog open={true} onOpenChange={() => setSelectedSegment(null)}>
+                        <DialogContent className="max-w-md mx-4 rounded-2xl max-h-[80vh] overflow-hidden flex flex-col">
+                            <DialogHeader>
+                                <DialogTitle className="font-['Montserrat']">Customers in "{selectedSegment.name}"</DialogTitle>
+                                <DialogDescription>
+                                    {selectedSegment.customer_count} customers match this segment
+                                </DialogDescription>
+                            </DialogHeader>
+                            <ScrollArea className="flex-1 max-h-[50vh]">
+                                {selectedSegment.customers ? (
+                                    <div className="space-y-2 pr-4">
+                                        {selectedSegment.customers.length === 0 ? (
+                                            <p className="text-center text-[#52525B] py-4">No customers in this segment</p>
+                                        ) : (
+                                            selectedSegment.customers.map(customer => (
+                                                <button
+                                                    key={customer.id}
+                                                    onClick={() => {
+                                                        setSelectedSegment(null);
+                                                        navigate(`/customers/${customer.id}`);
+                                                    }}
+                                                    className="w-full p-3 bg-gray-50 rounded-xl flex items-center justify-between hover:bg-gray-100 transition-colors text-left"
+                                                    data-testid={`segment-customer-${customer.id}`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="w-9 h-9">
+                                                            <AvatarFallback className="bg-[#329937]/10 text-[#329937] text-sm font-semibold">
+                                                                {customer.name.charAt(0)}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                        <div>
+                                                            <p className="font-medium text-[#1A1A1A] text-sm">{customer.name}</p>
+                                                            <p className="text-xs text-[#52525B]">{customer.phone}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-sm font-medium text-[#F26B33]">{customer.total_points} pts</p>
+                                                        <Badge variant="outline" className={`tier-badge ${customer.tier.toLowerCase()} text-xs`}>
+                                                            {customer.tier}
+                                                        </Badge>
+                                                    </div>
+                                                </button>
+                                            ))
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-center text-[#52525B] py-8">Loading customers...</p>
+                                )}
+                            </ScrollArea>
+                        </DialogContent>
+                    </Dialog>
                 )}
 
                 {/* Send Message Modal */}
                 {showSendMessage && selectedSegment && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowSendMessage(false)}>
-                        <div className="bg-white rounded-2xl p-6 w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-xl font-semibold">Send Message to "{selectedSegment.name}"</h3>
-                                <button onClick={() => setShowSendMessage(false)} className="text-[#52525B] hover:text-[#1A1A1A]">
-                                    <X className="w-6 h-6" />
-                                </button>
-                            </div>
+                    <Dialog open={true} onOpenChange={() => setShowSendMessage(false)}>
+                        <DialogContent className="max-w-md mx-4 rounded-2xl">
+                            <DialogHeader>
+                                <DialogTitle className="font-['Montserrat']">Send Message</DialogTitle>
+                                <DialogDescription>
+                                    Send to {selectedSegment.customer_count} customers in "{selectedSegment.name}"
+                                </DialogDescription>
+                            </DialogHeader>
 
-                            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                                <p className="text-sm text-blue-900">
-                                    <strong>Recipients:</strong> {selectedSegment.customer_count} customers
-                                </p>
-                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <Label className="text-sm font-medium">Message Template</Label>
+                                    <Select value={messageTemplate} onValueChange={setMessageTemplate}>
+                                        <SelectTrigger className="h-11 rounded-xl mt-1">
+                                            <SelectValue placeholder="Choose a template..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="welcome">Welcome Message</SelectItem>
+                                            <SelectItem value="birthday">Birthday Offer</SelectItem>
+                                            <SelectItem value="winback">Win-back Campaign</SelectItem>
+                                            <SelectItem value="promo">Promotional Offer</SelectItem>
+                                            <SelectItem value="points_expiry">Points Expiry Reminder</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                            <div className="mb-4">
-                                <Label className="mb-2">Select Message Template</Label>
-                                <Select value={messageTemplate} onValueChange={setMessageTemplate}>
-                                    <SelectTrigger className="h-12 rounded-xl">
-                                        <SelectValue placeholder="Choose a template..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="welcome">Welcome Message</SelectItem>
-                                        <SelectItem value="birthday">Birthday Offer</SelectItem>
-                                        <SelectItem value="winback">Win-back Campaign</SelectItem>
-                                        <SelectItem value="promo">Promotional Offer</SelectItem>
-                                        <SelectItem value="points_expiry">Points Expiry Reminder</SelectItem>
-                                        <SelectItem value="custom">Custom Message</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {messageTemplate && (
-                                <div className="mb-4">
-                                    <Label className="mb-2">Message Preview</Label>
-                                    <div className="p-4 bg-gray-50 rounded-lg border">
-                                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                                            {messageTemplate === 'welcome' && "Hi {{name}}! Welcome to our loyalty program. You've earned {{points}} points. Use them on your next visit!"}
-                                            {messageTemplate === 'birthday' && "Happy Birthday {{name}}! 🎂 Get 20% off your next meal + bonus 200 points. Valid for 7 days!"}
-                                            {messageTemplate === 'winback' && "We miss you {{name}}! It's been a while. Come back and get 100 bonus points on your next visit!"}
-                                            {messageTemplate === 'promo' && "Special offer for you {{name}}! Get 30% off this weekend. Your {{tier}} tier gives you extra 50 points!"}
-                                            {messageTemplate === 'points_expiry' && "Hi {{name}}, your {{points}} points expire in 30 days. Use them before {{expiry_date}}!"}
-                                            {messageTemplate === 'custom' && "Enter your custom message below..."}
+                                {messageTemplate && (
+                                    <div className="p-3 bg-gray-50 rounded-xl border">
+                                        <p className="text-xs font-medium text-[#52525B] mb-1">Preview:</p>
+                                        <p className="text-sm text-gray-700">
+                                            {messageTemplate === 'welcome' && "Hi {{name}}! Welcome to our loyalty program. You've earned {{points}} points!"}
+                                            {messageTemplate === 'birthday' && "Happy Birthday {{name}}! 🎂 Get 20% off + bonus 200 points!"}
+                                            {messageTemplate === 'winback' && "We miss you {{name}}! Come back for 100 bonus points!"}
+                                            {messageTemplate === 'promo' && "Special offer for you {{name}}! 30% off this weekend!"}
+                                            {messageTemplate === 'points_expiry' && "Hi {{name}}, your points expire soon. Use them now!"}
                                         </p>
                                     </div>
+                                )}
+
+                                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                                    <p className="text-xs text-amber-800">
+                                        <strong>⚠️ Coming Soon:</strong> WhatsApp/SMS integration is in development.
+                                    </p>
                                 </div>
-                            )}
 
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                                <p className="text-sm text-yellow-800">
-                                    <strong>⚠️ Coming Soon:</strong> WhatsApp/SMS integration is in development. 
-                                    This will allow you to send messages directly to your segments.
-                                </p>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setShowSendMessage(false)}
+                                        className="flex-1 rounded-xl"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={() => {
+                                            toast.info("WhatsApp/SMS integration coming soon!");
+                                            setShowSendMessage(false);
+                                        }}
+                                        className="flex-1 bg-[#F26B33] hover:bg-[#D85A2A] rounded-xl"
+                                        disabled={!messageTemplate}
+                                    >
+                                        Send Message
+                                    </Button>
+                                </div>
                             </div>
-
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setShowSendMessage(false)}
-                                    className="flex-1"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        toast.info("WhatsApp/SMS integration coming soon!");
-                                        setShowSendMessage(false);
-                                    }}
-                                    className="flex-1 bg-[#F26B33] hover:bg-[#D85A2A]"
-                                    disabled={!messageTemplate}
-                                >
-                                    Send to {selectedSegment.customer_count} Customers
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                        </DialogContent>
+                    </Dialog>
                 )}
 
                 {/* Edit Segment Modal */}
                 {showEditDialog && editingSegment && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowEditDialog(false)}>
-                        <div className="bg-white rounded-2xl p-6 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-                            <h3 className="text-lg font-semibold mb-4">Edit Segment</h3>
-                            <div className="mb-4">
-                                <Label className="mb-2">Segment Name</Label>
-                                <Input
-                                    type="text"
-                                    value={segmentName}
-                                    onChange={(e) => setSegmentName(e.target.value)}
-                                    className="h-12 rounded-xl"
-                                    placeholder="Enter segment name"
-                                />
+                    <Dialog open={true} onOpenChange={() => setShowEditDialog(false)}>
+                        <DialogContent className="max-w-sm mx-4 rounded-2xl">
+                            <DialogHeader>
+                                <DialogTitle className="font-['Montserrat']">Edit Segment</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                                <div>
+                                    <Label className="text-sm font-medium">Segment Name</Label>
+                                    <Input
+                                        type="text"
+                                        value={segmentName}
+                                        onChange={(e) => setSegmentName(e.target.value)}
+                                        className="h-11 rounded-xl mt-1"
+                                        placeholder="Enter segment name"
+                                        data-testid="edit-segment-name-input"
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowEditDialog(false);
+                                            setEditingSegment(null);
+                                            setSegmentName("");
+                                        }}
+                                        className="flex-1 rounded-xl"
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={updateSegment}
+                                        className="flex-1 bg-[#F26B33] hover:bg-[#D85A2A] rounded-xl"
+                                        data-testid="save-segment-btn"
+                                    >
+                                        Save
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => {
-                                        setShowEditDialog(false);
-                                        setEditingSegment(null);
-                                        setSegmentName("");
-                                    }}
-                                    className="flex-1"
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={updateSegment}
-                                    className="flex-1 bg-[#F26B33] hover:bg-[#D85A2A]"
-                                >
-                                    Save
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                        </DialogContent>
+                    </Dialog>
                 )}
             </div>
-        </div>
+        </MobileLayout>
     );
 };
 
