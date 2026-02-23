@@ -3675,7 +3675,7 @@ const SettingsPage = () => {
                 ) : settings && (
                     <>
                         {/* Points Earning Settings */}
-                        <h2 className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Points Earning</h2>
+                        <h2 id="loyalty-settings" className="text-lg font-semibold text-[#1A1A1A] mb-3 font-['Montserrat']">Points Earning</h2>
                         <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="earning-settings-card">
                             <CardContent className="p-4 space-y-4">
                                 <div>
