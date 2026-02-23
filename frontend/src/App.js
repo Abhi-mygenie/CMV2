@@ -777,10 +777,15 @@ const CustomersPage = () => {
 
     const fetchSegments = async () => {
         try {
-            const res = await api.get("/customers/segments/stats");
-            setSegments(res.data);
+            // Fetch segment stats for analytics
+            const statsRes = await api.get("/customers/segments/stats");
+            setSegments(statsRes.data);
+            
+            // Fetch saved segments for filtering
+            const segmentsRes = await api.get('/segments');
+            setSavedSegments(segmentsRes.data);
         } catch (err) {
-            console.error("Failed to load segments");
+            console.error("Failed to load segments:", err);
         }
     };
 
