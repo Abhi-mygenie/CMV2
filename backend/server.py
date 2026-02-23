@@ -297,6 +297,9 @@ class LoyaltySettings(BaseModel):
     off_peak_end_time: str = "17:00"  # 5 PM
     off_peak_bonus_type: str = "multiplier"  # "multiplier" or "flat"
     off_peak_bonus_value: float = 2.0  # 2x points or flat 50 points
+    # Feedback/Review Bonus
+    feedback_bonus_enabled: bool = True
+    feedback_bonus_points: int = 25
 
 class LoyaltySettingsUpdate(BaseModel):
     min_order_value: Optional[float] = None
