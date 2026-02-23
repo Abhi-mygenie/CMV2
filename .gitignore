@@ -77,4 +77,4 @@ agenthub/agents/youtube/db
 .cache/
 
 # Mobile development
-android-sdk/ 
+android-sdk/ dine-in-rewards/frontend/node_modules/.cache/default-development/0.pack
