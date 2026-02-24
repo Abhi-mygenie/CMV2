@@ -2090,15 +2090,15 @@ const CustomerDetailPage = () => {
                 <DialogContent className="max-w-sm mx-4 rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="font-['Montserrat']">
-                            {/* HIDDEN: Redeem functionality commented out */}
-                            {pointsAction === "bonus" ? "Give Bonus Points" : "Redeem Points (Hidden)"}
+                            {pointsAction === "bonus" ? "Give Bonus Points" : "Redeem Points"}
+                            {/* HIDDEN: Redeem button is hidden from UI but modal still works if triggered */}
                         </DialogTitle>
                         <DialogDescription>
                             {pointsAction === "bonus" 
                                 ? "Award bonus points as a reward or gift" 
-                                /* HIDDEN: Redeem description */
-                                : `Available: ${customer?.total_points} points (Redeem functionality hidden)`
+                                : `Available: ${customer?.total_points} points`
                             }
+                            {/* HIDDEN: Redeem functionality - pointsAction="redeem" case still works but button is hidden from UI */}
                         </DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handlePointsTransaction}>
@@ -2158,8 +2158,8 @@ const CustomerDetailPage = () => {
                 <DialogContent className="max-w-sm mx-4 rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="font-['Montserrat']">
-                            {/* HIDDEN: Use Wallet functionality commented out */}
-                            {walletAction === "credit" ? "Add Money to Wallet" : "Use Wallet Balance (Hidden)"}
+                            {walletAction === "credit" ? "Add Money to Wallet" : "Use Wallet Balance"}
+                            {/* HIDDEN: Use Wallet button is hidden from UI but modal still works if triggered */}
                         </DialogTitle>
                         <DialogDescription>
                             Current balance: ₹{customer?.wallet_balance?.toLocaleString() || 0}
