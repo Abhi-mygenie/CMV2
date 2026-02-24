@@ -309,6 +309,8 @@ async def mygenie_login(credentials: UserLogin):
                             "total_points_redeemed": mygenie_customer.get("total_points_redeemed", 0),
                             "total_spent": float(mygenie_customer.get("total_spent") or 0),
                             "wallet_balance": float(mygenie_customer.get("wallet_balance") or 0),
+                            "total_wallet_deposit": float(mygenie_customer.get("total_wallet_deposit") or 0),
+                            "wallet_used": float(mygenie_customer.get("wallet_used") or 0),
                             "mygenie_customer_id": mygenie_customer["id"],
                             "mygenie_synced": True,
                             "last_synced_at": datetime.now(timezone.utc).isoformat()
