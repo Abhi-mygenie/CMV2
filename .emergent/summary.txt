@@ -1,72 +1,71 @@
 <analysis>**original_problem_statement**: The initial request was to build a customer management application by cloning a git repository, integrating a Demo Mode, and connecting to an external MyGenie API for user authentication and customer data synchronization.
 
 The scope has since expanded to include:
-1.  **Bi-directional Sync**:
-    *   Sync customer data **FROM** MyGenie to the local DB (originally on login, now to be a manual-only action).
-    *   Sync customer data **TO** MyGenie when a customer is created or updated within this application.
+1.  **Bi-directional Sync**: Sync customer data from MyGenie to the local DB (as a manual action) and receive data from external POS systems.
 2.  **Schema Expansion**: Add detailed loyalty, wallet, and profile fields to the local customer database.
-3.  **POS Integration Webhooks**: Create a set of secure, API-key-authenticated endpoints for external Point-of-Sale (POS) systems like MyGenie to push customer data (creations/updates) into this application's database.
-4.  **New Sync API**: Create a new endpoint that allows a logged-in user to manually trigger a full customer sync from MyGenie, and remove the automatic sync that currently happens on login.
+3.  **POS Integration Webhooks**: Create secure, API-key-authenticated endpoints for external Point-of-Sale (POS) systems to push customer and order data into this application's database.
+4.  **Manual Sync Control**: Remove the automatic sync on login and provide a UI button for manual sync, which is only visible when no customers exist for the logged-in user.
+5.  **Order Processing**: Implement a webhook to receive order data from MyGenie, automatically create customers, calculate and award loyalty points, and update customer statistics.
 
 **User's preferred language**: English
 
 **what currently exists?**
 A full-stack application (React frontend, FastAPI backend, MongoDB) is running. It features a dual-login system (Demo Mode and Live Mode via MyGenie API).
 
-The application supports bi-directional data flow with the MyGenie API:
--   **Push to MyGenie**: When a customer is created or edited in the app's UI, the changes are pushed to the MyGenie API.
--   **Pull from MyGenie**: A function exists to pull all customer data from MyGenie, which is currently triggered automatically on user login.
-
-Webhook endpoints ( and ) have been created to allow external POS systems to create and update customers in the local database. These are secured with an  header and support a comprehensive payload including  and .
+Key functionalities:
+-   **Manual Customer Sync**: A Sync MyGenie button on the Customers page allows users in Live Mode to pull all their customer data from the MyGenie API. This button is only visible if they currently have zero customers in the local database. The automatic sync on login has been removed.
+-   **POS Integration Webhooks**: A suite of endpoints under  allows external systems to interact with the application using an  for authentication:
+    -   : Create a customer.
+    -   : Update a customer.
+    -   : Look up a customer by phone number.
+    -   : A newly created webhook to receive and process order data. It handles new customer creation, loyalty point calculation based on a local tier system, and updates customer visit/spending stats. It also has protection against processing duplicate orders.
 
 **Last working item**:
-*   **Last item agent was working**: The agent was confirming the requirements for the user's latest request: to create a new manual sync API and remove the existing auto-sync-on-login feature. The user wants a Sync button in the UI that will trigger a full customer data pull from the MyGenie API.
-*   **Status**: NOT STARTED
-*   **Agent Testing Done**: N/A
-*   **Which testing method agent to use?**: backend testing agent. After implementation, the agent should:
-    1.  Confirm the auto-sync on login is removed.
-    2.  Test the new manual sync endpoint to verify it correctly pulls and updates customer data from the MyGenie API.
-*   **User Testing Done**: N
+-   **Last item agent was working**: Implementing the new order processing webhook (). The agent worked with the user to define the payload structure, implemented the backend logic, tested it successfully with , and updated the API documentation.
+-   **Status**: USER VERIFICATION PENDING
+-   **Agent Testing Done**: Y
+-   **Which testing method agent to use?**: backend testing agent. A persistent test should be created for the new  webhook to ensure its logic (new customer creation, point calculation, duplicate order rejection) is robust.
+-   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-*   There are no outstanding bugs. The focus is on implementing the new feature requested by the user.
+*   There are no outstanding bugs. The primary pending item is user verification of the newly created order webhook.
 
 **Issues Detail**:
 *   N/A
 
 **In progress Task List**:
-*   **Task 1: Implement New Manual Sync Mechanism (P0)**
-    *   **Where to resume**:
-        1.  In , remove the call to  from the login endpoint.
-        2.  Create a new endpoint, such as , in .
-        3.  This new endpoint should be protected by the standard user JWT authentication and should call the existing  function to perform the sync.
-    *   **What will be achieved with this?**: The customer sync will no longer happen automatically on every login, reducing redundant API calls. Instead, it will be a deliberate action initiated by the user from the frontend.
-    *   **Status**: NOT STARTED
+*   **Task 1: Verify Order Webhook Implementation (P0)**
+    *   **Where to resume**: The user needs to review the functionality of the  endpoint and the updated API documentation. The user also needs to provide the final API field names for , , , and , which were unknown during implementation.
+    *   **What will be achieved with this?**: Finalizes the order processing feature, a core part of the application logic.
+    *   **Status**: USER VERIFICATION PENDING
     *   **Should Test frontend/backend/both after fix?**: Backend
-    *   **Blocked on something**: None
+    *   **Blocked on something**: User feedback and missing field names.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks**:
-    *   **Task 1 (P1)**: Add a Sync button in the frontend (e.g., in a Settings page) to call the newly created manual sync API.
-    *   **Task 2 (P2)**: Refactor hardcoded MyGenie API URLs from  files into the backend  file for better configuration management.
+    *   **Task 1 (P1)**: Refactor hardcoded MyGenie API URLs from  files (, ) into the backend  file.
 *   **Future Tasks**:
-    *   **Task 3 (P3)**: Implement UI and functionality for customers to redeem loyalty points and use their wallet balance.
+    *   **Task 2 (P2)**: Implement UI and functionality for customers to redeem loyalty points and use their wallet balance.
+    *   **Task 3 (P3)**: Address incomplete loyalty/wallet data from the MyGenie API sync. This is a potential blocker for the redemption UI.
+    *   **Task 4 (P4)**: Consider creating a bulk sync endpoint () for MyGenie to push multiple customers at once, if the user confirms this is needed.
 
 **Completed work in this session**
--   **Sync to MyGenie**: Implemented functionality to sync customer creations and updates from the local application *to* the MyGenie API.
--   **POS Integration Webhooks**:
-    -   Created  endpoint for external systems to create customers.
-    -   Created  endpoint for external systems to update customers.
-    -   Secured these endpoints using an  header.
--   **Payload Finalization**: Iteratively refined the webhook payload with the user to include a comprehensive set of customer fields, including  and .
+-   **Removed Auto-Sync**: Removed the automatic customer sync from the MyGenie login process in .
+-   **Conditional Sync Button**: Updated  to only show the Sync MyGenie button if the user is in Live Mode and has no customers.
+-   **Created Order Webhook**:
+    -   Implemented a new endpoint  in .
+    -   This webhook auto-creates customers, calculates and awards loyalty points based on a tier system, updates customer stats, and prevents duplicate orders.
+    -   Created a new  schema and  collection.
+-   **API Documentation**: Created and updated  with details for all POS endpoints.
+-   **Database Cleanup**: Cleared the database of non-test users and customers as requested by the user.
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: Incomplete Loyalty/Wallet Data from MyGenie API**
-    *   During the initial sync implementation, the agent discovered that the MyGenie customer list API only returns current balances (, ) and not the detailed transaction history fields (, , etc.) that the user requested.
+    *   The MyGenie customer list API used for the manual sync only provides current balances (, ) and not the detailed transaction history (, , etc.) required for a full-featured loyalty UI. The new order webhook now tracks this locally, but historical data is missing.
     *   **Debug checklist**:
-        1.  Re-confirm with the user if there is an alternate MyGenie API endpoint that provides this detailed data.
-        2.  Discuss whether this data should be tracked locally within this application instead of relying on the MyGenie sync.
-    *   **Why to solve this issue and what will be achieved with this?**: This is a blocker for the original requirement of displaying detailed loyalty and wallet history in the UI.
+        1.  Re-confirm with the user if an alternate MyGenie API endpoint provides this detailed transaction data.
+        2.  Discuss whether historical transaction data should be tracked locally going forward, now that the order webhook is in place.
+    *   **Why to solve this issue and what will be achieved with this?**: This is a blocker for the future task of displaying detailed loyalty and wallet history in the UI.
     *   **Should Test frontend/backend/both after fix**: Backend (API investigation).
     *   **Is recurring issue?**: N
 
@@ -80,55 +79,60 @@ Webhook endpoints ( and ) have been created to allow external POS systems to cre
 *   **Frontend**: React, Axios, React Context API.
 *   **Backend**: FastAPI, Motor (async MongoDB driver), Pydantic.
 *   **Database**: MongoDB.
-*   **Authentication**:
-    *   JWT-based for the application's internal session management.
-    *   API Key-based ( header) for the external POS webhook endpoints.
+*   **Authentication**: JWT-based for the application's internal sessions; API Key-based ( header) for the external POS webhook endpoints.
 
 **key DB schema**
 *   **customers**: 
+*   **orders**: 
 
 **changes in tech stack**
 *   None.
 
 **All files of reference**
-*   : To be modified to remove auto-sync.
-*   : Contains existing customer logic; will be modified to add the new manual sync endpoint.
-*   : Contains the newly created webhook endpoints for POS systems.
-*   : Contains the updated Pydantic models for customer data.
+*   : Modified to remove auto-sync on login.
+*   : Modified to add the  webhook and its business logic.
+*   : Created for the new order Pydantic model.
+*   : Modified for the conditional Sync MyGenie button logic.
+*   : Created and updated to document the POS APIs for external developers.
 
 **Areas that need refactoring**:
 *   Hardcoded MyGenie API URLs in  and  should be moved to the  file.
 
 **key api endpoints**
-*   : Authenticates user. (Auto-sync to be removed).
-*   : Creates a customer and syncs it **to** MyGenie.
-*   : Updates a customer and syncs it **to** MyGenie.
-*   : **(Webhook)** Creates a customer from an external POS.
-*   : **(Webhook)** Updates a customer from an external POS.
-*   : **(To be created)** Manually triggers a sync **from** MyGenie.
+*   : Authenticates user via MyGenie. (Auto-sync removed).
+*   : Manually triggers a customer data pull **from** MyGenie.
+*   : **(Webhook)** Creates a customer.
+*   : **(Webhook)** Updates a customer.
+*   : **(Webhook)** Looks up a customer by phone.
+*   : **(Webhook - NEW)** Receives and processes order data from a POS.
 
 **Critical Info for New Agent**
-*   The application now handles three types of data synchronization: pushing local changes to MyGenie, pulling remote changes from MyGenie (manually), and receiving data from external POS systems via webhooks. Be mindful of which flow you are working on.
-*   The webhook APIs () use a different authentication method (API Key) than the internal app APIs (, JWT).
-*   The user is very hands-on and requires confirmation of your understanding before you begin implementation. Use the  tool frequently to propose plans and clarify requirements.
+*   **Active Directory**: The correct and active codebase is in , not . The previous agent initially worked in the wrong directory before realizing this and cleaning up.
+*   **User Interaction**: The user provides requirements incrementally. Always confirm your understanding and proposed plan before implementation.
+*   **Pending User Input**: The user still needs to provide the final field names for , , , and  for the new order webhook payload. The current implementation uses placeholders.
+*   **API Key**: The active API key for testing POS webhooks is stored in the user object in the database and is retrieved during the webhook's authentication check. Do not rely on hardcoded keys.
 
 **documents and test reports created in this job**
-*   None in this session.
+*   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (msg 134):** Clarified that  is for the POS system (e.g., mygenie) and  is for the restaurant. (Status: Completed)
-2.  **User (msg 136):** Confirmed understanding and asked for the final payload before implementation. (Status: Completed)
-3.  **User (msg 138):** Approved the final payload and instructed the agent to proceed. (Status: Completed)
-4.  **User (msg 158):** Stated that the phone number must be a required field for the update endpoint as it's the unique key. (Status: Completed)
-5.  **User (msg 168):** Asked for the  commands for the completed create and update endpoints. (Status: Completed)
-6.  **User (msg 170):** Requested a new  API that will be triggered by a UI button. Specified that the automatic sync on login should be removed and asked the agent to state their understanding before proceeding. (Status: In Progress - this is the current active task).
+1.  **msg 198**: User asks to include  in the order webhook payload. (Status: Completed)
+2.  **msg 200**: User clarifies that  is only needed for new customers. (Status: Completed)
+3.  **msg 202**: User states they will get the  field name later. (Status: In Progress - Pending User)
+4.  **msg 204**: User clarifies which loyalty/wallet fields MyGenie sends. (Status: Completed)
+5.  **msg 206**: User states they will get the remaining field names later and asks for the final expected payload. (Status: In Progress - Pending User)
+6.  **msg 208**: User requests to remove several fields from the proposed payload. (Status: Completed)
+7.  **msg 210**: User gives the go-ahead to create the webhook with the agreed structure. (Status: Completed)
+8.  **msg 212-228**: Agent implements and tests the new  webhook. (Status: Completed)
+9.  **msg 231**: Agent provides a summary of the completed order webhook and the updated API documentation. (Status: Completed)
+10. **(No pending messages)**
 
 **Project Health Check:**
 *   **Broken**: None.
 *   **Mocked**: The MyGenie API is a live external integration.
 
 **3rd Party Integrations**
-*   **MyGenie API**: Used for user authentication and bi-directional customer data synchronization.
+*   **MyGenie API**: Used for user authentication and customer data synchronization.
 
 **Testing status**
 *   **Testing agent used after significant changes**: NO
@@ -141,10 +145,8 @@ Webhook endpoints ( and ) have been created to allow external POS systems to cre
     *   Email: 
     *   Password: 
 *   **POS Webhook API Key**:
-    *   Header: 
-    *   Value: 
+    *   The API key is dynamically retrieved from the user's record in the database during the request. To test, you must first log in as a user (e.g., the MyGenie user above) to ensure a user record with an API key exists. The key  was mentioned initially, but the agent discovered the correct way is to use the one associated with the user account.
 
 **What agent forgot to execute**
-*   The agent has correctly queued up the user's latest request but has not yet started the implementation.
-*   The unresolved issue regarding incomplete loyalty/wallet data from the MyGenie API was put on hold and needs to be brought back to the user's attention before related UI work can begin.
-*   The task to refactor hardcoded URLs into the  file is still pending from the previous session.</analysis>
+*   The task to refactor hardcoded URLs into the  file is still pending from a previous session.
+*   The unresolved issue regarding incomplete loyalty/wallet data from the MyGenie API was not re-addressed with the user. This will be important before starting UI work on loyalty features.</analysis>
