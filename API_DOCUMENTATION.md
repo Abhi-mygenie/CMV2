@@ -14,7 +14,7 @@ All POS API endpoints require authentication via API Key in the request header:
 X-API-Key: your_api_key_here
 ```
 
-**Example API Key:** `dp_live_HsC-SvTGzEeO1WLZcNUfWNnjfZTi7vzQrLDHEKnVLzA`
+**Example API Key:** `dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4`
 
 ---
 
@@ -62,7 +62,7 @@ POST /api/pos/customers
 
 ```bash
 curl -X POST "https://cmv2-sync.preview.emergentagent.com/api/pos/customers" \
-  -H "X-API-Key: dp_live_HsC-SvTGzEeO1WLZcNUfWNnjfZTi7vzQrLDHEKnVLzA" \
+  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
     "pos_id": "mygenie",
@@ -104,14 +104,6 @@ curl -X POST "https://cmv2-sync.preview.emergentagent.com/api/pos/customers" \
     "customer_id": "existing_customer_id",
     "existing": true
   }
-}
-```
-
-### Error Response - Unauthorized (401)
-
-```json
-{
-  "detail": "API key required in X-API-Key header"
 }
 ```
 
@@ -166,7 +158,7 @@ PUT /api/pos/customers/{customer_id}
 
 ```bash
 curl -X PUT "https://cmv2-sync.preview.emergentagent.com/api/pos/customers/550e8400-e29b-41d4-a716-446655440000" \
-  -H "X-API-Key: dp_live_HsC-SvTGzEeO1WLZcNUfWNnjfZTi7vzQrLDHEKnVLzA" \
+  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
     "pos_id": "mygenie",
@@ -204,16 +196,6 @@ curl -X PUT "https://cmv2-sync.preview.emergentagent.com/api/pos/customers/550e8
 }
 ```
 
-### Error Response - Phone Conflict (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Another customer with this phone already exists",
-  "data": null
-}
-```
-
 ---
 
 ## 3. Customer Lookup
@@ -241,7 +223,7 @@ POST /api/pos/customer-lookup
 
 ```bash
 curl -X POST "https://cmv2-sync.preview.emergentagent.com/api/pos/customer-lookup" \
-  -H "X-API-Key: dp_live_HsC-SvTGzEeO1WLZcNUfWNnjfZTi7vzQrLDHEKnVLzA" \
+  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "9876543210"
@@ -286,6 +268,108 @@ curl -X POST "https://cmv2-sync.preview.emergentagent.com/api/pos/customer-looku
 
 ---
 
+## 4. Order Webhook (NEW)
+
+Webhook endpoint for MyGenie to send order data on every completed order. Automatically calculates and awards loyalty points.
+
+### Endpoint
+```
+POST /api/pos/orders
+```
+
+### Headers
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `X-API-Key` | string | Yes | API key for authentication |
+| `Content-Type` | string | Yes | `application/json` |
+
+### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `pos_id` | string | **Yes** | POS system identifier ("mygenie") |
+| `restaurant_id` | string | **Yes** | Restaurant ID in POS system |
+| `order_id` | string | **Yes** | Unique order ID from POS |
+| `cust_mobile` | string | **Yes** | Customer phone number (10 digits) |
+| `cust_name` | string | No | Customer name (required only for new customers) |
+| `order_amount` | float | **Yes** | Total order amount |
+| `wallet_used` | float | No | Wallet amount used (default: 0) |
+| `coupon_code` | string | No | Coupon code applied |
+| `coupon_discount` | float | No | Discount from coupon (default: 0) |
+| `payment_method` | string | No | Payment method (e.g., "TAB", "CASH", "CARD") |
+| `payment_status` | string | **Yes** | Must be "success" to process |
+| `order_type` | string | No | Order type: "pos", "dine_in", "takeaway", "delivery" |
+
+### Example Request
+
+```bash
+curl -X POST "https://cmv2-sync.preview.emergentagent.com/api/pos/orders" \
+  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pos_id": "mygenie",
+    "restaurant_id": "478",
+    "order_id": "ORD-2025-001234",
+    "cust_mobile": "9653078025",
+    "cust_name": "Piyush",
+    "order_amount": 987.0,
+    "wallet_used": 0.0,
+    "coupon_code": "",
+    "coupon_discount": 0.0,
+    "payment_method": "TAB",
+    "payment_status": "success",
+    "order_type": "pos"
+  }'
+```
+
+### Success Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Order processed successfully",
+  "data": {
+    "order_id": "e4252338-1f3b-413b-83a6-d90072bb9ecd",
+    "pos_order_id": "ORD-2025-001234",
+    "customer_id": "f95ce018-89d8-4818-a90d-a541078d10a9",
+    "customer_name": "Piyush",
+    "is_new_customer": true,
+    "order_amount": 987.0,
+    "points_earned": 49,
+    "total_points": 49,
+    "tier": "Bronze",
+    "wallet_used": 0.0,
+    "coupon_applied": "",
+    "coupon_discount": 0.0
+  }
+}
+```
+
+### Response - Duplicate Order (200 OK)
+
+```json
+{
+  "success": false,
+  "message": "Duplicate order - already processed",
+  "data": {
+    "order_id": "e4252338-1f3b-413b-83a6-d90072bb9ecd",
+    "duplicate": true
+  }
+}
+```
+
+### Response - Payment Not Successful (200 OK)
+
+```json
+{
+  "success": false,
+  "message": "Order not processed - payment status: failed",
+  "data": null
+}
+```
+
+---
+
 ## Response Schema
 
 All API responses follow this standard format:
@@ -316,6 +400,21 @@ All API responses follow this standard format:
 
 ---
 
+## Points Calculation
+
+Points are calculated automatically based on tier:
+
+| Tier | Points Earned | Threshold |
+|------|---------------|-----------|
+| Bronze | 5% of order amount | 0 - 499 points |
+| Silver | 7% of order amount | 500 - 1,499 points |
+| Gold | 10% of order amount | 1,500 - 4,999 points |
+| Platinum | 15% of order amount | 5,000+ points |
+
+**Note:** Points are only earned on orders meeting the minimum order value (default: ₹100).
+
+---
+
 ## Rate Limits
 
 Currently no rate limits are enforced. Please use responsibly.
@@ -324,15 +423,15 @@ Currently no rate limits are enforced. Please use responsibly.
 
 ## Notes for Integration
 
-1. **Phone Number Format**: Send phone numbers as 10-digit strings without country code. The country code is sent separately in the `country_code` field.
+1. **Phone Number Format**: Send phone numbers as 10-digit strings without country code.
 
-2. **Customer Uniqueness**: Phone number is the unique identifier for customers within a restaurant. Attempting to create a customer with an existing phone will return the existing customer's ID.
+2. **Customer Auto-Creation**: If an order is received for a non-existent customer, the system will auto-create the customer using `cust_mobile` and `cust_name`.
 
-3. **Date Format**: All dates should be in `YYYY-MM-DD` format.
+3. **Duplicate Prevention**: Orders with the same `pos_id` + `order_id` combination will be rejected as duplicates.
 
-4. **POS Identification**: Always include `pos_id` (your system identifier) and `restaurant_id` (restaurant's ID in your system) for tracking and debugging purposes.
+4. **Payment Status**: Only orders with `payment_status: "success"` will be processed.
 
-5. **Allergies & Favorites**: These are arrays of strings. Common allergies include: "Gluten", "Dairy", "Eggs", "Peanuts", "Tree Nuts", "Soy", "Fish", "Shellfish", "Sesame", "Mustard".
+5. **Points Calculation**: Points are calculated locally based on `order_amount` and the customer's current tier.
 
 ---
 
