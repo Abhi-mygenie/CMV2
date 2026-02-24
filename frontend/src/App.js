@@ -921,7 +921,8 @@ const CustomersPage = () => {
                         Customers
                     </h1>
                     <div className="flex gap-2">
-                        {!isDemoMode && (
+                        {/* Sync button only shows when NOT in demo mode AND no customers exist */}
+                        {!isDemoMode && !loading && customers.length === 0 && (
                             <Button 
                                 onClick={syncFromMyGenie}
                                 disabled={syncing}
