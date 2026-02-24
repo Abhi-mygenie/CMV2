@@ -2090,12 +2090,14 @@ const CustomerDetailPage = () => {
                 <DialogContent className="max-w-sm mx-4 rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="font-['Montserrat']">
-                            {pointsAction === "bonus" ? "Give Bonus Points" : "Redeem Points"}
+                            {/* HIDDEN: Redeem functionality commented out */}
+                            {pointsAction === "bonus" ? "Give Bonus Points" : "Redeem Points (Hidden)"}
                         </DialogTitle>
                         <DialogDescription>
                             {pointsAction === "bonus" 
                                 ? "Award bonus points as a reward or gift" 
-                                : `Available: ${customer?.total_points} points`
+                                /* HIDDEN: Redeem description */
+                                : `Available: ${customer?.total_points} points (Redeem functionality hidden)`
                             }
                         </DialogDescription>
                     </DialogHeader>
@@ -2156,7 +2158,8 @@ const CustomerDetailPage = () => {
                 <DialogContent className="max-w-sm mx-4 rounded-2xl">
                     <DialogHeader>
                         <DialogTitle className="font-['Montserrat']">
-                            {walletAction === "credit" ? "Add Money to Wallet" : "Use Wallet Balance"}
+                            {/* HIDDEN: Use Wallet functionality commented out */}
+                            {walletAction === "credit" ? "Add Money to Wallet" : "Use Wallet Balance (Hidden)"}
                         </DialogTitle>
                         <DialogDescription>
                             Current balance: ₹{customer?.wallet_balance?.toLocaleString() || 0}
