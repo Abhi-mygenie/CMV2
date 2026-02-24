@@ -31,33 +31,76 @@ async def verify_pos_api_key(x_api_key: str = Header(None)):
 # ============================================
 
 class POSCustomerCreate(BaseModel):
-    """Schema for POS to create a customer"""
+    """Schema for POS to create a customer - includes all customer fields"""
+    # Basic Info
     name: str
     phone: str
     country_code: str = "+91"
     email: Optional[str] = None
-    dob: Optional[str] = None
-    anniversary: Optional[str] = None
+    
+    # Personal Details
+    dob: Optional[str] = None  # Date of birth (YYYY-MM-DD)
+    anniversary: Optional[str] = None  # Anniversary date (YYYY-MM-DD)
+    
+    # Customer Type
+    customer_type: str = "normal"  # "normal" or "corporate"
+    
+    # GST Details
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
+    
+    # Address
     address: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
+    
+    # Preferences
+    allergies: Optional[List[str]] = None  # List of allergies
+    favorites: Optional[List[str]] = None  # List of favorite items
+    
+    # Custom Fields
+    custom_field_1: Optional[str] = None
+    custom_field_2: Optional[str] = None
+    custom_field_3: Optional[str] = None
+    
+    # Notes
     notes: Optional[str] = None
 
+
 class POSCustomerUpdate(BaseModel):
-    """Schema for POS to update a customer"""
+    """Schema for POS to update a customer - all fields optional"""
+    # Basic Info
     name: Optional[str] = None
     phone: Optional[str] = None
     country_code: Optional[str] = None
     email: Optional[str] = None
-    dob: Optional[str] = None
-    anniversary: Optional[str] = None
+    
+    # Personal Details
+    dob: Optional[str] = None  # Date of birth (YYYY-MM-DD)
+    anniversary: Optional[str] = None  # Anniversary date (YYYY-MM-DD)
+    
+    # Customer Type
+    customer_type: Optional[str] = None  # "normal" or "corporate"
+    
+    # GST Details
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
+    
+    # Address
     address: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
+    
+    # Preferences
+    allergies: Optional[List[str]] = None  # List of allergies
+    favorites: Optional[List[str]] = None  # List of favorite items
+    
+    # Custom Fields
+    custom_field_1: Optional[str] = None
+    custom_field_2: Optional[str] = None
+    custom_field_3: Optional[str] = None
+    
+    # Notes
     notes: Optional[str] = None
 
 
