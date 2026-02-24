@@ -88,7 +88,8 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const { login } = useAuth();
+    const [isDemoLoading, setIsDemoLoading] = useState(false);
+    const { login, demoLogin } = useAuth();
     const navigate = useNavigate();
 
     // Load saved credentials on mount
@@ -121,6 +122,19 @@ const LoginPage = () => {
             toast.error(err.response?.data?.detail || "Login failed");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleDemoLogin = async () => {
+        setIsDemoLoading(true);
+        try {
+            await demoLogin();
+            toast.success("Welcome to Demo Mode! 🎉");
+            navigate("/");
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Demo login failed");
+        } finally {
+            setIsDemoLoading(false);
         }
     };
 
