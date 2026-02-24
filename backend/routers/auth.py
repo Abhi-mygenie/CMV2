@@ -1,12 +1,17 @@
 from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime, timezone
 import uuid
+import os
 
 from core.database import db
 from core.auth import hash_password, verify_password, create_token, generate_api_key, get_current_user
 from models.schemas import UserCreate, UserLogin, UserResponse, TokenResponse
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+# Demo user credentials
+DEMO_EMAIL = "test@restaurant.com"
+DEMO_PASSWORD = "Test123456"
 
 @router.post("/register", response_model=TokenResponse)
 async def register(user_data: UserCreate):

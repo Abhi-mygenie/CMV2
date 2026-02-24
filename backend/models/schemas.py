@@ -26,6 +26,7 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+    is_demo: bool = False
 
 # Customer Models
 class CustomerBase(BaseModel):
