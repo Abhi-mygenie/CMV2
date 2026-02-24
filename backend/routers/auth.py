@@ -111,3 +111,65 @@ async def get_me(user: dict = Depends(get_current_user)):
         phone=user["phone"],
         created_at=user["created_at"]
     )
+
+@router.post("/demo-login", response_model=TokenResponse)
+async def demo_login():
+    """
+    Demo mode login - uses local test user without MyGenie authentication
+    For testing and demonstration purposes only
+    """
+    user = await db.users.find_one({"email": DEMO_EMAIL}, {"_id": 0})
+    
+    if not user:
+        raise HTTPException(
+            status_code=404, 
+            detail="Demo user not found. Please run setup first."
+        )
+    
+    token = create_token(user["id"])
+    return TokenResponse(
+        access_token=token,
+        user=UserResponse(
+            id=user["id"],
+            email=user["email"],
+            restaurant_name=user["restaurant_name"],
+            phone=user["phone"],
+            created_at=user["created_at"]
+        ),
+        is_demo=True
+    )
+
+@router.post("/mygenie-login", response_model=TokenResponse)
+async def mygenie_login(credentials: UserLogin):
+    """
+    Production login - authenticates via MyGenie API endpoints
+    TODO: Integrate with actual MyGenie authentication API
+    """
+    # TODO: Replace with actual MyGenie API call
+    # For now, this is a placeholder that mimics the structure
+    
+    # Placeholder for MyGenie API integration:
+    # mygenie_api_url = os.getenv("MYGENIE_API_URL", "https://api.mygenie.com")
+    # response = await http_client.post(
+    #     f"{mygenie_api_url}/auth/login",
+    #     json={"email": credentials.email, "password": credentials.password}
+    # )
+    # mygenie_user = response.json()
+    
+    # For now, check local DB (will be replaced with MyGenie API)
+    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
+    if not user or not verify_password(credentials.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    token = create_token(user["id"])
+    return TokenResponse(
+        access_token=token,
+        user=UserResponse(
+            id=user["id"],
+            email=user["email"],
+            restaurant_name=user["restaurant_name"],
+            phone=user["phone"],
+            created_at=user["created_at"]
+        ),
+        is_demo=False
+    )
