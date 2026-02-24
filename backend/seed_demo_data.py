@@ -261,7 +261,8 @@ segments = [
         "description": "Gold tier loyalty members",
         "filters": {"tier": "Gold"},
         "customer_count": len([c for c in customers if c["tier"] == "Gold"]),
-        "created_at": (now - timedelta(days=45)).isoformat()
+        "created_at": (now - timedelta(days=45)).isoformat(),
+        "updated_at": (now - timedelta(days=45)).isoformat()
     },
     {
         "id": "segment-demo-2",
@@ -270,7 +271,8 @@ segments = [
         "description": "Customers who haven't visited in 30+ days",
         "filters": {"last_visit_days": "30"},
         "customer_count": 18,
-        "created_at": (now - timedelta(days=30)).isoformat()
+        "created_at": (now - timedelta(days=30)).isoformat(),
+        "updated_at": (now - timedelta(days=30)).isoformat()
     },
     {
         "id": "segment-demo-3",
@@ -279,7 +281,8 @@ segments = [
         "description": "Business and corporate customers",
         "filters": {"customer_type": "corporate"},
         "customer_count": len([c for c in customers if c["customer_type"] == "corporate"]),
-        "created_at": (now - timedelta(days=20)).isoformat()
+        "created_at": (now - timedelta(days=20)).isoformat(),
+        "updated_at": (now - timedelta(days=20)).isoformat()
     }
 ]
 
