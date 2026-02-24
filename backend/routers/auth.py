@@ -274,6 +274,89 @@ async def mygenie_login(credentials: UserLogin):
             # Step 4: Create local JWT token
             token = create_token(user_id)
             
+            # Step 5: Auto-sync customers from MyGenie in background
+            try:
+                # Fetch customers from MyGenie
+                customers_response = await client.post(
+                    f"{mygenie_api_url}/api/v2/vendoremployee/restaurant-customer-list",
+                    headers={
+                        "Authorization": f"Bearer {mygenie_token}",
+                        "Content-Type": "application/json; charset=UTF-8",
+                        "X-localization": "en"
+                    },
+                    json={},
+                    timeout=15.0
+                )
+                
+                if customers_response.status_code == 200:
+                    customers_data = customers_response.json()
+                    customer_list = customers_data.get("customer_list", [])
+                    
+                    # Sync customers to local DB
+                    for mygenie_customer in customer_list:
+                        customer_data = {
+                            "user_id": user_id,
+                            "name": mygenie_customer.get("customer_name") or "Unknown",
+                            "phone": mygenie_customer.get("phone") or "",
+                            "country_code": "+91",
+                            "email": f"customer{mygenie_customer['id']}@mygenie.local",
+                            "dob": mygenie_customer.get("date_of_birth"),
+                            "anniversary": mygenie_customer.get("date_of_anniversary"),
+                            "gst_name": mygenie_customer.get("gst_name"),
+                            "gst_number": mygenie_customer.get("gst_number"),
+                            "total_points": mygenie_customer.get("loyalty_point", 0),
+                            "wallet_balance": float(mygenie_customer.get("wallet_balance") or 0),
+                            "mygenie_customer_id": mygenie_customer["id"],
+                            "mygenie_synced": True,
+                            "last_synced_at": datetime.now(timezone.utc).isoformat()
+                        }
+                        
+                        # Determine tier
+                        points = customer_data["total_points"]
+                        if points >= 5000:
+                            tier = "Platinum"
+                        elif points >= 1500:
+                            tier = "Gold"
+                        elif points >= 500:
+                            tier = "Silver"
+                        else:
+                            tier = "Bronze"
+                        customer_data["tier"] = tier
+                        
+                        # Check if customer exists
+                        existing = await db.customers.find_one({
+                            "user_id": user_id,
+                            "mygenie_customer_id": mygenie_customer["id"]
+                        })
+                        
+                        if existing:
+                            await db.customers.update_one(
+                                {"id": existing["id"]},
+                                {"$set": customer_data}
+                            )
+                        else:
+                            customer_data["id"] = str(uuid.uuid4())
+                            customer_data["created_at"] = datetime.now(timezone.utc).isoformat()
+                            customer_data["customer_type"] = "normal"
+                            customer_data["notes"] = None
+                            customer_data["address"] = None
+                            customer_data["city"] = None
+                            customer_data["pincode"] = None
+                            customer_data["allergies"] = []
+                            customer_data["custom_field_1"] = None
+                            customer_data["custom_field_2"] = None
+                            customer_data["custom_field_3"] = None
+                            customer_data["favorites"] = []
+                            customer_data["total_visits"] = 0
+                            customer_data["total_spent"] = 0.0
+                            customer_data["last_visit"] = None
+                            await db.customers.insert_one(customer_data)
+                    
+                    print(f"✅ Auto-synced {len(customer_list)} customers from MyGenie on login")
+            except Exception as e:
+                # Don't fail login if customer sync fails
+                print(f"⚠️ Customer auto-sync failed (non-critical): {str(e)}")
+            
             return TokenResponse(
                 access_token=token,
                 user=UserResponse(
