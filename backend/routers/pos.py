@@ -72,14 +72,14 @@ class POSCustomerCreate(BaseModel):
 
 
 class POSCustomerUpdate(BaseModel):
-    """Schema for POS to update a customer - all fields optional except POS identifiers"""
+    """Schema for POS to update a customer - phone is required as unique key"""
     # POS Identification (Required)
     pos_id: str  # POS system identifier (mygenie, petpooja, ezzo)
     restaurant_id: str  # Restaurant ID in that POS system
     
-    # Basic Info
+    # Basic Info (phone is required - unique key)
+    phone: str  # Required - unique identifier
     name: Optional[str] = None
-    phone: Optional[str] = None
     country_code: Optional[str] = None
     email: Optional[str] = None
     
