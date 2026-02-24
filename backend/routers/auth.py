@@ -86,21 +86,11 @@ async def register(user_data: UserCreate):
 
 @router.post("/login", response_model=TokenResponse)
 async def login(credentials: UserLogin):
-    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
-    if not user or not verify_password(credentials.password, user["password_hash"]):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token = create_token(user["id"])
-    return TokenResponse(
-        access_token=token,
-        user=UserResponse(
-            id=user["id"],
-            email=user["email"],
-            restaurant_name=user["restaurant_name"],
-            phone=user["phone"],
-            created_at=user["created_at"]
-        )
-    )
+    """
+    Unified login endpoint - routes to MyGenie authentication
+    Kept for backward compatibility, calls mygenie_login internally
+    """
+    return await mygenie_login(credentials)
 
 @router.get("/me", response_model=UserResponse)
 async def get_me(user: dict = Depends(get_current_user)):
