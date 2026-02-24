@@ -136,6 +136,9 @@ async def pos_create_customer(
     customer_doc = {
         "id": customer_id,
         "user_id": user["id"],
+        # POS Identification
+        "pos_id": customer_data.pos_id,
+        "pos_restaurant_id": customer_data.restaurant_id,
         # Basic Info
         "name": customer_data.name,
         "phone": customer_data.phone,
