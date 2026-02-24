@@ -388,6 +388,61 @@ async def update_customer(customer_id: str, update_data: CustomerUpdate, user: d
     if update_dict:
         await db.customers.update_one({"id": customer_id}, {"$set": update_dict})
     
+    # Sync to MyGenie if user has token
+    user_record = await db.users.find_one({"id": user["id"]})
+    mygenie_token = user_record.get("mygenie_token") if user_record else None
+    
+    if mygenie_token:
+        # Get updated customer data
+        updated_customer = await db.customers.find_one({"id": customer_id}, {"_id": 0})
+        
+        mygenie_api_url = os.getenv("MYGENIE_API_URL", "https://preprod.mygenie.online")
+        
+        # Split name into first and last name
+        name_parts = (updated_customer.get("name") or "").split(" ", 1)
+        f_name = name_parts[0] if name_parts else ""
+        l_name = name_parts[1] if len(name_parts) > 1 else ""
+        
+        mygenie_payload = {
+            "phone": updated_customer.get("phone") or "",
+            "f_name": f_name,
+            "l_name": l_name,
+            "email": updated_customer.get("email") or "",
+            "gst_number": updated_customer.get("gst_number") or "",
+            "gst_name": updated_customer.get("gst_name") or "",
+            "date_of_birth": updated_customer.get("dob") or "",
+            "date_of_anniversary": updated_customer.get("anniversary") or "",
+            "membership_id": ""
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    f"{mygenie_api_url}/api/v1/vendoremployee/pos/user-check-create",
+                    headers={
+                        "Authorization": f"Bearer {mygenie_token}",
+                        "Content-Type": "application/json; charset=UTF-8",
+                        "X-localization": "en"
+                    },
+                    json=mygenie_payload,
+                    timeout=15.0
+                )
+                
+                if resp.status_code == 200:
+                    mygenie_resp = resp.json()
+                    mygenie_customer_id = mygenie_resp.get("user_id")
+                    # Update mygenie_customer_id if not already set
+                    if not customer.get("mygenie_customer_id"):
+                        await db.customers.update_one(
+                            {"id": customer_id},
+                            {"$set": {"mygenie_customer_id": mygenie_customer_id, "mygenie_synced": True}}
+                        )
+                    print(f"✅ Customer updated in MyGenie: {mygenie_customer_id}")
+                else:
+                    print(f"⚠️ MyGenie update failed: {resp.status_code} - {resp.text}")
+        except Exception as e:
+            print(f"⚠️ MyGenie update error (non-critical): {str(e)}")
+    
     updated = await db.customers.find_one({"id": customer_id}, {"_id": 0})
     return Customer(**updated)
 
