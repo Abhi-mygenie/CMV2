@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [token, setToken] = useState(localStorage.getItem("token"));
     const [loading, setLoading] = useState(true);
+    const [isDemoMode, setIsDemoMode] = useState(localStorage.getItem("is_demo") === "true");
 
     // Create API client
     const api = createApiClient(token);
@@ -51,8 +52,20 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         const res = await axios.post(`${API}/auth/login`, { email, password });
         localStorage.setItem("token", res.data.access_token);
+        localStorage.setItem("is_demo", res.data.is_demo || false);
         setToken(res.data.access_token);
         setUser(res.data.user);
+        setIsDemoMode(res.data.is_demo || false);
+        return res.data;
+    };
+
+    const demoLogin = async () => {
+        const res = await axios.post(`${API}/auth/demo-login`);
+        localStorage.setItem("token", res.data.access_token);
+        localStorage.setItem("is_demo", "true");
+        setToken(res.data.access_token);
+        setUser(res.data.user);
+        setIsDemoMode(true);
         return res.data;
     };
 
@@ -66,12 +79,14 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("is_demo");
         setToken(null);
         setUser(null);
+        setIsDemoMode(false);
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, api, login, register, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, api, login, demoLogin, register, logout, loading, isDemoMode }}>
             {children}
         </AuthContext.Provider>
     );
