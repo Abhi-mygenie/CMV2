@@ -1,70 +1,74 @@
 <analysis>**original_problem_statement**: The initial request was to build a customer management application by cloning a git repository, integrating a Demo Mode, and connecting to an external MyGenie API for user authentication and customer data synchronization.
 
 The scope has since expanded to include:
-1.  **Bi-directional Sync**: Sync customer data from MyGenie to the local DB (as a manual action) and receive data from external POS systems.
+1.  **Bi-directional Sync**: Sync customer data from MyGenie to the local DB (as a manual action) and receive data from external POS systems via webhooks.
 2.  **Schema Expansion**: Add detailed loyalty, wallet, and profile fields to the local customer database.
-3.  **POS Integration Webhooks**: Create secure, API-key-authenticated endpoints for external Point-of-Sale (POS) systems to push customer and order data into this application's database.
-4.  **Manual Sync Control**: Remove the automatic sync on login and provide a UI button for manual sync, which is only visible when no customers exist for the logged-in user.
-5.  **Order Processing**: Implement a webhook to receive order data from MyGenie, automatically create customers, calculate and award loyalty points, and update customer statistics.
+3.  **POS Integration Webhooks**: Create secure, API-key-authenticated endpoints for external Point-of-Sale (POS) systems to push customer, order, and loyalty data.
+4.  **Loyalty & Wallet Logic**: Implement backend logic to calculate loyalty points based on configurable tiers, deduct used wallet balances from customer profiles, and provide endpoints for POS systems to validate redeemable points before a transaction.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application (React frontend, FastAPI backend, MongoDB) is running. It features a dual-login system (Demo Mode and Live Mode via MyGenie API).
+A full-stack application (React frontend, FastAPI backend, MongoDB) with a dual-login system (Demo Mode and Live Mode via MyGenie API).
 
 Key functionalities:
--   **Manual Customer Sync**: A Sync MyGenie button on the Customers page allows users in Live Mode to pull all their customer data from the MyGenie API. This button is only visible if they currently have zero customers in the local database. The automatic sync on login has been removed.
--   **POS Integration Webhooks**: A suite of endpoints under  allows external systems to interact with the application using an  for authentication:
+-   **Manual Customer Sync**: A Sync MyGenie button on the Customers page allows users to pull data from the MyGenie API.
+-   **Configurable Loyalty System**: A settings page in the UI allows the user to define loyalty tiers, points-to-currency conversion rates, and minimum order values.
+-   **POS Integration Webhooks**: A suite of endpoints under  for external systems, authenticated via an  header:
     -   : Create a customer.
     -   : Update a customer.
     -   : Look up a customer by phone number.
-    -   : A newly created webhook to receive and process order data. It handles new customer creation, loyalty point calculation based on a local tier system, and updates customer visit/spending stats. It also has protection against processing duplicate orders.
+    -   : Processes an order, correctly calculates and awards loyalty points based on tier settings, and deducts any used wallet balance from the customer's profile.
+    -   : A new endpoint that calculates the maximum loyalty points a customer can redeem for a given bill amount, based on their current balance and the app's loyalty settings.
+-   **API Documentation**: An  file detailing the POS endpoints.
 
 **Last working item**:
--   **Last item agent was working**: Implementing the new order processing webhook (). The agent worked with the user to define the payload structure, implemented the backend logic, tested it successfully with , and updated the API documentation.
+-   **Last item agent was working**: Created a new API endpoint  to allow POS systems to check the maximum loyalty points a customer can use for a given bill amount. The agent implemented the logic, tested it successfully with , and updated the  file as requested by the user.
 -   **Status**: USER VERIFICATION PENDING
 -   **Agent Testing Done**: Y
--   **Which testing method agent to use?**: backend testing agent. A persistent test should be created for the new  webhook to ensure its logic (new customer creation, point calculation, duplicate order rejection) is robust.
+-   **Which testing method agent to use?**: backend testing agent. A persistent test should be created for the new  webhook.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-*   There are no outstanding bugs. The primary pending item is user verification of the newly created order webhook.
+*   There are no outstanding bugs reported by the user. The main pending items are user verification of the last session's work.
 
 **Issues Detail**:
 *   N/A
 
 **In progress Task List**:
-*   **Task 1: Verify Order Webhook Implementation (P0)**
-    *   **Where to resume**: The user needs to review the functionality of the  endpoint and the updated API documentation. The user also needs to provide the final API field names for , , , and , which were unknown during implementation.
-    *   **What will be achieved with this?**: Finalizes the order processing feature, a core part of the application logic.
+*   **Task 1: Verify New  Endpoint (P0)**
+    *   **Where to resume**: The user needs to review the functionality and documentation for the newly created  endpoint.
+    *   **What will be achieved with this?**: Finalizes a key piece of the loyalty redemption flow for external POS systems.
     *   **Status**: USER VERIFICATION PENDING
     *   **Should Test frontend/backend/both after fix?**: Backend
-    *   **Blocked on something**: User feedback and missing field names.
+    *   **Blocked on something**: User feedback.
+*   **Task 2: Verify Wallet Deduction Fix (P1)**
+    *   **Where to resume**: The user needs to verify that the  webhook now correctly deducts the  amount from a customer's .
+    *   **What will be achieved with this?**: Confirms a critical bug fix in the order processing logic is working as expected.
+    *   **Status**: USER VERIFICATION PENDING
+    *   **Should Test frontend/backend/both after fix?**: Backend
+    *   **Blocked on something**: User feedback.
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks**:
     *   **Task 1 (P1)**: Refactor hardcoded MyGenie API URLs from  files (, ) into the backend  file.
 *   **Future Tasks**:
-    *   **Task 2 (P2)**: Implement UI and functionality for customers to redeem loyalty points and use their wallet balance.
+    *   **Task 2 (P2)**: Implement UI and functionality for customers to redeem loyalty points and use their wallet balance within the application itself.
     *   **Task 3 (P3)**: Address incomplete loyalty/wallet data from the MyGenie API sync. This is a potential blocker for the redemption UI.
     *   **Task 4 (P4)**: Consider creating a bulk sync endpoint () for MyGenie to push multiple customers at once, if the user confirms this is needed.
 
 **Completed work in this session**
--   **Removed Auto-Sync**: Removed the automatic customer sync from the MyGenie login process in .
--   **Conditional Sync Button**: Updated  to only show the Sync MyGenie button if the user is in Live Mode and has no customers.
--   **Created Order Webhook**:
-    -   Implemented a new endpoint  in .
-    -   This webhook auto-creates customers, calculates and awards loyalty points based on a tier system, updates customer stats, and prevents duplicate orders.
-    -   Created a new  schema and  collection.
--   **API Documentation**: Created and updated  with details for all POS endpoints.
--   **Database Cleanup**: Cleared the database of non-test users and customers as requested by the user.
+-   **Fixed Wallet Deduction Bug**: Identified and fixed a critical bug in the  webhook where the  amount was not being subtracted from the customer's . The fix was added to .
+-   **Verified Loyalty Logic**: Confirmed through a series of tests that the order webhook correctly calculates loyalty points based on tier settings stored in the database, including handling tier upgrades.
+-   **Created Max Redeemable Points Endpoint**: Implemented and tested a new endpoint, , in  to calculate the maximum redeemable points for a transaction.
+-   **Updated API Documentation**: Updated  to include the new  endpoint and to add  to the response of the order webhook.
 
 **Earlier issues found/mentioned but not fixed**
 *   **Issue 1: Incomplete Loyalty/Wallet Data from MyGenie API**
-    *   The MyGenie customer list API used for the manual sync only provides current balances (, ) and not the detailed transaction history (, , etc.) required for a full-featured loyalty UI. The new order webhook now tracks this locally, but historical data is missing.
+    *   The MyGenie customer API used for manual sync only provides current balances, not the detailed transaction history required for a full-featured loyalty UI. The new order webhook tracks this locally for new orders, but historical data is missing for synced customers.
     *   **Debug checklist**:
-        1.  Re-confirm with the user if an alternate MyGenie API endpoint provides this detailed transaction data.
-        2.  Discuss whether historical transaction data should be tracked locally going forward, now that the order webhook is in place.
+        1.  Confirm with the user if an alternate MyGenie API endpoint exists that provides this data.
+        2.  Discuss whether to only track this data locally going forward.
     *   **Why to solve this issue and what will be achieved with this?**: This is a blocker for the future task of displaying detailed loyalty and wallet history in the UI.
     *   **Should Test frontend/backend/both after fix**: Backend (API investigation).
     *   **Is recurring issue?**: N
@@ -76,56 +80,52 @@ Key functionalities:
 
 
 **Key Technical Concepts**
-*   **Frontend**: React, Axios, React Context API.
+*   **Frontend**: React, Axios.
 *   **Backend**: FastAPI, Motor (async MongoDB driver), Pydantic.
 *   **Database**: MongoDB.
-*   **Authentication**: JWT-based for the application's internal sessions; API Key-based ( header) for the external POS webhook endpoints.
+*   **Authentication**: JWT-based for internal sessions; API Key-based ( header) for external POS webhooks.
 
 **key DB schema**
 *   **customers**: 
 *   **orders**: 
+*   **settings**: 
 
 **changes in tech stack**
 *   None.
 
 **All files of reference**
-*   : Modified to remove auto-sync on login.
-*   : Modified to add the  webhook and its business logic.
-*   : Created for the new order Pydantic model.
-*   : Modified for the conditional Sync MyGenie button logic.
-*   : Created and updated to document the POS APIs for external developers.
+*   : Heavily modified to fix the wallet deduction bug and add the  endpoint.
+*   : Updated to document the new endpoint and reflect changes to the order webhook response.
+*   : Viewed to understand how loyalty settings are structured.
+*   : Viewed to understand the loyalty calculation logic.
 
 **Areas that need refactoring**:
 *   Hardcoded MyGenie API URLs in  and  should be moved to the  file.
 
 **key api endpoints**
-*   : Authenticates user via MyGenie. (Auto-sync removed).
-*   : Manually triggers a customer data pull **from** MyGenie.
+*   : Authenticates user via MyGenie.
+*   : Manually triggers a customer data pull from MyGenie.
 *   : **(Webhook)** Creates a customer.
 *   : **(Webhook)** Updates a customer.
 *   : **(Webhook)** Looks up a customer by phone.
-*   : **(Webhook - NEW)** Receives and processes order data from a POS.
+*   : **(Webhook)** Receives and processes order data.
+*   : **(Webhook - NEW)** Returns max redeemable points for a bill.
 
 **Critical Info for New Agent**
-*   **Active Directory**: The correct and active codebase is in , not . The previous agent initially worked in the wrong directory before realizing this and cleaning up.
-*   **User Interaction**: The user provides requirements incrementally. Always confirm your understanding and proposed plan before implementation.
-*   **Pending User Input**: The user still needs to provide the final field names for , , , and  for the new order webhook payload. The current implementation uses placeholders.
-*   **API Key**: The active API key for testing POS webhooks is stored in the user object in the database and is retrieved during the webhook's authentication check. Do not rely on hardcoded keys.
+*   The user directs development incrementally. The immediate next step is to get the user's verification on the wallet deduction fix and the new  endpoint.
+*   The API documentation in  is important to the user and should be kept up-to-date with any changes to the POS webhooks.
 
 **documents and test reports created in this job**
-*   
+*    (Updated)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **msg 198**: User asks to include  in the order webhook payload. (Status: Completed)
-2.  **msg 200**: User clarifies that  is only needed for new customers. (Status: Completed)
-3.  **msg 202**: User states they will get the  field name later. (Status: In Progress - Pending User)
-4.  **msg 204**: User clarifies which loyalty/wallet fields MyGenie sends. (Status: Completed)
-5.  **msg 206**: User states they will get the remaining field names later and asks for the final expected payload. (Status: In Progress - Pending User)
-6.  **msg 208**: User requests to remove several fields from the proposed payload. (Status: Completed)
-7.  **msg 210**: User gives the go-ahead to create the webhook with the agreed structure. (Status: Completed)
-8.  **msg 212-228**: Agent implements and tests the new  webhook. (Status: Completed)
-9.  **msg 231**: Agent provides a summary of the completed order webhook and the updated API documentation. (Status: Completed)
-10. **(No pending messages)**
+1.  **msg 74**: User requested an API to return available loyalty points for a customer to use in a transaction. (Status: Completed)
+2.  **msg 77**: User specified the inputs (, , , ) and output () for the new API. (Status: Completed)
+3.  **msg 80**: User clarified that the new API should focus only on loyalty points, not wallet balance. (Status: Completed)
+4.  **msg 83**: User confirmed YEs to the agent's proposed plan to implement the new endpoint. (Status: Completed)
+5.  **msg 98**: User requested the final webhook structure and documentation for the new endpoint. (Status: Completed)
+6.  **msg 101**: User confirmed yes, greenlighting the agent to provide the documentation. (Status: Completed)
+7.  **(No pending messages)** The agent has fulfilled the last user request; the next action is to await user feedback/verification.
 
 **Project Health Check:**
 *   **Broken**: None.
@@ -145,8 +145,8 @@ Key functionalities:
     *   Email: 
     *   Password: 
 *   **POS Webhook API Key**:
-    *   The API key is dynamically retrieved from the user's record in the database during the request. To test, you must first log in as a user (e.g., the MyGenie user above) to ensure a user record with an API key exists. The key  was mentioned initially, but the agent discovered the correct way is to use the one associated with the user account.
+    *   The API key is retrieved dynamically from the user's record in the database during the request. To test, first log in as the user above to ensure a user record with an API key exists. A previously used key for testing is .
 
 **What agent forgot to execute**
-*   The task to refactor hardcoded URLs into the  file is still pending from a previous session.
-*   The unresolved issue regarding incomplete loyalty/wallet data from the MyGenie API was not re-addressed with the user. This will be important before starting UI work on loyalty features.</analysis>
+*   The pending task to refactor hardcoded URLs into the  file is still outstanding from a previous session.
+*   Persistent tests (e.g., pytest) were not created for the new wallet deduction logic or the  endpoint. This should be considered to prevent future regressions.</analysis>
