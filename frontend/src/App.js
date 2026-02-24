@@ -706,6 +706,19 @@ const CustomersPage = () => {
         }
     };
 
+    const syncFromMyGenie = async () => {
+        setSyncing(true);
+        try {
+            const res = await api.post("/customers/sync-from-mygenie");
+            toast.success(res.data.message || "Customers synced successfully!");
+            await fetchCustomers(); // Refresh the list
+        } catch (err) {
+            toast.error(err.response?.data?.detail || "Failed to sync customers from MyGenie");
+        } finally {
+            setSyncing(false);
+        }
+    };
+
     const saveAsSegment = async () => {
         if (!segmentName.trim()) {
             toast.error("Please enter a segment name");
