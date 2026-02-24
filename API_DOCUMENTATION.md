@@ -430,8 +430,21 @@ curl -X POST "https://customer-sync-app.preview.emergentagent.com/api/pos/orders
     "total_points": 49,
     "tier": "Bronze",
     "wallet_used": 0.0,
+    "wallet_balance_after": 500.0,
     "coupon_applied": "",
     "coupon_discount": 0.0
+  }
+}
+```
+
+### Response - Insufficient Wallet Balance (200 OK)
+
+```json
+{
+  "success": false,
+  "message": "Insufficient wallet balance. Available: 300.0, Requested: 500.0",
+  "data": {
+    "available_balance": 300.0
   }
 }
 ```
