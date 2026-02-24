@@ -248,6 +248,100 @@ async def pos_update_customer(
     )
 
 # ============================================
+# Loyalty Points - Max Redeemable Check
+# ============================================
+
+class POSMaxRedeemableRequest(BaseModel):
+    """Request to check max redeemable loyalty points"""
+    pos_id: str
+    restaurant_id: str
+    cust_mobile: str
+    bill_amount: float
+
+
+@router.post("/max-redeemable", response_model=POSResponse)
+async def pos_max_redeemable(
+    request: POSMaxRedeemableRequest,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    Check maximum loyalty points redeemable for a given bill.
+    Returns max points and their monetary value.
+    """
+    # Find customer by phone
+    customer = await db.customers.find_one({
+        "user_id": user["id"],
+        "phone": request.cust_mobile
+    })
+    
+    if not customer:
+        return POSResponse(
+            success=False,
+            message="Customer not found",
+            data={"registered": False}
+        )
+    
+    # Get loyalty settings
+    settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
+    if not settings:
+        settings = {
+            "redemption_value": 0.25,
+            "min_redemption_points": 100,
+            "max_redemption_percent": 50.0,
+            "max_redemption_amount": 500.0
+        }
+    
+    available_points = customer.get("total_points", 0)
+    redemption_value = settings.get("redemption_value", 0.25)
+    min_redemption = settings.get("min_redemption_points", 100)
+    max_percent = settings.get("max_redemption_percent", 50.0)
+    max_amount = settings.get("max_redemption_amount", 500.0)
+    
+    # Check if customer has minimum points
+    if available_points < min_redemption:
+        return POSResponse(
+            success=True,
+            message="Customer does not have minimum points required for redemption",
+            data={
+                "max_points_redeemable": 0,
+                "max_discount_value": 0.0,
+                "available_points": available_points,
+                "min_points_required": min_redemption
+            }
+        )
+    
+    # Calculate max discount by bill percentage
+    max_by_percent = (request.bill_amount * max_percent) / 100
+    
+    # Calculate max discount by absolute cap
+    max_by_cap = max_amount
+    
+    # Calculate max discount by available points
+    max_by_points = available_points * redemption_value
+    
+    # Take the minimum of all limits
+    max_discount = min(max_by_percent, max_by_cap, max_by_points)
+    
+    # Convert back to points
+    max_points = int(max_discount / redemption_value)
+    
+    # Ensure we don't exceed available points
+    max_points = min(max_points, available_points)
+    
+    # Recalculate exact discount value
+    max_discount_value = round(max_points * redemption_value, 2)
+    
+    return POSResponse(
+        success=True,
+        message="Max redeemable calculated",
+        data={
+            "max_points_redeemable": max_points,
+            "max_discount_value": max_discount_value
+        }
+    )
+
+
+# ============================================
 # Order Webhook (for MyGenie to call on every order)
 # ============================================
 
