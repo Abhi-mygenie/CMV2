@@ -101,6 +101,8 @@ class Customer(BaseModel):
     tier: str = "Bronze"
     created_at: str
     last_visit: Optional[str] = None
+    mygenie_customer_id: Optional[int] = None
+    mygenie_synced: Optional[bool] = None
 
 # Wallet Transaction Models
 class WalletTransactionCreate(BaseModel):
