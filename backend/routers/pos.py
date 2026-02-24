@@ -211,6 +211,10 @@ async def pos_update_customer(
     
     update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
     
+    # Map restaurant_id to pos_restaurant_id for storage
+    if "restaurant_id" in update_dict:
+        update_dict["pos_restaurant_id"] = update_dict.pop("restaurant_id")
+    
     # Check phone uniqueness if phone is being updated
     if "phone" in update_dict and update_dict["phone"] != customer.get("phone"):
         existing = await db.customers.find_one({
