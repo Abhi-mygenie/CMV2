@@ -1953,6 +1953,8 @@ const CustomerDetailPage = () => {
                                 <Plus className="w-4 h-4 mr-1" /> Add Money
                             </Button>
                         </div>
+                        {/* HIDDEN: Redeem and Use Wallet functionality - commented out as per requirement */}
+                        {/* 
                         <div className="grid grid-cols-2 gap-3 mt-2">
                             <Button 
                                 onClick={() => { setPointsAction("redeem"); setShowPointsModal(true); }}
@@ -1973,6 +1975,7 @@ const CustomerDetailPage = () => {
                                 <ArrowDownRight className="w-4 h-4 mr-1" /> Use Wallet
                             </Button>
                         </div>
+                        */}
                     </CardContent>
                 </Card>
 
