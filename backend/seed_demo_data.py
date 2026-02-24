@@ -23,14 +23,14 @@ print("🧹 Clearing existing demo data...")
 demo_user = db.users.find_one({"email": "demo@restaurant.com"})
 if demo_user:
     demo_user_id = demo_user["id"]
-    db.customers.delete_many({"restaurant_id": demo_user_id})
-    db.points_transactions.delete_many({"restaurant_id": demo_user_id})
-    db.wallet_transactions.delete_many({"restaurant_id": demo_user_id})
-    db.coupons.delete_many({"restaurant_id": demo_user_id})
-    db.segments.delete_many({"restaurant_id": demo_user_id})
-    db.feedback.delete_many({"restaurant_id": demo_user_id})
-    db.whatsapp_templates.delete_many({"restaurant_id": demo_user_id})
-    db.automation_rules.delete_many({"restaurant_id": demo_user_id})
+    db.customers.delete_many({"user_id": demo_user_id})
+    db.points_transactions.delete_many({"user_id": demo_user_id})
+    db.wallet_transactions.delete_many({"user_id": demo_user_id})
+    db.coupons.delete_many({"user_id": demo_user_id})
+    db.segments.delete_many({"user_id": demo_user_id})
+    db.feedback.delete_many({"user_id": demo_user_id})
+    db.whatsapp_templates.delete_many({"user_id": demo_user_id})
+    db.automation_rules.delete_many({"user_id": demo_user_id})
     db.users.delete_one({"id": demo_user_id})
     print(f"✅ Cleared data for existing demo user")
 
@@ -92,7 +92,7 @@ for i in range(55):
     
     customer = {
         "id": f"customer-demo-{i+1}",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "name": name,
         "phone": phone,
         "country_code": "+91",
@@ -141,7 +141,7 @@ for customer in customers[:30]:  # Add transactions for first 30 customers
         
         transaction = {
             "id": f"points-{customer['id']}-{j}",
-            "restaurant_id": demo_user_id,
+            "user_id": demo_user_id,
             "customer_id": customer["id"],
             "customer_name": customer["name"],
             "points": points,
@@ -174,7 +174,7 @@ for customer in customers[:20]:  # Add wallet transactions for first 20 customer
             
             transaction = {
                 "id": f"wallet-{customer['id']}-{j}",
-                "restaurant_id": demo_user_id,
+                "user_id": demo_user_id,
                 "customer_id": customer["id"],
                 "customer_name": customer["name"],
                 "amount": amount,
@@ -195,7 +195,7 @@ now = datetime.utcnow()
 coupons = [
     {
         "id": "coupon-demo-1",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "code": "WELCOME20",
         "description": "Welcome offer - 20% off on first order",
         "discount_type": "percentage",
@@ -212,7 +212,7 @@ coupons = [
     },
     {
         "id": "coupon-demo-2",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "code": "GOLD50",
         "description": "Flat ₹50 off for Gold tier members",
         "discount_type": "fixed",
@@ -230,7 +230,7 @@ coupons = [
     },
     {
         "id": "coupon-demo-3",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "code": "WEEKEND15",
         "description": "Weekend special - 15% off",
         "discount_type": "percentage",
@@ -255,7 +255,7 @@ print("📊 Creating customer segments...")
 segments = [
     {
         "id": "segment-demo-1",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "name": "VIP Gold Members",
         "filters": {"tier": "Gold"},
         "customer_count": len([c for c in customers if c["tier"] == "Gold"]),
@@ -263,7 +263,7 @@ segments = [
     },
     {
         "id": "segment-demo-2",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "name": "Inactive Customers (30+ days)",
         "filters": {"last_visit_days": "30"},
         "customer_count": 18,
@@ -271,7 +271,7 @@ segments = [
     },
     {
         "id": "segment-demo-3",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "name": "Corporate Clients",
         "filters": {"customer_type": "corporate"},
         "customer_count": len([c for c in customers if c["customer_type"] == "corporate"]),
@@ -300,7 +300,7 @@ for i, customer in enumerate(customers[:25]):
     if random.random() > 0.3:
         feedback = {
             "id": f"feedback-demo-{i+1}",
-            "restaurant_id": demo_user_id,
+            "user_id": demo_user_id,
             "customer_id": customer["id"],
             "customer_name": customer["name"],
             "rating": random.randint(3, 5),
@@ -318,7 +318,7 @@ print("💬 Creating WhatsApp templates...")
 templates = [
     {
         "id": "template-demo-1",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "name": "Welcome Message",
         "content": "Welcome to {{restaurant_name}}, {{customer_name}}! 🎉 Thank you for joining our loyalty program.",
         "variables": ["restaurant_name", "customer_name"],
@@ -326,7 +326,7 @@ templates = [
     },
     {
         "id": "template-demo-2",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "name": "Points Earned",
         "content": "Hi {{customer_name}}! You've earned {{points_earned}} points. Your balance: {{points_balance}} points. 🌟",
         "variables": ["customer_name", "points_earned", "points_balance"],
@@ -334,7 +334,7 @@ templates = [
     },
     {
         "id": "template-demo-3",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "name": "Birthday Wishes",
         "content": "Happy Birthday {{customer_name}}! 🎂 We've added {{points_earned}} bonus points to your account!",
         "variables": ["customer_name", "points_earned"],
@@ -350,7 +350,7 @@ print("🤖 Creating automation rules...")
 rules = [
     {
         "id": "rule-demo-1",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "event": "points_earned",
         "template_id": "template-demo-2",
         "template_name": "Points Earned",
@@ -360,7 +360,7 @@ rules = [
     },
     {
         "id": "rule-demo-2",
-        "restaurant_id": demo_user_id,
+        "user_id": demo_user_id,
         "event": "birthday",
         "template_id": "template-demo-3",
         "template_name": "Birthday Wishes",
@@ -377,7 +377,7 @@ print(f"✅ Created {len(rules)} automation rules")
 print("⚙️ Creating loyalty settings...")
 loyalty_settings = {
     "id": f"settings-{demo_user_id}",
-    "restaurant_id": demo_user_id,
+    "user_id": demo_user_id,
     "points_per_rupee": 1,
     "redemption_rate": 1,
     "min_points_to_redeem": 100,
@@ -400,7 +400,7 @@ loyalty_settings = {
 }
 
 db.loyalty_settings.replace_one(
-    {"restaurant_id": demo_user_id},
+    {"user_id": demo_user_id},
     loyalty_settings,
     upsert=True
 )
