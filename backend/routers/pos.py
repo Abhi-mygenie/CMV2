@@ -444,6 +444,21 @@ async def pos_order_webhook(
             }
             await db.points_transactions.insert_one(tx_doc)
         
+        # Record wallet transaction if wallet was used
+        if wallet_used > 0:
+            wallet_tx_doc = {
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "customer_id": customer["id"],
+                "amount": wallet_used,
+                "transaction_type": "debit",
+                "description": f"Used on order {order_data.order_id}",
+                "order_id": order_doc["id"],
+                "balance_after": new_wallet_balance,
+                "created_at": now
+            }
+            await db.wallet_transactions.insert_one(wallet_tx_doc)
+        
         return POSResponse(
             success=True,
             message="Order processed successfully",
@@ -457,7 +472,8 @@ async def pos_order_webhook(
                 "points_earned": points_earned,
                 "total_points": new_points,
                 "tier": new_tier,
-                "wallet_used": order_data.wallet_used or 0.0,
+                "wallet_used": wallet_used,
+                "wallet_balance_after": new_wallet_balance,
                 "coupon_applied": order_data.coupon_code,
                 "coupon_discount": order_data.coupon_discount or 0.0
             }
