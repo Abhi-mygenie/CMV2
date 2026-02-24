@@ -3,6 +3,7 @@ from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 import uuid
 import os
+import httpx
 
 from core.database import db
 from core.auth import get_current_user
@@ -13,6 +14,130 @@ from models.schemas import (
 )
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
+
+@router.post("/sync-from-mygenie")
+async def sync_customers_from_mygenie(user: dict = Depends(get_current_user)):
+    """
+    Fetch customers from MyGenie API and sync to local database
+    """
+    try:
+        # Get MyGenie token from user record
+        user_record = await db.users.find_one({"id": user["id"]})
+        mygenie_token = user_record.get("mygenie_token")
+        
+        if not mygenie_token:
+            raise HTTPException(
+                status_code=400,
+                detail="MyGenie token not found. Please login again."
+            )
+        
+        # Fetch customers from MyGenie
+        mygenie_api_url = os.getenv("MYGENIE_API_URL", "https://preprod.mygenie.online")
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{mygenie_api_url}/api/v2/vendoremployee/restaurant-customer-list",
+                headers={
+                    "Authorization": f"Bearer {mygenie_token}",
+                    "Content-Type": "application/json; charset=UTF-8",
+                    "X-localization": "en"
+                },
+                json={},
+                timeout=15.0
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail="Failed to fetch customers from MyGenie"
+                )
+            
+            data = response.json()
+            customer_list = data.get("customer_list", [])
+            
+            synced_count = 0
+            updated_count = 0
+            
+            for mygenie_customer in customer_list:
+                # Map MyGenie customer to our schema
+                customer_data = {
+                    "user_id": user["id"],
+                    "name": mygenie_customer.get("customer_name") or "Unknown",
+                    "phone": mygenie_customer.get("phone") or "",
+                    "country_code": "+91",
+                    "email": f"customer{mygenie_customer['id']}@mygenie.local",
+                    "dob": mygenie_customer.get("date_of_birth"),
+                    "anniversary": mygenie_customer.get("date_of_anniversary"),
+                    "gst_name": mygenie_customer.get("gst_name"),
+                    "gst_number": mygenie_customer.get("gst_number"),
+                    "total_points": mygenie_customer.get("loyalty_point", 0),
+                    "wallet_balance": float(mygenie_customer.get("wallet_balance") or 0),
+                    "mygenie_customer_id": mygenie_customer["id"],
+                    "mygenie_synced": True,
+                    "last_synced_at": datetime.now(timezone.utc).isoformat()
+                }
+                
+                # Determine tier based on points
+                points = customer_data["total_points"]
+                if points >= 5000:
+                    tier = "Platinum"
+                elif points >= 1500:
+                    tier = "Gold"
+                elif points >= 500:
+                    tier = "Silver"
+                else:
+                    tier = "Bronze"
+                customer_data["tier"] = tier
+                
+                # Check if customer already exists
+                existing = await db.customers.find_one({
+                    "user_id": user["id"],
+                    "mygenie_customer_id": mygenie_customer["id"]
+                })
+                
+                if existing:
+                    # Update existing customer
+                    await db.customers.update_one(
+                        {"id": existing["id"]},
+                        {"$set": customer_data}
+                    )
+                    updated_count += 1
+                else:
+                    # Create new customer
+                    customer_data["id"] = str(uuid.uuid4())
+                    customer_data["created_at"] = datetime.now(timezone.utc).isoformat()
+                    customer_data["customer_type"] = "normal"
+                    customer_data["notes"] = None
+                    customer_data["address"] = None
+                    customer_data["city"] = None
+                    customer_data["pincode"] = None
+                    customer_data["allergies"] = []
+                    customer_data["custom_field_1"] = None
+                    customer_data["custom_field_2"] = None
+                    customer_data["custom_field_3"] = None
+                    customer_data["favorites"] = []
+                    customer_data["total_visits"] = 0
+                    customer_data["total_spent"] = 0.0
+                    customer_data["last_visit"] = None
+                    
+                    await db.customers.insert_one(customer_data)
+                    synced_count += 1
+            
+            return {
+                "success": True,
+                "synced": synced_count,
+                "updated": updated_count,
+                "total": len(customer_list),
+                "message": f"Successfully synced {synced_count} new and updated {updated_count} existing customers from MyGenie"
+            }
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="MyGenie API timeout")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"MyGenie API error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Sync failed: {str(e)}")
+
 
 @router.post("", response_model=Customer)
 async def create_customer(customer_data: CustomerCreate, user: dict = Depends(get_current_user)):
