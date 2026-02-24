@@ -1,0 +1,114 @@
+[
+  {
+    "_id": {
+      "$oid": "699d9de6e19767034427b78f"
+    },
+    "id": "d6d269c5-e406-4a60-a2e7-46820f8ce529",
+    "user_id": "6bbaaa22-6a9b-4b37-8362-cec76754aa2a",
+    "customer_id": "f95ce018-89d8-4818-a90d-a541078d10a9",
+    "points": 49,
+    "transaction_type": "earn",
+    "description": "Earned on order ORD-TEST-001 (Rs.987.0)",
+    "order_id": "e4252338-1f3b-413b-83a6-d90072bb9ecd",
+    "balance_after": 49,
+    "created_at": "2026-02-24T12:47:34.399577+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699d9deee19767034427b791"
+    },
+    "id": "1cc85b46-7499-47cd-807c-b01c3df33474",
+    "user_id": "6bbaaa22-6a9b-4b37-8362-cec76754aa2a",
+    "customer_id": "f95ce018-89d8-4818-a90d-a541078d10a9",
+    "points": 75,
+    "transaction_type": "earn",
+    "description": "Earned on order ORD-TEST-002 (Rs.1500.0)",
+    "order_id": "7450fd11-85f7-47f0-b81c-83c6f42910e0",
+    "balance_after": 124,
+    "created_at": "2026-02-24T12:47:42.100605+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699da0bfe99ffd3155248457"
+    },
+    "id": "295d3d8e-3914-4b30-9422-9a8e2f3f0be2",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "points": 25,
+    "transaction_type": "earn",
+    "description": "Earned on order TEST-ORD-001 (Rs.500.0)",
+    "order_id": "4a1e84d5-e00d-44d9-b047-0bc295138510",
+    "balance_after": 25,
+    "created_at": "2026-02-24T12:59:43.267970+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699da0c6e99ffd3155248459"
+    },
+    "id": "5a007e59-19b7-4e23-96ec-54a690ac1903",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "points": 50,
+    "transaction_type": "earn",
+    "description": "Earned on order TEST-ORD-002 (Rs.1000.0)",
+    "order_id": "70f0f9f2-aad6-4cd2-ae8c-e61082e5d185",
+    "balance_after": 75,
+    "created_at": "2026-02-24T12:59:50.355151+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699da0cce99ffd315524845b"
+    },
+    "id": "4562875d-e97f-47ce-9b34-b7a86ca83391",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "points": 450,
+    "transaction_type": "earn",
+    "description": "Earned on order TEST-ORD-003 (Rs.9000.0)",
+    "order_id": "e6c0b2ae-0d0d-4c64-b08f-51216425e87d",
+    "balance_after": 525,
+    "created_at": "2026-02-24T12:59:56.746473+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699da0d3e99ffd315524845d"
+    },
+    "id": "a10ffbaf-2e29-46a7-9b8c-c98250d08218",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "points": 140,
+    "transaction_type": "earn",
+    "description": "Earned on order TEST-ORD-004 (Rs.2000.0)",
+    "order_id": "3b0d3480-a471-4eba-a6b5-9a8b25f90dea",
+    "balance_after": 665,
+    "created_at": "2026-02-24T13:00:03.415819+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699da17af23094a85009c8e1"
+    },
+    "id": "1bd2cc49-0b98-44c0-8c6f-0156856851da",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "points": 70,
+    "transaction_type": "earn",
+    "description": "Earned on order TEST-WALLET-001 (Rs.1000.0)",
+    "order_id": "9ccb9ae7-2dd0-417d-82ee-de67123d7e88",
+    "balance_after": 735,
+    "created_at": "2026-02-24T13:02:50.911416+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699da190f23094a85009c8e4"
+    },
+    "id": "07c604ff-f312-4cda-8334-a3908497ca24",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "points": 56,
+    "transaction_type": "earn",
+    "description": "Earned on order TEST-WALLET-003 (Rs.800.0)",
+    "order_id": "eb3e8377-b5e1-4fcc-ac4e-6c057d5ec795",
+    "balance_after": 791,
+    "created_at": "2026-02-24T13:03:12.434592+00:00"
+  }
+]

@@ -1,0 +1,77 @@
+{
+  "export_date": "2026-02-24T13:49:03.096649+00:00",
+  "database": "loyalty_app",
+  "total_documents": 1458,
+  "collections": [
+    {
+      "collection": "users",
+      "count": 2,
+      "file": "/app/db_export/users.json"
+    },
+    {
+      "collection": "customers",
+      "count": 1435,
+      "file": "/app/db_export/customers.json"
+    },
+    {
+      "collection": "orders",
+      "count": 9,
+      "file": "/app/db_export/orders.json"
+    },
+    {
+      "collection": "wallet_transactions",
+      "count": 2,
+      "file": "/app/db_export/wallet_transactions.json"
+    },
+    {
+      "collection": "points_transactions",
+      "count": 8,
+      "file": "/app/db_export/points_transactions.json"
+    },
+    {
+      "collection": "coupons",
+      "count": 0,
+      "file": null
+    },
+    {
+      "collection": "coupon_usages",
+      "count": 0,
+      "file": null
+    },
+    {
+      "collection": "segments",
+      "count": 0,
+      "file": null
+    },
+    {
+      "collection": "loyalty_settings",
+      "count": 2,
+      "file": "/app/db_export/loyalty_settings.json"
+    },
+    {
+      "collection": "feedback",
+      "count": 0,
+      "file": null
+    },
+    {
+      "collection": "whatsapp_templates",
+      "count": 0,
+      "file": null
+    },
+    {
+      "collection": "automation_rules",
+      "count": 0,
+      "file": null
+    },
+    {
+      "collection": "campaigns",
+      "count": 0,
+      "file": null
+    },
+    {
+      "collection": "campaign_messages",
+      "count": 0,
+      "file": null
+    }
+  ]
+}
