@@ -23,6 +23,161 @@ async def verify_pos_api_key(x_api_key: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid API key")
     return user
 
+
+# ============================================
+# POS Customer Management APIs (for MyGenie/other POS to call)
+# ============================================
+
+class POSCustomerCreate(BaseModel):
+    """Schema for POS to create a customer"""
+    name: str
+    phone: str
+    country_code: str = "+91"
+    email: Optional[str] = None
+    dob: Optional[str] = None
+    anniversary: Optional[str] = None
+    gst_name: Optional[str] = None
+    gst_number: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+    notes: Optional[str] = None
+
+class POSCustomerUpdate(BaseModel):
+    """Schema for POS to update a customer"""
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    country_code: Optional[str] = None
+    email: Optional[str] = None
+    dob: Optional[str] = None
+    anniversary: Optional[str] = None
+    gst_name: Optional[str] = None
+    gst_number: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+    notes: Optional[str] = None
+
+
+@router.post("/customers", response_model=POSResponse)
+async def pos_create_customer(
+    customer_data: POSCustomerCreate,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    API for POS (MyGenie/others) to create a customer in our database.
+    Requires X-API-Key header for authentication.
+    """
+    # Check if phone exists for this user
+    existing = await db.customers.find_one({"user_id": user["id"], "phone": customer_data.phone})
+    if existing:
+        return POSResponse(
+            success=False,
+            message="Customer with this phone already exists",
+            data={"customer_id": existing["id"], "existing": True}
+        )
+    
+    customer_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    customer_doc = {
+        "id": customer_id,
+        "user_id": user["id"],
+        "name": customer_data.name,
+        "phone": customer_data.phone,
+        "country_code": customer_data.country_code,
+        "email": customer_data.email,
+        "dob": customer_data.dob,
+        "anniversary": customer_data.anniversary,
+        "gst_name": customer_data.gst_name,
+        "gst_number": customer_data.gst_number,
+        "address": customer_data.address,
+        "city": customer_data.city,
+        "pincode": customer_data.pincode,
+        "notes": customer_data.notes,
+        "customer_type": "normal",
+        "allergies": [],
+        "custom_field_1": None,
+        "custom_field_2": None,
+        "custom_field_3": None,
+        "favorites": [],
+        "total_points": 0,
+        "wallet_balance": 0.0,
+        "total_visits": 0,
+        "total_spent": 0.0,
+        "tier": "Bronze",
+        "created_at": now,
+        "last_visit": None,
+        "pos_synced": True,
+        "pos_synced_at": now
+    }
+    
+    await db.customers.insert_one(customer_doc)
+    
+    return POSResponse(
+        success=True,
+        message="Customer created successfully",
+        data={
+            "customer_id": customer_id,
+            "name": customer_data.name,
+            "phone": customer_data.phone,
+            "created_at": now
+        }
+    )
+
+
+@router.put("/customers/{customer_id}", response_model=POSResponse)
+async def pos_update_customer(
+    customer_id: str,
+    update_data: POSCustomerUpdate,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    API for POS (MyGenie/others) to update a customer in our database.
+    Requires X-API-Key header for authentication.
+    """
+    customer = await db.customers.find_one({"id": customer_id, "user_id": user["id"]})
+    if not customer:
+        return POSResponse(
+            success=False,
+            message="Customer not found",
+            data=None
+        )
+    
+    update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
+    
+    # Check phone uniqueness if phone is being updated
+    if "phone" in update_dict and update_dict["phone"] != customer.get("phone"):
+        existing = await db.customers.find_one({
+            "user_id": user["id"],
+            "phone": update_dict["phone"],
+            "id": {"$ne": customer_id}
+        })
+        if existing:
+            return POSResponse(
+                success=False,
+                message="Another customer with this phone already exists",
+                data=None
+            )
+    
+    if update_dict:
+        update_dict["pos_synced"] = True
+        update_dict["pos_synced_at"] = datetime.now(timezone.utc).isoformat()
+        await db.customers.update_one({"id": customer_id}, {"$set": update_dict})
+    
+    updated = await db.customers.find_one({"id": customer_id}, {"_id": 0})
+    
+    return POSResponse(
+        success=True,
+        message="Customer updated successfully",
+        data={
+            "customer_id": customer_id,
+            "name": updated.get("name"),
+            "phone": updated.get("phone"),
+            "updated_at": update_dict.get("pos_synced_at")
+        }
+    )
+
 @router.post("/webhook/payment-received", response_model=POSResponse)
 async def pos_payment_received(
     webhook_data: POSPaymentWebhook,
