@@ -43,8 +43,8 @@
 ╠════════════════════════════════════════════════════════════════╣
 ║                                                                ║
 ║  Regular Login:        MyGenie API (STRICTLY)                 ║
-║  • ALL production users                                        ║
-║  • Including test@restaurant.com                              ║
+║  • ONLY real production users                                 ║
+║  • test@restaurant.com does NOT exist in MyGenie             ║
 ║  • Auth happens on MyGenie servers                            ║
 ║  • User data synced to local DB after auth                    ║
 ║                                                                ║
@@ -86,7 +86,7 @@
 12. No demo banner shown
 ```
 
-### Example 2: Test User Login (Same Flow!)
+### Example 2: Trying to Login with test@restaurant.com via Regular Login
 ```
 1. User visits login page
 2. Enters email: test@restaurant.com
@@ -94,10 +94,11 @@
 4. Clicks "Sign In"
 5. Frontend → POST /api/auth/login
 6. Backend → POST https://api.mygenie.com/auth/login
-7. MyGenie validates test user
-8. Backend receives test user data
-9. User logged in ✅
-10. No demo banner shown
+7. ❌ MyGenie returns 401 - User not found
+8. Error: "Invalid credentials"
+   
+Note: test@restaurant.com does NOT exist in MyGenie!
+Use Demo Mode button instead.
 ```
 
 ### Example 3: Demo Mode (Quick Testing)

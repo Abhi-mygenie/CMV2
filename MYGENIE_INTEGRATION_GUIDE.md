@@ -31,7 +31,7 @@ This application uses a dual authentication system:
 
 ### 1. Regular Login (MyGenie API) ⭐ PRIMARY METHOD
 
-**For**: ALL production users including test users
+**For**: ONLY real production users (test@restaurant.com does NOT exist in MyGenie)
 **Endpoint**: `POST /api/auth/login` → `POST /api/auth/mygenie-login`
 **Process**:
 ```
@@ -275,7 +275,7 @@ Before going to production:
 ## FAQ
 
 ### Q: Can test@restaurant.com still be used?
-**A**: Yes! But it must be authenticated through MyGenie API. Demo Mode bypasses MyGenie and uses local DB.
+**A**: Yes, but ONLY via Demo Mode button! test@restaurant.com does NOT exist in MyGenie - it's purely a local demo user. Regular login will ONLY work with real MyGenie users.
 
 ### Q: What if MyGenie API is down?
 **A**: Regular logins will fail (503 error). Demo Mode will still work as it uses local DB.
