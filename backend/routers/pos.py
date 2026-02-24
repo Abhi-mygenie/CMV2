@@ -128,24 +128,33 @@ async def pos_create_customer(
     customer_doc = {
         "id": customer_id,
         "user_id": user["id"],
+        # Basic Info
         "name": customer_data.name,
         "phone": customer_data.phone,
         "country_code": customer_data.country_code,
         "email": customer_data.email,
+        # Personal Details
         "dob": customer_data.dob,
         "anniversary": customer_data.anniversary,
+        # Customer Type
+        "customer_type": customer_data.customer_type,
+        # GST Details
         "gst_name": customer_data.gst_name,
         "gst_number": customer_data.gst_number,
+        # Address
         "address": customer_data.address,
         "city": customer_data.city,
         "pincode": customer_data.pincode,
+        # Preferences
+        "allergies": customer_data.allergies or [],
+        "favorites": customer_data.favorites or [],
+        # Custom Fields
+        "custom_field_1": customer_data.custom_field_1,
+        "custom_field_2": customer_data.custom_field_2,
+        "custom_field_3": customer_data.custom_field_3,
+        # Notes
         "notes": customer_data.notes,
-        "customer_type": "normal",
-        "allergies": [],
-        "custom_field_1": None,
-        "custom_field_2": None,
-        "custom_field_3": None,
-        "favorites": [],
+        # System Fields (default values)
         "total_points": 0,
         "wallet_balance": 0.0,
         "total_visits": 0,
