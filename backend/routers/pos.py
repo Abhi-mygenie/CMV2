@@ -32,6 +32,10 @@ async def verify_pos_api_key(x_api_key: str = Header(None)):
 
 class POSCustomerCreate(BaseModel):
     """Schema for POS to create a customer - includes all customer fields"""
+    # POS Identification (Required)
+    pos_id: str  # POS system identifier (mygenie, petpooja, ezzo)
+    restaurant_id: str  # Restaurant ID in that POS system
+    
     # Basic Info
     name: str
     phone: str
@@ -68,7 +72,11 @@ class POSCustomerCreate(BaseModel):
 
 
 class POSCustomerUpdate(BaseModel):
-    """Schema for POS to update a customer - all fields optional"""
+    """Schema for POS to update a customer - all fields optional except POS identifiers"""
+    # POS Identification (Required)
+    pos_id: str  # POS system identifier (mygenie, petpooja, ezzo)
+    restaurant_id: str  # Restaurant ID in that POS system
+    
     # Basic Info
     name: Optional[str] = None
     phone: Optional[str] = None
