@@ -920,13 +920,30 @@ const CustomersPage = () => {
                     <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="customers-title">
                         Customers
                     </h1>
-                    <Button 
-                        onClick={() => setShowAddModal(true)}
-                        className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full h-10 px-4"
-                        data-testid="add-customer-btn"
-                    >
-                        <Plus className="w-4 h-4 mr-1" /> Add
-                    </Button>
+                    <div className="flex gap-2">
+                        {!isDemoMode && (
+                            <Button 
+                                onClick={syncFromMyGenie}
+                                disabled={syncing}
+                                variant="outline"
+                                className="rounded-full h-10 px-4 border-[#329937] text-[#329937] hover:bg-[#329937]/10"
+                                data-testid="sync-mygenie-btn"
+                            >
+                                {syncing ? (
+                                    <>⏳ Syncing...</>
+                                ) : (
+                                    <>🔄 Sync MyGenie</>
+                                )}
+                            </Button>
+                        )}
+                        <Button 
+                            onClick={() => setShowAddModal(true)}
+                            className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full h-10 px-4"
+                            data-testid="add-customer-btn"
+                        >
+                            <Plus className="w-4 h-4 mr-1" /> Add
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Search & Filter Row */}
