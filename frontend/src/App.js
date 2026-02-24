@@ -636,12 +636,13 @@ const DashboardPage = () => {
 // ============ CUSTOMERS PAGE ============
 
 const CustomersPage = () => {
-    const { api } = useAuth();
+    const { api, isDemoMode } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [customers, setCustomers] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
+    const [syncing, setSyncing] = useState(false);
     const [showAddModal, setShowAddModal] = useState(location.state?.openAddModal || false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState(null);
