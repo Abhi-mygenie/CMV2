@@ -132,21 +132,94 @@ async def demo_login():
 @router.post("/mygenie-login", response_model=TokenResponse)
 async def mygenie_login(credentials: UserLogin):
     """
-    Production login - authenticates via MyGenie API endpoints
-    TODO: Integrate with actual MyGenie authentication API
+    Production login - STRICTLY authenticates via MyGenie API
+    All users (including test users) must authenticate through MyGenie
+    
+    Integration Required:
+    1. Set MYGENIE_API_URL in environment (.env)
+    2. Set MYGENIE_API_KEY in environment (.env)
+    3. Uncomment the MyGenie API call section below
     """
-    # TODO: Replace with actual MyGenie API call
-    # For now, this is a placeholder that mimics the structure
     
-    # Placeholder for MyGenie API integration:
+    # ==========================================
+    # TODO: UNCOMMENT THIS SECTION WHEN MYGENIE API IS READY
+    # ==========================================
+    # import httpx
+    # 
     # mygenie_api_url = os.getenv("MYGENIE_API_URL", "https://api.mygenie.com")
-    # response = await http_client.post(
-    #     f"{mygenie_api_url}/auth/login",
-    #     json={"email": credentials.email, "password": credentials.password}
-    # )
-    # mygenie_user = response.json()
+    # mygenie_api_key = os.getenv("MYGENIE_API_KEY")
+    # 
+    # if not mygenie_api_url or not mygenie_api_key:
+    #     raise HTTPException(
+    #         status_code=500, 
+    #         detail="MyGenie API not configured"
+    #     )
+    # 
+    # async with httpx.AsyncClient() as client:
+    #     try:
+    #         response = await client.post(
+    #             f"{mygenie_api_url}/auth/login",
+    #             json={
+    #                 "email": credentials.email,
+    #                 "password": credentials.password
+    #             },
+    #             headers={
+    #                 "X-API-Key": mygenie_api_key,
+    #                 "Content-Type": "application/json"
+    #             },
+    #             timeout=10.0
+    #         )
+    #         
+    #         if response.status_code != 200:
+    #             raise HTTPException(
+    #                 status_code=401, 
+    #                 detail="Invalid credentials from MyGenie"
+    #             )
+    #         
+    #         mygenie_user = response.json()
+    #         
+    #         # Sync user to local database if needed
+    #         user_id = mygenie_user.get("id") or str(uuid.uuid4())
+    #         
+    #         # Check if user exists locally, if not create
+    #         local_user = await db.users.find_one({"email": credentials.email})
+    #         if not local_user:
+    #             user_doc = {
+    #                 "id": user_id,
+    #                 "email": mygenie_user["email"],
+    #                 "restaurant_name": mygenie_user["restaurant_name"],
+    #                 "phone": mygenie_user.get("phone", ""),
+    #                 "created_at": datetime.now(timezone.utc).isoformat()
+    #             }
+    #             await db.users.insert_one(user_doc)
+    #         else:
+    #             user_id = local_user["id"]
+    #         
+    #         # Create local JWT token
+    #         token = create_token(user_id)
+    #         
+    #         return TokenResponse(
+    #             access_token=token,
+    #             user=UserResponse(
+    #                 id=user_id,
+    #                 email=mygenie_user["email"],
+    #                 restaurant_name=mygenie_user["restaurant_name"],
+    #                 phone=mygenie_user.get("phone", ""),
+    #                 created_at=local_user["created_at"] if local_user else user_doc["created_at"]
+    #             ),
+    #             is_demo=False
+    #         )
+    #         
+    #     except httpx.TimeoutException:
+    #         raise HTTPException(status_code=504, detail="MyGenie API timeout")
+    #     except httpx.RequestError as e:
+    #         raise HTTPException(status_code=503, detail=f"MyGenie API error: {str(e)}")
     
-    # For now, check local DB (will be replaced with MyGenie API)
+    # ==========================================
+    # TEMPORARY: Local DB fallback (REMOVE AFTER MYGENIE INTEGRATION)
+    # ==========================================
+    # This is ONLY for development/testing
+    # In production, this entire section should be removed
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user or not verify_password(credentials.password, user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
