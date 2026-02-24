@@ -1,77 +1,74 @@
-<analysis>**original_problem_statement**: The user's initial request was to pull the git repository  and build the application. The scope evolved to include:
-1.  **Demo Mode**: Implement a Demo Mode feature on the login page that uses a local test user () for immediate access without external authentication.
-2.  **MyGenie Integration**: Integrate with the production MyGenie API for real user authentication.
-3.  **Customer Sync**: Fetch and synchronize customer data from the MyGenie API into the local MongoDB database upon user login. This includes an automatic sync on login and a manual sync button in the UI.
-4.  **Schema Expansion**: Enhance the local customer database schema and the sync logic to store additional data points from the MyGenie API, specifically:
-    *   **Loyalty**: , , .
-    *   **Wallet**: , .
+<analysis>**original_problem_statement**: The initial request was to build a customer management application by cloning a git repository, integrating a Demo Mode, and connecting to an external MyGenie API for user authentication and customer data synchronization.
+
+The scope has since expanded to include:
+1.  **Bi-directional Sync**:
+    *   Sync customer data **FROM** MyGenie to the local DB (originally on login, now to be a manual-only action).
+    *   Sync customer data **TO** MyGenie when a customer is created or updated within this application.
+2.  **Schema Expansion**: Add detailed loyalty, wallet, and profile fields to the local customer database.
+3.  **POS Integration Webhooks**: Create a set of secure, API-key-authenticated endpoints for external Point-of-Sale (POS) systems like MyGenie to push customer data (creations/updates) into this application's database.
+4.  **New Sync API**: Create a new endpoint that allows a logged-in user to manually trigger a full customer sync from MyGenie, and remove the automatic sync that currently happens on login.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application with a React frontend and FastAPI backend is fully set up and running. The environment is configured, dependencies are installed, and services are managed by .
+A full-stack application (React frontend, FastAPI backend, MongoDB) is running. It features a dual-login system (Demo Mode and Live Mode via MyGenie API).
 
-The application features a dual-login system:
-1.  A fully functional Demo Mode that logs in using a hardcoded local user.
-2.  A Live Mode that authenticates users against the external MyGenie API and automatically syncs their associated customer data into the local MongoDB.
+The application supports bi-directional data flow with the MyGenie API:
+-   **Push to MyGenie**: When a customer is created or edited in the app's UI, the changes are pushed to the MyGenie API.
+-   **Pull from MyGenie**: A function exists to pull all customer data from MyGenie, which is currently triggered automatically on user login.
 
-The database schema and backend sync logic have been updated to accommodate new fields for detailed loyalty and wallet tracking, as requested by the user.
+Webhook endpoints ( and ) have been created to allow external POS systems to create and update customers in the local database. These are secured with an  header and support a comprehensive payload including  and .
 
 **Last working item**:
-*   **Last item agent was working**: The agent just finished updating the backend sync logic to include new wallet-related fields from the MyGenie API:  and . The code in  (manual sync) and  (auto-sync on login) was modified.
-*   **Status**: IN PROGRESS
-*   **Agent Testing Done**: N
-*   **Which testing method agent to use?**: backend testing agent. The agent needs to log in with a MyGenie user (), which triggers an auto-sync. Then, it must query the  collection in MongoDB to confirm that the new fields (, ) have been added to the customer documents and populated correctly. This can be done with a  script.
+*   **Last item agent was working**: The agent was confirming the requirements for the user's latest request: to create a new manual sync API and remove the existing auto-sync-on-login feature. The user wants a Sync button in the UI that will trigger a full customer data pull from the MyGenie API.
+*   **Status**: NOT STARTED
+*   **Agent Testing Done**: N/A
+*   **Which testing method agent to use?**: backend testing agent. After implementation, the agent should:
+    1.  Confirm the auto-sync on login is removed.
+    2.  Test the new manual sync endpoint to verify it correctly pulls and updates customer data from the MyGenie API.
 *   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1 (P0)**: Verify that the newly added wallet fields are syncing correctly.
+*   There are no outstanding bugs. The focus is on implementing the new feature requested by the user.
 
 **Issues Detail**:
-*   **Issue 1: Verify the new wallet fields (, ) are correctly synced and stored in the database.**
-    *   **Attempted fixes**: The backend code has been updated to handle these fields, but no verification has been performed.
-    *   **Next debug checklist**:
-        1.  Log in to the application using the MyGenie credentials:  / .
-        2.  This action will automatically trigger the customer sync process from the MyGenie API.
-        3.  Execute a  script to connect to the local MongoDB.
-        4.  Query the  collection and inspect a few documents.
-        5.  Confirm that the  and  fields exist and contain numerical values (they default to 0 if not provided by the API).
-    *   **Why fix this issue and what will be achieved with the fix?**: This will complete the user's requirement for comprehensive wallet data tracking and ensure data integrity between the MyGenie API and the local database.
-    *   **Status**: TESTING PENDING
-    *   **Is recurring issue?**: N
-    *   **Should Test frontend/backend/both after fix?**: Backend
-    *   **Blocked on other issue**: None
+*   N/A
 
 **In progress Task List**:
-There are no tasks currently in progress. The immediate focus is on verifying the last implementation.
+*   **Task 1: Implement New Manual Sync Mechanism (P0)**
+    *   **Where to resume**:
+        1.  In , remove the call to  from the login endpoint.
+        2.  Create a new endpoint, such as , in .
+        3.  This new endpoint should be protected by the standard user JWT authentication and should call the existing  function to perform the sync.
+    *   **What will be achieved with this?**: The customer sync will no longer happen automatically on every login, reducing redundant API calls. Instead, it will be a deliberate action initiated by the user from the frontend.
+    *   **Status**: NOT STARTED
+    *   **Should Test frontend/backend/both after fix?**: Backend
+    *   **Blocked on something**: None
 
 **Upcoming and Future Tasks**
 *   **Upcoming Tasks**:
-    *   **Task 1 (P0)**: Update the frontend UI to display the newly synced data. The customer detail view should be modified to show the lifetime loyalty points (, ) and wallet transactions (, ).
-    *   **Task 2 (P1)**: Display the  amount for each customer in the UI.
+    *   **Task 1 (P1)**: Add a Sync button in the frontend (e.g., in a Settings page) to call the newly created manual sync API.
+    *   **Task 2 (P2)**: Refactor hardcoded MyGenie API URLs from  files into the backend  file for better configuration management.
 *   **Future Tasks**:
-    *   **Task 3 (P2)**: Implement functionality for customers to redeem loyalty points and use their wallet balance. The current app only displays this data.
-    *   **Task 4 (P3)**: Refactor the backend to move hardcoded MyGenie API URLs from the Python files (, ) into the  configuration file.
+    *   **Task 3 (P3)**: Implement UI and functionality for customers to redeem loyalty points and use their wallet balance.
 
 **Completed work in this session**
-*   **Initial Setup**: Cloned the  git repository, installed all dependencies, configured environment variables, and successfully started both frontend and backend services.
-*   **Demo Mode Implementation**:
-    *   Added a Try Demo Mode button to the login page ().
-    *   Created a  endpoint for local authentication ().
-    *   Added a persistent Demo Mode banner in the UI for clarity.
-*   **MyGenie API Integration**:
-    *   Integrated MyGenie's authentication endpoints into the  flow.
-    *   Implemented logic to create or update local user records based on the unique  from the MyGenie API.
-*   **Customer Data Synchronization**:
-    *   Created a robust sync function () to fetch customer data from MyGenie.
-    *   Implemented automatic sync on every user login.
-    *   Added a manual Sync MyGenie button on the customer list page ().
-*   **Database Schema Enhancement**:
-    *   Updated the  MongoDB collection to store , , and .
-    *   Further updated the schema to store  and .
+-   **Sync to MyGenie**: Implemented functionality to sync customer creations and updates from the local application *to* the MyGenie API.
+-   **POS Integration Webhooks**:
+    -   Created  endpoint for external systems to create customers.
+    -   Created  endpoint for external systems to update customers.
+    -   Secured these endpoints using an  header.
+-   **Payload Finalization**: Iteratively refined the webhook payload with the user to include a comprehensive set of customer fields, including  and .
 
 **Earlier issues found/mentioned but not fixed**
-*   None.
+*   **Issue 1: Incomplete Loyalty/Wallet Data from MyGenie API**
+    *   During the initial sync implementation, the agent discovered that the MyGenie customer list API only returns current balances (, ) and not the detailed transaction history fields (, , etc.) that the user requested.
+    *   **Debug checklist**:
+        1.  Re-confirm with the user if there is an alternate MyGenie API endpoint that provides this detailed data.
+        2.  Discuss whether this data should be tracked locally within this application instead of relying on the MyGenie sync.
+    *   **Why to solve this issue and what will be achieved with this?**: This is a blocker for the original requirement of displaying detailed loyalty and wallet history in the UI.
+    *   **Should Test frontend/backend/both after fix**: Backend (API investigation).
+    *   **Is recurring issue?**: N
 
 **Known issue recurrence from previous fork**
 *   None.
@@ -80,64 +77,58 @@ There are no tasks currently in progress. The immediate focus is on verifying th
 
 
 **Key Technical Concepts**
-*   **Frontend**: React, Tailwind CSS, Radix UI, Axios, React Context API.
+*   **Frontend**: React, Axios, React Context API.
 *   **Backend**: FastAPI, Motor (async MongoDB driver), Pydantic.
 *   **Database**: MongoDB.
-*   **Authentication**: A hybrid JWT-based system. The app validates credentials against the external MyGenie API and then issues its own JWT to manage the local session.
-*   **Architecture**: A Backend-for-Frontend (BFF) pattern where the FastAPI backend serves the React frontend while also acting as a proxy and data synchronizer for the external MyGenie API.
+*   **Authentication**:
+    *   JWT-based for the application's internal session management.
+    *   API Key-based ( header) for the external POS webhook endpoints.
 
 **key DB schema**
-*   **users**: 
 *   **customers**: 
 
 **changes in tech stack**
 *   None.
 
 **All files of reference**
-*   : Core file for login logic, MyGenie authentication, and triggering the auto-sync.
-*   : Contains the customer data synchronization logic for both manual and automatic triggers.
-*   : The entry point for users, containing the Demo Mode button.
-*   : Manages the application's authentication state.
-*   : Displays the customer list and includes the manual sync button.
+*   : To be modified to remove auto-sync.
+*   : Contains existing customer logic; will be modified to add the new manual sync endpoint.
+*   : Contains the newly created webhook endpoints for POS systems.
+*   : Contains the updated Pydantic models for customer data.
 
 **Areas that need refactoring**:
-*   The MyGenie API URLs are currently hardcoded in  and . They should be moved to the backend  file to allow for easier configuration between environments (e.g., pre-prod vs. production).
+*   Hardcoded MyGenie API URLs in  and  should be moved to the  file.
 
 **key api endpoints**
-*   : Authenticates via MyGenie API and triggers an automatic customer sync.
-*   : Logs in the local demo user.
-*   : Manually triggers customer sync from MyGenie.
-*   : Retrieves the list of synced customers from the local database.
+*   : Authenticates user. (Auto-sync to be removed).
+*   : Creates a customer and syncs it **to** MyGenie.
+*   : Updates a customer and syncs it **to** MyGenie.
+*   : **(Webhook)** Creates a customer from an external POS.
+*   : **(Webhook)** Updates a customer from an external POS.
+*   : **(To be created)** Manually triggers a sync **from** MyGenie.
 
 **Critical Info for New Agent**
-*   The application operates in two distinct modes: **Demo Mode** (local data only) and **Live Mode** (MyGenie API integration).
-*   In Live Mode, the local MongoDB is the app's source of truth, but its data is populated and updated exclusively from the MyGenie API. The backend handles all data synchronization.
-*   Use the provided credentials for testing both modes. The  user has associated customer data with loyalty points and wallet balances, making it ideal for testing the sync functionality.
-*   Be aware that MyGenie API URLs are currently hardcoded in the backend code.
+*   The application now handles three types of data synchronization: pushing local changes to MyGenie, pulling remote changes from MyGenie (manually), and receiving data from external POS systems via webhooks. Be mindful of which flow you are working on.
+*   The webhook APIs () use a different authentication method (API Key) than the internal app APIs (, JWT).
+*   The user is very hands-on and requires confirmation of your understanding before you begin implementation. Use the  tool frequently to propose plans and clarify requirements.
 
 **documents and test reports created in this job**
-*   
-*   
-*   
+*   None in this session.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User (msg 259):** Requested to test with  and confirm sync of loyalty/wallet points. (Status: Completed)
-2.  **Agent (msg 264):** Confirmed loyalty and wallet balances were syncing. (Status: Completed)
-3.  **User (msg 265):** Requested adding , ,  fields. (Status: Completed)
-4.  **Agent (msg 266):** Confirmed understanding and asked for exact API field names. (Status: Completed)
-5.  **User (msg 267):** Provided the exact field names for new loyalty data. (Status: Completed)
-6.  **Agent (msg 268-278):** Implemented and verified the loyalty field updates. (Status: Completed)
-7.  **User (msg 280):** Requested similar detailed fields for the wallet: , , . (Status: Completed)
-8.  **Agent (msg 281):** Confirmed understanding and asked for exact API field names for the wallet. (Status: Completed)
-9.  **User (msg 282):** Provided wallet field names: , , and to keep . (Status: Completed)
-10. **Agent (msg 283-289):** Implemented wallet field updates and restarted the backend. (Status: In Progress - Verification Pending)
+1.  **User (msg 134):** Clarified that  is for the POS system (e.g., mygenie) and  is for the restaurant. (Status: Completed)
+2.  **User (msg 136):** Confirmed understanding and asked for the final payload before implementation. (Status: Completed)
+3.  **User (msg 138):** Approved the final payload and instructed the agent to proceed. (Status: Completed)
+4.  **User (msg 158):** Stated that the phone number must be a required field for the update endpoint as it's the unique key. (Status: Completed)
+5.  **User (msg 168):** Asked for the  commands for the completed create and update endpoints. (Status: Completed)
+6.  **User (msg 170):** Requested a new  API that will be triggered by a UI button. Specified that the automatic sync on login should be removed and asked the agent to state their understanding before proceeding. (Status: In Progress - this is the current active task).
 
 **Project Health Check:**
 *   **Broken**: None.
-*   **Mocked**: The MyGenie API is a live external integration, not mocked. However, its URL is hardcoded, which is not ideal.
+*   **Mocked**: The MyGenie API is a live external integration.
 
 **3rd Party Integrations**
-*   **MyGenie API**: Used for user authentication and fetching customer data. No API key required; uses a standard email/password login flow.
+*   **MyGenie API**: Used for user authentication and bi-directional customer data synchronization.
 
 **Testing status**
 *   **Testing agent used after significant changes**: NO
@@ -146,14 +137,14 @@ There are no tasks currently in progress. The immediate focus is on verifying th
 *   **Known regressions**: None
 
 **Credentials to test flow:**
-*   **Demo Mode**: Click the Try Demo Mode button on the login page.
-*   **MyGenie User 1 (basic user)**:
+*   **MyGenie User (for login)**:
     *   Email: 
     *   Password: 
-*   **MyGenie User 2 (with customer data)**:
-    *   Email: 
-    *   Password: 
+*   **POS Webhook API Key**:
+    *   Header: 
+    *   Value: 
 
 **What agent forgot to execute**
-*   The agent implemented the code to sync the new wallet fields (, ) but did not run a test to verify that the data is correctly saved to MongoDB after a sync.
-*   The agent did not refactor the hardcoded MyGenie API URL into an environment variable.</analysis>
+*   The agent has correctly queued up the user's latest request but has not yet started the implementation.
+*   The unresolved issue regarding incomplete loyalty/wallet data from the MyGenie API was put on hold and needs to be brought back to the user's attention before related UI work can begin.
+*   The task to refactor hardcoded URLs into the  file is still pending from the previous session.</analysis>
