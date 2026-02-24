@@ -304,6 +304,7 @@ for i, customer in enumerate(customers[:25]):
             "user_id": demo_user_id,
             "customer_id": customer["id"],
             "customer_name": customer["name"],
+            "customer_phone": customer["phone"],
             "rating": random.randint(3, 5),
             "comments": random.choice(comments),
             "created_at": random_date_ago(60)
