@@ -268,7 +268,98 @@ curl -X POST "https://customer-sync-app.preview.emergentagent.com/api/pos/custom
 
 ---
 
-## 4. Order Webhook (NEW)
+## 4. Max Redeemable Points
+
+Check the maximum loyalty points a customer can redeem for a given bill amount. Use this before checkout to validate redemption.
+
+### Endpoint
+```
+POST /api/pos/max-redeemable
+```
+
+### Headers
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `X-API-Key` | string | Yes | API key for authentication |
+| `Content-Type` | string | Yes | `application/json` |
+
+### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `pos_id` | string | **Yes** | POS system identifier ("mygenie") |
+| `restaurant_id` | string | **Yes** | Restaurant ID in POS system |
+| `cust_mobile` | string | **Yes** | Customer phone number (10 digits) |
+| `bill_amount` | float | **Yes** | Order bill amount |
+
+### Example Request
+
+```bash
+curl -X POST "https://customer-sync-app.preview.emergentagent.com/api/pos/max-redeemable" \
+  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "pos_id": "mygenie",
+    "restaurant_id": "478",
+    "cust_mobile": "9876543210",
+    "bill_amount": 1000
+  }'
+```
+
+### Success Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Max redeemable calculated",
+  "data": {
+    "max_points_redeemable": 400,
+    "max_discount_value": 100.00
+  }
+}
+```
+
+### Response - Customer Not Found (200 OK)
+
+```json
+{
+  "success": false,
+  "message": "Customer not found",
+  "data": {
+    "registered": false
+  }
+}
+```
+
+### Response - Below Minimum Points (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Customer does not have minimum points required for redemption",
+  "data": {
+    "max_points_redeemable": 0,
+    "max_discount_value": 0.0,
+    "available_points": 50,
+    "min_points_required": 100
+  }
+}
+```
+
+### Calculation Logic
+
+The maximum redeemable points are calculated considering:
+
+1. **Customer's available points** - Cannot redeem more than they have
+2. **Minimum points required** - Customer must have at least 100 points (configurable)
+3. **Max redemption percent** - Cannot exceed 50% of bill amount (configurable)
+4. **Max redemption cap** - Cannot exceed ₹500 absolute cap (configurable)
+
+The API returns the **lowest** of all these limits.
+
+---
+
+## 5. Order Webhook
 
 Webhook endpoint for MyGenie to send order data on every completed order. Automatically calculates and awards loyalty points.
 
