@@ -154,6 +154,54 @@ async def create_customer(customer_data: CustomerCreate, user: dict = Depends(ge
     customer_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     
+    # Get user's MyGenie token for API sync
+    user_record = await db.users.find_one({"id": user["id"]})
+    mygenie_token = user_record.get("mygenie_token") if user_record else None
+    mygenie_customer_id = None
+    
+    # Sync to MyGenie if token available
+    if mygenie_token:
+        mygenie_api_url = os.getenv("MYGENIE_API_URL", "https://preprod.mygenie.online")
+        
+        # Split name into first and last name
+        name_parts = (customer_data.name or "").split(" ", 1)
+        f_name = name_parts[0] if name_parts else ""
+        l_name = name_parts[1] if len(name_parts) > 1 else ""
+        
+        mygenie_payload = {
+            "phone": customer_data.phone or "",
+            "f_name": f_name,
+            "l_name": l_name,
+            "email": customer_data.email or "",
+            "gst_number": customer_data.gst_number or "",
+            "gst_name": customer_data.gst_name or "",
+            "date_of_birth": customer_data.dob or "",
+            "date_of_anniversary": customer_data.anniversary or "",
+            "membership_id": ""
+        }
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    f"{mygenie_api_url}/api/v1/vendoremployee/pos/user-check-create",
+                    headers={
+                        "Authorization": f"Bearer {mygenie_token}",
+                        "Content-Type": "application/json; charset=UTF-8",
+                        "X-localization": "en"
+                    },
+                    json=mygenie_payload,
+                    timeout=15.0
+                )
+                
+                if resp.status_code == 200:
+                    mygenie_resp = resp.json()
+                    mygenie_customer_id = mygenie_resp.get("user_id")
+                    print(f"✅ Customer synced to MyGenie: {mygenie_customer_id}")
+                else:
+                    print(f"⚠️ MyGenie sync failed: {resp.status_code} - {resp.text}")
+        except Exception as e:
+            print(f"⚠️ MyGenie sync error (non-critical): {str(e)}")
+    
     customer_doc = {
         "id": customer_id,
         "user_id": user["id"],
@@ -181,7 +229,9 @@ async def create_customer(customer_data: CustomerCreate, user: dict = Depends(ge
         "total_spent": 0.0,
         "tier": "Bronze",
         "created_at": now,
-        "last_visit": None
+        "last_visit": None,
+        "mygenie_customer_id": mygenie_customer_id,
+        "mygenie_synced": mygenie_customer_id is not None
     }
     
     await db.customers.insert_one(customer_doc)
