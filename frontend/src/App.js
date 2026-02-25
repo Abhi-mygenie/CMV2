@@ -1314,6 +1314,12 @@ const CustomersPage = () => {
                     </div>
                 )}
             </div>
+            </>
+            )}
+            
+            {customerTab === "segments" && (
+                <SegmentsPageContent />
+            )}
 
             {/* Add Customer Modal */}
             <Dialog open={showAddModal} onOpenChange={(open) => { setShowAddModal(open); if (!open) resetForm(); }}>
