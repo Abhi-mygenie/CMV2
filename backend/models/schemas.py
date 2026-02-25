@@ -32,24 +32,57 @@ class TokenResponse(BaseModel):
 
 # Customer Models
 class CustomerBase(BaseModel):
+    # Basic Information
     name: str
     phone: str
     country_code: str = "+91"
     email: Optional[str] = None
-    notes: Optional[str] = None
+    gender: Optional[str] = None  # male, female, other, prefer_not_to_say
     dob: Optional[str] = None
     anniversary: Optional[str] = None
-    customer_type: str = "normal"
+    preferred_language: Optional[str] = None  # en, hi, etc.
+    customer_type: str = "normal"  # normal, corporate
+    segment_tags: Optional[List[str]] = None  # Array of segment IDs
+    
+    # Contact & Marketing Permissions
+    whatsapp_opt_in: bool = False
+    whatsapp_opt_in_date: Optional[str] = None
+    promo_whatsapp_allowed: bool = True
+    promo_sms_allowed: bool = True
+    email_marketing_allowed: bool = True
+    call_allowed: bool = True
+    is_blocked: bool = False
+    
+    # Loyalty Information
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None  # customer_id who referred
+    membership_id: Optional[str] = None
+    membership_expiry: Optional[str] = None
+    
+    # Behavior & Preferences
+    favorite_category: Optional[str] = None
+    preferred_payment_mode: Optional[str] = None  # cash, card, upi
+    
+    # Corporate Information
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
+    
+    # Address
     address: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
+    
+    # Preferences
     allergies: Optional[List[str]] = None
+    favorites: Optional[List[str]] = None
+    
+    # Custom Fields
     custom_field_1: Optional[str] = None
     custom_field_2: Optional[str] = None
     custom_field_3: Optional[str] = None
-    favorites: Optional[List[str]] = None
+    
+    # Notes
+    notes: Optional[str] = None
 
 class CustomerCreate(CustomerBase):
     pass
