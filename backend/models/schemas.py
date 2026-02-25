@@ -142,33 +142,73 @@ class CustomerUpdate(BaseModel):
 
 class Customer(BaseModel):
     model_config = ConfigDict(extra="ignore")
+    
+    # System Fields
     id: str
     user_id: str
+    created_at: str
+    updated_at: Optional[str] = None
+    
+    # Basic Information
     name: str
     phone: str
     country_code: str = "+91"
     email: Optional[str] = None
-    notes: Optional[str] = None
+    gender: Optional[str] = None
     dob: Optional[str] = None
     anniversary: Optional[str] = None
+    preferred_language: Optional[str] = None
     customer_type: str = "normal"
+    segment_tags: Optional[List[str]] = None
+    
+    # Contact & Marketing Permissions
+    whatsapp_opt_in: bool = False
+    whatsapp_opt_in_date: Optional[str] = None
+    promo_whatsapp_allowed: bool = True
+    promo_sms_allowed: bool = True
+    email_marketing_allowed: bool = True
+    call_allowed: bool = True
+    is_blocked: bool = False
+    
+    # Loyalty Information
+    total_points: int = 0
+    wallet_balance: float = 0.0
+    tier: str = "Bronze"
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None
+    membership_id: Optional[str] = None
+    membership_expiry: Optional[str] = None
+    
+    # Spending & Visit Behavior
+    total_visits: int = 0
+    total_spent: float = 0.0
+    avg_order_value: float = 0.0
+    last_visit: Optional[str] = None
+    favorite_category: Optional[str] = None
+    preferred_payment_mode: Optional[str] = None
+    
+    # Corporate Information
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
+    
+    # Address
     address: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
+    
+    # Preferences
     allergies: Optional[List[str]] = None
+    favorites: Optional[List[str]] = None
+    
+    # Custom Fields
     custom_field_1: Optional[str] = None
     custom_field_2: Optional[str] = None
     custom_field_3: Optional[str] = None
-    favorites: Optional[List[str]] = None
-    total_points: int = 0
-    wallet_balance: float = 0.0
-    total_visits: int = 0
-    total_spent: float = 0.0
-    tier: str = "Bronze"
-    created_at: str
-    last_visit: Optional[str] = None
+    
+    # Notes
+    notes: Optional[str] = None
+    
+    # MyGenie Sync
     mygenie_customer_id: Optional[int] = None
     mygenie_synced: Optional[bool] = None
 
