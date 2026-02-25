@@ -5634,10 +5634,13 @@ const WhatsAppAutomationPage = () => {
         try {
             const res = await api.get("/whatsapp/template-variable-map");
             const mappingsObj = {};
+            const modesObj = {};
             (res.data.mappings || []).forEach(m => {
                 mappingsObj[m.template_id] = m.mappings || {};
+                modesObj[m.template_id] = m.modes || {};
             });
             setTemplateVariableMappings(mappingsObj);
+            setTemplateVariableModes(modesObj);
         } catch (err) {
             console.error("Failed to load variable mappings:", err);
         }
