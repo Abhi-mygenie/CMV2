@@ -146,6 +146,19 @@ class POSCustomerUpdate(BaseModel):
     favorite_category: Optional[str] = None
     preferred_payment_mode: Optional[str] = None
     
+    # Customer Source & Journey
+    lead_source: Optional[str] = None
+    campaign_source: Optional[str] = None
+    last_interaction_date: Optional[str] = None
+    assigned_salesperson: Optional[str] = None
+    
+    # WhatsApp CRM Tracking
+    last_whatsapp_sent: Optional[str] = None
+    last_whatsapp_response: Optional[str] = None
+    last_campaign_clicked: Optional[str] = None
+    last_coupon_used: Optional[str] = None
+    automation_status_tag: Optional[str] = None
+    
     # GST Details
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
