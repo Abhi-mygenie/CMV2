@@ -5396,8 +5396,9 @@ const WhatsAppAutomationPage = () => {
     const [automationFilter, setAutomationFilter] = useState("all"); // "all", "active", "not_configured"
     
     // Filter state for templates tab
-    const [templateFilter, setTemplateFilter] = useState("all"); // "all", "mapped", "not_mapped", "draft", "pending", "approved"
+    const [templateFilter, setTemplateFilter] = useState("approved"); // "all", "approved", "pending", "draft"
     const [categoryFilter, setCategoryFilter] = useState("all"); // "all", "marketing", "utility", "authentication"
+    const [mappingToggle, setMappingToggle] = useState("mapped"); // "mapped", "not_mapped" — only when status = approved
     
     // Custom template state
     const [customTemplates, setCustomTemplates] = useState([]);
