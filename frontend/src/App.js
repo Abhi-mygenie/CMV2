@@ -4808,7 +4808,7 @@ const WhatsAppAutomationPage = () => {
                     setAuthkeyTemplates(tplRes.data.templates || []);
                     const mapObj = {};
                     (mapRes.data.mappings || []).forEach(m => {
-                        mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name };
+                        mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name, saved: true };
                     });
                     setEventMappings(mapObj);
                 } catch (_) {}
