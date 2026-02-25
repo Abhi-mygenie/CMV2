@@ -262,6 +262,19 @@ async def pos_create_customer(
         "favorite_category": customer_data.favorite_category,
         "preferred_payment_mode": customer_data.preferred_payment_mode,
         
+        # Customer Source & Journey
+        "lead_source": customer_data.lead_source,
+        "campaign_source": customer_data.campaign_source,
+        "last_interaction_date": now,
+        "assigned_salesperson": customer_data.assigned_salesperson,
+        
+        # WhatsApp CRM Tracking
+        "last_whatsapp_sent": None,
+        "last_whatsapp_response": None,
+        "last_campaign_clicked": None,
+        "last_coupon_used": None,
+        "automation_status_tag": None,
+        
         # GST Details
         "gst_name": customer_data.gst_name,
         "gst_number": customer_data.gst_number,
