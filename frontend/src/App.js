@@ -616,7 +616,7 @@ const DashboardPage = () => {
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-[#1A1A1A] truncate">{customer.name}</p>
+                                    <p className="font-medium text-[#1A1A1A] truncate">{customer.name} <span className="text-[#52525B] font-normal">({customer.total_visits || 0})</span></p>
                                     <p className="text-sm text-[#52525B]">{customer.phone}</p>
                                 </div>
                                 <div className="text-right">
