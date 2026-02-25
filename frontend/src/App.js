@@ -5132,124 +5132,84 @@ const WhatsAppAutomationPage = () => {
 
                     {/* Automation Tab */}
                     <TabsContent value="automation" className="mt-4">
-                        {templates.length === 0 ? (
+                        {!whatsappApiKey ? (
                             <Card className="rounded-xl border-0 shadow-sm">
                                 <CardContent className="p-8 text-center">
-                                    <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-                                    <p className="text-[#52525B]">Create templates first</p>
-                                    <p className="text-xs text-gray-400 mt-1">You need at least one template to create automation rules</p>
-                                    <Button 
-                                        onClick={() => setActiveTab("templates")}
-                                        variant="outline"
-                                        className="mt-4"
-                                    >
-                                        Go to Templates
+                                    <KeyRound className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                                    <p className="text-[#52525B]">API Key Required</p>
+                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to map templates to events</p>
+                                    <Button onClick={() => setActiveTab("settings")} variant="outline" className="mt-4">
+                                        Go to Settings
                                     </Button>
                                 </CardContent>
                             </Card>
                         ) : (
                             <>
-                                <Button 
-                                    onClick={() => {
-                                        setEditingRule(null);
-                                        setRuleForm({ event_type: "", template_id: "", is_enabled: true, delay_minutes: 0 });
-                                        setShowRuleModal(true);
-                                    }}
-                                    className="w-full h-12 bg-[#F26B33] hover:bg-[#D85A2A] rounded-xl mb-4"
-                                    data-testid="add-rule-btn"
-                                >
-                                    <Plus className="w-4 h-4 mr-2" /> Add Automation Rule
-                                </Button>
-
-                                {automationRules.length === 0 ? (
+                                {authkeyTemplates.length === 0 && !loadingAuthkeyTemplates && (
+                                    <Button
+                                        onClick={fetchAuthkeyTemplatesAndMappings}
+                                        className="w-full h-12 bg-[#25D366] hover:bg-[#1da851] rounded-xl mb-4"
+                                        data-testid="load-authkey-templates-btn"
+                                    >
+                                        Load WhatsApp Templates
+                                    </Button>
+                                )}
+                                {loadingAuthkeyTemplates ? (
                                     <Card className="rounded-xl border-0 shadow-sm">
                                         <CardContent className="p-8 text-center">
-                                            <Clock className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                            <p className="text-[#52525B]">No automation rules yet</p>
-                                            <p className="text-xs text-gray-400 mt-1">Set up automatic messages for events</p>
+                                            <div className="w-8 h-8 border-3 border-[#25D366] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                                            <p className="text-[#52525B]">Fetching templates from AuthKey.io...</p>
                                         </CardContent>
                                     </Card>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {automationRules.map(rule => (
-                                            <Card key={rule.id} className="rounded-xl border-0 shadow-sm" data-testid={`rule-${rule.id}`}>
-                                                <CardContent className="p-4">
-                                                    <div className="flex items-start justify-between">
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <Badge className={`${rule.is_enabled ? 'bg-[#25D366]' : 'bg-gray-400'} text-white`}>
-                                                                    {rule.is_enabled ? "Active" : "Inactive"}
-                                                                </Badge>
-                                                                {rule.delay_minutes > 0 && (
-                                                                    <Badge variant="outline" className="text-xs">
-                                                                        {rule.delay_minutes}m delay
-                                                                    </Badge>
-                                                                )}
-                                                            </div>
-                                                            <p className="font-semibold text-[#1A1A1A]">
-                                                                {eventLabels[rule.event_type] || rule.event_type}
-                                                            </p>
-                                                            <p className="text-sm text-[#52525B] mt-1 flex items-center gap-1">
-                                                                <ChevronRight className="w-3 h-3" />
-                                                                Template: <span className="font-medium">{getTemplateName(rule.template_id)}</span>
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex items-center gap-1">
-                                                            <Switch 
-                                                                checked={rule.is_enabled}
-                                                                onCheckedChange={() => handleToggleRule(rule.id)}
-                                                                data-testid={`toggle-rule-${rule.id}`}
-                                                            />
-                                                            <button 
-                                                                onClick={() => handleEditRule(rule)}
-                                                                className="p-2 hover:bg-gray-100 rounded-full"
-                                                                data-testid={`edit-rule-${rule.id}`}
+                                ) : authkeyTemplates.length > 0 && (
+                                    <>
+                                        <p className="text-sm text-[#52525B] mb-3">
+                                            Map a WhatsApp template to each event. {authkeyTemplates.length} templates available.
+                                        </p>
+                                        <div className="space-y-3">
+                                            {availableEvents.map(event => {
+                                                const mapped = eventMappings[event.event];
+                                                return (
+                                                    <Card key={event.event} className="rounded-xl border-0 shadow-sm" data-testid={`event-map-${event.event}`}>
+                                                        <CardContent className="p-4">
+                                                            <p className="font-semibold text-[#1A1A1A] text-sm">{eventLabels[event.event] || event.event}</p>
+                                                            <p className="text-xs text-[#52525B] mb-2">{event.description}</p>
+                                                            <Select
+                                                                value={mapped?.template_id?.toString() || ""}
+                                                                onValueChange={(val) => {
+                                                                    const tpl = authkeyTemplates.find(t => t.wid.toString() === val);
+                                                                    setEventMappings(prev => ({
+                                                                        ...prev,
+                                                                        [event.event]: tpl ? { template_id: tpl.wid, template_name: tpl.temp_name } : null,
+                                                                    }));
+                                                                }}
                                                             >
-                                                                <Edit2 className="w-4 h-4 text-[#52525B]" />
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleDeleteRule(rule.id)}
-                                                                className="p-2 hover:bg-red-50 rounded-full"
-                                                                data-testid={`delete-rule-${rule.id}`}
-                                                            >
-                                                                <Trash2 className="w-4 h-4 text-red-500" />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
+                                                                <SelectTrigger className="h-10 rounded-xl" data-testid={`select-template-${event.event}`}>
+                                                                    <SelectValue placeholder="Select template" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    {authkeyTemplates.map(tpl => (
+                                                                        <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
+                                                                            {tpl.temp_name}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </CardContent>
+                                                    </Card>
+                                                );
+                                            })}
+                                        </div>
+                                        <Button
+                                            onClick={handleSaveMappings}
+                                            disabled={savingMappings}
+                                            className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white mt-4"
+                                            data-testid="save-mappings-btn"
+                                        >
+                                            {savingMappings ? "Saving..." : "Save Mappings"}
+                                        </Button>
+                                    </>
                                 )}
-
-                                {/* Available Events Guide */}
-                                <Card className="rounded-xl border-0 shadow-sm mt-6">
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm font-semibold">Available Events</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="pt-0">
-                                        <ScrollArea className="h-48">
-                                            <div className="space-y-2">
-                                                {availableEvents.map(event => {
-                                                    const hasRule = automationRules.some(r => r.event_type === event.event);
-                                                    return (
-                                                        <div key={event.event} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                                                            <div>
-                                                                <p className="text-sm font-medium text-[#1A1A1A]">{eventLabels[event.event] || event.event}</p>
-                                                                <p className="text-xs text-[#52525B]">{event.description}</p>
-                                                            </div>
-                                                            {hasRule ? (
-                                                                <Badge className="bg-[#25D366] text-white text-xs">Configured</Badge>
-                                                            ) : (
-                                                                <Badge variant="outline" className="text-xs">Not set</Badge>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </ScrollArea>
-                                    </CardContent>
-                                </Card>
                             </>
                         )}
                     </TabsContent>
