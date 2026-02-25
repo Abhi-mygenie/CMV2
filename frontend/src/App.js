@@ -3850,25 +3850,8 @@ const SegmentsPageContent = () => {
     });
 
     return (
-        <MobileLayout>
-            <div className="p-4 max-w-lg mx-auto" data-testid="segments-page">
-                {/* Header - matching WhatsApp Automation style */}
-                <div className="flex items-center gap-3 mb-4">
-                    <button 
-                        onClick={() => navigate(-1)} 
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5 text-[#1A1A1A]" />
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="segments-title">
-                            Segments
-                        </h1>
-                        <p className="text-sm text-[#52525B]">Customer groups & automation</p>
-                    </div>
-                </div>
-
-                {/* Info Card - matching WhatsApp Automation style */}
+            <div data-testid="segments-page">
+                {/* Info Card */}
                 <Card className="rounded-xl border-0 shadow-sm bg-[#25D366]/5 mb-4">
                     <CardContent className="p-4">
                         <div className="flex items-start gap-3">
