@@ -510,6 +510,12 @@ async def register_via_qr(restaurant_id: str, customer_data: CustomerCreate):
     customer_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
     
+    # Check for first visit bonus
+    settings = await db.loyalty_settings.find_one({"user_id": restaurant_id}, {"_id": 0})
+    first_visit_bonus = 0
+    if settings and settings.get("first_visit_bonus_enabled", False):
+        first_visit_bonus = settings.get("first_visit_bonus_points", 50)
+    
     customer_doc = {
         "id": customer_id,
         "user_id": restaurant_id,
@@ -531,17 +537,38 @@ async def register_via_qr(restaurant_id: str, customer_data: CustomerCreate):
         "custom_field_2": customer_data.custom_field_2,
         "custom_field_3": customer_data.custom_field_3,
         "favorites": customer_data.favorites or [],
-        "total_points": 0,
+        "total_points": first_visit_bonus,
         "wallet_balance": 0.0,
         "total_visits": 0,
         "total_spent": 0.0,
         "tier": "Bronze",
         "created_at": now,
-        "last_visit": None
+        "last_visit": None,
+        "first_visit_bonus_awarded": first_visit_bonus > 0
     }
     
     await db.customers.insert_one(customer_doc)
-    return {"message": "Registration successful", "customer_id": customer_id}
+    
+    # Record first visit bonus transaction if awarded
+    if first_visit_bonus > 0:
+        tx_doc = {
+            "id": str(uuid.uuid4()),
+            "user_id": restaurant_id,
+            "customer_id": customer_id,
+            "points": first_visit_bonus,
+            "transaction_type": "bonus",
+            "description": "First visit bonus - Welcome reward",
+            "bill_amount": None,
+            "balance_after": first_visit_bonus,
+            "created_at": now
+        }
+        await db.points_transactions.insert_one(tx_doc)
+    
+    return {
+        "message": "Registration successful",
+        "customer_id": customer_id,
+        "first_visit_bonus_awarded": first_visit_bonus
+    }
 
 
 # Segments router
