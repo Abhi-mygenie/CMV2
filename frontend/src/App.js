@@ -922,8 +922,6 @@ const CustomersPage = () => {
             referral_code: "", referred_by: "", membership_id: "", membership_expiry: "",
             // Behavior & Preferences
             favorite_category: "", preferred_payment_mode: "",
-            // Behavior & Preferences
-            favorite_category: "", preferred_payment_mode: "",
             // Customer Source & Journey
             lead_source: "", campaign_source: "", assigned_salesperson: "",
             // WhatsApp CRM Tracking
@@ -936,6 +934,11 @@ const CustomersPage = () => {
             delivery_instructions: "", map_location: null,
             // Preferences
             allergies: [], favorites: [],
+            // Dining Preferences
+            preferred_dining_type: "", preferred_time_slot: "", favorite_table: "",
+            avg_party_size: "", diet_preference: "", spice_level: "", cuisine_preference: "",
+            // Special Occasions
+            kids_birthday: [], spouse_name: "", festival_preference: [], special_dates: [],
             // Custom Fields
             custom_field_1: "", custom_field_2: "", custom_field_3: "",
             // Notes
