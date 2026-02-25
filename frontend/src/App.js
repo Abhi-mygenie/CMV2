@@ -5186,47 +5186,34 @@ const WhatsAppAutomationPage = () => {
                                                 const mapped = eventMappings[eventKey];
                                                 const isSaved = mapped?.saved;
                                                 const isEditing = editingEvent === eventKey;
+                                                const isEnabled = mapped?.is_enabled !== false;
 
                                                 return (
                                                     <Card key={eventKey} className="rounded-xl border-0 shadow-sm" data-testid={`event-map-${eventKey}`}>
                                                         <CardContent className="p-4">
-                                                            <div className="flex items-center justify-between mb-1">
+                                                            {/* Row 1: Event name + badge */}
+                                                            <div className="flex items-center justify-between mb-2">
                                                                 <p className="font-semibold text-[#1A1A1A] text-sm">{eventLabels[eventKey] || eventKey}</p>
-                                                                {isSaved && !isEditing && (
-                                                                    <Badge className="bg-[#25D366] text-white text-xs">Mapped</Badge>
-                                                                )}
+                                                                <Badge className={`${isSaved ? 'bg-[#25D366]' : 'bg-gray-400'} text-white text-xs`}>
+                                                                    {isSaved ? "Mapped" : "Not Mapped"}
+                                                                </Badge>
                                                             </div>
 
-                                                            {isSaved && !isEditing ? (
-                                                                <div className="flex items-center justify-between mt-2">
-                                                                    <p className="text-sm text-[#52525B]">Template: <span className="font-medium">{mapped.template_name}</span></p>
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        className="h-8 rounded-lg text-xs"
-                                                                        onClick={() => {
-                                                                            setEditingEvent(eventKey);
-                                                                            setEditingEventValue(mapped.template_id?.toString() || "");
-                                                                        }}
-                                                                        data-testid={`edit-event-${eventKey}`}
-                                                                    >
-                                                                        <Edit2 className="w-3 h-3 mr-1" /> Edit
-                                                                    </Button>
-                                                                </div>
-                                                            ) : (
+                                                            {/* Row 2: Template name */}
+                                                            {!isEditing && (
+                                                                <p className="text-sm text-[#52525B] mb-2">
+                                                                    Template: <span className="font-medium">{isSaved ? mapped.template_name : "None"}</span>
+                                                                </p>
+                                                            )}
+
+                                                            {/* Editing state: dropdown */}
+                                                            {isEditing && (
                                                                 <>
                                                                     <Select
-                                                                        value={isEditing ? (editingEventValue || "") : ""}
-                                                                        onValueChange={(val) => {
-                                                                            if (isEditing) {
-                                                                                setEditingEventValue(val);
-                                                                            } else {
-                                                                                setEditingEvent(eventKey);
-                                                                                setEditingEventValue(val);
-                                                                            }
-                                                                        }}
+                                                                        value={editingEventValue || ""}
+                                                                        onValueChange={(val) => setEditingEventValue(val)}
                                                                     >
-                                                                        <SelectTrigger className="h-10 rounded-xl mt-2" data-testid={`select-template-${eventKey}`}>
+                                                                        <SelectTrigger className="h-10 rounded-xl" data-testid={`select-template-${eventKey}`}>
                                                                             <SelectValue placeholder="Select template" />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
@@ -5238,23 +5225,20 @@ const WhatsAppAutomationPage = () => {
                                                                         </SelectContent>
                                                                     </Select>
                                                                     <div className="flex justify-end gap-2 mt-2">
-                                                                        {isEditing && (
-                                                                            <Button
-                                                                                variant="outline"
-                                                                                size="sm"
-                                                                                className="h-8 rounded-lg text-xs"
-                                                                                onClick={() => { setEditingEvent(null); setEditingEventValue(null); }}
-                                                                            >
-                                                                                Cancel
-                                                                            </Button>
-                                                                        )}
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            className="h-8 rounded-lg text-xs"
+                                                                            onClick={() => { setEditingEvent(null); setEditingEventValue(null); }}
+                                                                        >
+                                                                            Cancel
+                                                                        </Button>
                                                                         <Button
                                                                             size="sm"
                                                                             className="h-8 rounded-lg text-xs bg-[#25D366] hover:bg-[#1da851] text-white"
-                                                                            disabled={savingMappings || !(isEditing ? editingEventValue : false)}
+                                                                            disabled={savingMappings || !editingEventValue}
                                                                             onClick={() => {
-                                                                                const val = editingEventValue;
-                                                                                const tpl = authkeyTemplates.find(t => t.wid.toString() === val);
+                                                                                const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
                                                                                 if (tpl) handleSaveEventMapping(eventKey, tpl.wid, tpl.temp_name);
                                                                             }}
                                                                             data-testid={`save-event-${eventKey}`}
@@ -5263,6 +5247,33 @@ const WhatsAppAutomationPage = () => {
                                                                         </Button>
                                                                     </div>
                                                                 </>
+                                                            )}
+
+                                                            {/* Row 3: Toggle + Edit (always visible when not editing) */}
+                                                            {!isEditing && (
+                                                                <div className="flex items-center justify-between mt-1">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <Switch
+                                                                            checked={isSaved && isEnabled}
+                                                                            disabled={!isSaved}
+                                                                            onCheckedChange={() => handleToggleEventMapping(eventKey)}
+                                                                            data-testid={`toggle-event-${eventKey}`}
+                                                                        />
+                                                                        <span className="text-xs text-[#52525B]">Send on event</span>
+                                                                    </div>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="h-8 rounded-lg text-xs"
+                                                                        onClick={() => {
+                                                                            setEditingEvent(eventKey);
+                                                                            setEditingEventValue(mapped?.template_id?.toString() || "");
+                                                                        }}
+                                                                        data-testid={`edit-event-${eventKey}`}
+                                                                    >
+                                                                        <Edit2 className="w-3 h-3 mr-1" /> Edit
+                                                                    </Button>
+                                                                </div>
                                                             )}
                                                         </CardContent>
                                                     </Card>
