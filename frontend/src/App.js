@@ -5410,6 +5410,28 @@ const WhatsAppAutomationPage = () => {
         "send_bill": "Send Bill (New Order)"
     };
 
+    // Event descriptions for the card UI
+    const eventDescriptions = {
+        "points_earned": "Automatically send when customer earns points from a purchase",
+        "points_redeemed": "Notify customer when they redeem their loyalty points",
+        "bonus_points": "Send when bonus points are added to customer's account",
+        "wallet_credit": "Alert customer when wallet is topped up",
+        "wallet_debit": "Confirm when payment is made from wallet",
+        "birthday": "Send birthday wishes to customers on their special day",
+        "anniversary": "Celebrate customer's anniversary with your business",
+        "first_visit": "Welcome message for first-time customers",
+        "tier_upgrade": "Congratulate customer on reaching a new loyalty tier",
+        "coupon_earned": "Notify when customer receives a new coupon",
+        "points_expiring": "Remind customers before their points expire",
+        "feedback_received": "Thank customer for submitting feedback",
+        "inactive_reminder": "Re-engage customers who haven't visited recently",
+        "send_bill": "Send bill/receipt after a new order"
+    };
+
+    // State for automation card configuration modal
+    const [showAutomationConfigModal, setShowAutomationConfigModal] = useState(false);
+    const [configuringEvent, setConfiguringEvent] = useState(null);
+
     useEffect(() => {
         fetchData();
     }, []);
