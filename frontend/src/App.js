@@ -6874,7 +6874,15 @@ const WhatsAppAutomationPage = () => {
                                 <div className="bg-[#E5DDD5] rounded-xl p-3">
                                     <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm">
                                         <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                            {previewTemplate.temp_body}
+                                            {(() => {
+                                                const mappings = templateVariableMappings[previewTemplate.wid] || {};
+                                                const modes = templateVariableModes[previewTemplate.wid] || {};
+                                                const parts = resolvePreviewWithSampleData(previewTemplate.temp_body, mappings, modes);
+                                                return parts.map((part, idx) => {
+                                                    if (part.type === "na") return <span key={idx} className="text-red-500 font-medium">NA</span>;
+                                                    return <span key={idx}>{part.value}</span>;
+                                                });
+                                            })()}
                                         </p>
                                         <div className="flex items-center justify-end gap-1 mt-2">
                                             <span className="text-[10px] text-gray-500">
