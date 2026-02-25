@@ -43,13 +43,33 @@ class POSCustomerCreate(BaseModel):
     phone: str
     country_code: str = "+91"
     email: Optional[str] = None
+    gender: Optional[str] = None  # male, female, other, prefer_not_to_say
     
     # Personal Details
     dob: Optional[str] = None  # Date of birth (YYYY-MM-DD)
     anniversary: Optional[str] = None  # Anniversary date (YYYY-MM-DD)
+    preferred_language: Optional[str] = None  # en, hi, etc.
     
     # Customer Type
     customer_type: str = "normal"  # "normal" or "corporate"
+    segment_tags: Optional[List[str]] = None
+    
+    # Contact & Marketing Permissions
+    whatsapp_opt_in: bool = False
+    promo_whatsapp_allowed: bool = True
+    promo_sms_allowed: bool = True
+    email_marketing_allowed: bool = True
+    call_allowed: bool = True
+    
+    # Loyalty Information
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None
+    membership_id: Optional[str] = None
+    membership_expiry: Optional[str] = None
+    
+    # Behavior & Preferences
+    favorite_category: Optional[str] = None
+    preferred_payment_mode: Optional[str] = None
     
     # GST Details
     gst_name: Optional[str] = None
@@ -84,13 +104,34 @@ class POSCustomerUpdate(BaseModel):
     name: Optional[str] = None
     country_code: Optional[str] = None
     email: Optional[str] = None
+    gender: Optional[str] = None
     
     # Personal Details
-    dob: Optional[str] = None  # Date of birth (YYYY-MM-DD)
-    anniversary: Optional[str] = None  # Anniversary date (YYYY-MM-DD)
+    dob: Optional[str] = None
+    anniversary: Optional[str] = None
+    preferred_language: Optional[str] = None
     
     # Customer Type
-    customer_type: Optional[str] = None  # "normal" or "corporate"
+    customer_type: Optional[str] = None
+    segment_tags: Optional[List[str]] = None
+    
+    # Contact & Marketing Permissions
+    whatsapp_opt_in: Optional[bool] = None
+    promo_whatsapp_allowed: Optional[bool] = None
+    promo_sms_allowed: Optional[bool] = None
+    email_marketing_allowed: Optional[bool] = None
+    call_allowed: Optional[bool] = None
+    is_blocked: Optional[bool] = None
+    
+    # Loyalty Information
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None
+    membership_id: Optional[str] = None
+    membership_expiry: Optional[str] = None
+    
+    # Behavior & Preferences
+    favorite_category: Optional[str] = None
+    preferred_payment_mode: Optional[str] = None
     
     # GST Details
     gst_name: Optional[str] = None
@@ -102,8 +143,8 @@ class POSCustomerUpdate(BaseModel):
     pincode: Optional[str] = None
     
     # Preferences
-    allergies: Optional[List[str]] = None  # List of allergies
-    favorites: Optional[List[str]] = None  # List of favorite items
+    allergies: Optional[List[str]] = None
+    favorites: Optional[List[str]] = None
     
     # Custom Fields
     custom_field_1: Optional[str] = None
