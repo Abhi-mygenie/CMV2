@@ -7084,8 +7084,7 @@ const TemplatesPage = () => {
     const [sampleCustomerData, setSampleCustomerData] = useState({});
     
     // Template preview state
-    const [showTemplatePreview, setShowTemplatePreview] = useState(false);
-    const [previewTemplate, setPreviewTemplate] = useState(null);
+    const [expandedPreviews, setExpandedPreviews] = useState({});
     
     const availableVariables = [
         { key: "customer_name", label: "Customer Name", example: "John" },
