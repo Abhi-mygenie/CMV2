@@ -4726,6 +4726,8 @@ const WhatsAppAutomationPage = () => {
     const [eventMappings, setEventMappings] = useState({});
     const [loadingAuthkeyTemplates, setLoadingAuthkeyTemplates] = useState(false);
     const [savingMappings, setSavingMappings] = useState(false);
+    const [editingEvent, setEditingEvent] = useState(null);
+    const [editingEventValue, setEditingEventValue] = useState(null);
     
     // Template form state
     const [showTemplateModal, setShowTemplateModal] = useState(false);
