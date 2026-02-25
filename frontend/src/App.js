@@ -3513,10 +3513,11 @@ const SegmentsPage = () => {
     const fetchTemplates = async () => {
         setTemplatesLoading(true);
         try {
-            // Fetch templates and variable mappings in parallel
-            const [templatesRes, mappingsRes] = await Promise.all([
+            // Fetch templates, variable mappings, and sample data in parallel
+            const [templatesRes, mappingsRes, sampleRes] = await Promise.all([
                 api.get("/whatsapp/authkey-templates"),
-                api.get("/whatsapp/template-variable-map")
+                api.get("/whatsapp/template-variable-map"),
+                api.get("/customers/sample-data")
             ]);
             
             const authkeyTemplates = templatesRes.data.templates || [];
@@ -3531,15 +3532,22 @@ const SegmentsPage = () => {
             }));
             setTemplates(formattedTemplates);
             
-            // Process variable mappings
+            // Process variable mappings and modes
             const mappingsObj = {};
+            const modesObj = {};
             (mappingsRes.data.mappings || []).forEach(m => {
                 mappingsObj[m.template_id] = m.mappings || {};
+                modesObj[m.template_id] = m.modes || {};
             });
             setSegmentTemplateVariableMappings(mappingsObj);
+            setSegmentTemplateVariableModes(modesObj);
+            
+            // Load sample customer data
+            const sample = sampleRes.data.sample || {};
+            sample.restaurant_name = sampleRes.data.restaurant_name || "";
+            setSegmentSampleData(sample);
         } catch (err) {
             console.error("Failed to fetch templates:", err);
-            // Fallback to empty array if API fails
             setTemplates([]);
         } finally {
             setTemplatesLoading(false);
