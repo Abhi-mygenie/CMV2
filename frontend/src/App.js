@@ -5604,16 +5604,22 @@ const WhatsAppAutomationPage = () => {
             await api.put(`/whatsapp/template-variable-map/${mappingTemplate.wid}`, {
                 template_id: mappingTemplate.wid,
                 template_name: mappingTemplate.temp_name,
-                mappings: variableMappings
+                mappings: variableMappings,
+                modes: variableMappingModes
             });
             setTemplateVariableMappings(prev => ({
                 ...prev,
                 [mappingTemplate.wid]: variableMappings
             }));
+            setTemplateVariableModes(prev => ({
+                ...prev,
+                [mappingTemplate.wid]: variableMappingModes
+            }));
             toast.success("Variable mappings saved!");
             setShowVariableMappingModal(false);
             setMappingTemplate(null);
             setVariableMappings({});
+            setVariableMappingModes({});
         } catch (err) {
             toast.error("Failed to save variable mappings");
         } finally {
