@@ -5076,72 +5076,54 @@ const WhatsAppAutomationPage = () => {
 
                     {/* Templates Tab */}
                     <TabsContent value="templates" className="mt-4">
-                        <Button 
-                            onClick={() => {
-                                setEditingTemplate(null);
-                                setTemplateForm({ name: "", message: "", media_type: null, media_url: "", variables: [] });
-                                setShowTemplateModal(true);
-                            }}
-                            className="w-full h-12 bg-[#25D366] hover:bg-[#20BD5A] rounded-xl mb-4"
-                            data-testid="add-template-btn"
-                        >
-                            <Plus className="w-4 h-4 mr-2" /> Create New Template
-                        </Button>
-
-                        {templates.length === 0 ? (
+                        {!whatsappApiKey ? (
+                            <Card className="rounded-xl border-0 shadow-sm">
+                                <CardContent className="p-8 text-center">
+                                    <KeyRound className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                                    <p className="text-[#52525B]">API Key Required</p>
+                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to view templates</p>
+                                    <Button onClick={() => setActiveTab("settings")} variant="outline" className="mt-4">
+                                        Go to Settings
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ) : loadingAuthkeyTemplates ? (
+                            <Card className="rounded-xl border-0 shadow-sm">
+                                <CardContent className="p-8 text-center">
+                                    <div className="w-8 h-8 border-3 border-[#25D366] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                                    <p className="text-[#52525B]">Fetching templates from AuthKey.io...</p>
+                                </CardContent>
+                            </Card>
+                        ) : authkeyTemplates.length === 0 ? (
                             <Card className="rounded-xl border-0 shadow-sm">
                                 <CardContent className="p-8 text-center">
                                     <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                    <p className="text-[#52525B]">No templates yet</p>
-                                    <p className="text-xs text-gray-400 mt-1">Create your first message template</p>
+                                    <p className="text-[#52525B]">No templates found</p>
+                                    <p className="text-xs text-gray-400 mt-1">No WhatsApp templates available for this API key</p>
                                 </CardContent>
                             </Card>
                         ) : (
                             <div className="space-y-3">
-                                {templates.map(template => (
-                                    <Card key={template.id} className="rounded-xl border-0 shadow-sm" data-testid={`template-${template.id}`}>
-                                        <CardContent className="p-4">
-                                            <div className="flex items-start justify-between mb-2">
-                                                <div>
-                                                    <p className="font-semibold text-[#1A1A1A]">{template.name}</p>
-                                                    {template.variables?.length > 0 && (
-                                                        <div className="flex flex-wrap gap-1 mt-1">
-                                                            {template.variables.map(v => (
-                                                                <Badge key={v} variant="outline" className="text-xs">
-                                                                    {`{{${v}}}`}
-                                                                </Badge>
-                                                            ))}
-                                                        </div>
-                                                    )}
+                                {authkeyTemplates.map(tpl => {
+                                    const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                    return (
+                                        <Card key={tpl.wid} className="rounded-xl border-0 shadow-sm" data-testid={`authkey-tpl-${tpl.wid}`}>
+                                            <CardContent className="p-4">
+                                                <p className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</p>
+                                                {variables.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1 mt-1">
+                                                        {variables.map(v => (
+                                                            <Badge key={v} variant="outline" className="text-xs">{v}</Badge>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                <div className="bg-gray-50 p-3 rounded-lg mt-2">
+                                                    <p className="text-sm text-[#52525B] whitespace-pre-wrap">{tpl.temp_body}</p>
                                                 </div>
-                                                <div className="flex items-center gap-1">
-                                                    <button 
-                                                        onClick={() => handleEditTemplate(template)}
-                                                        className="p-2 hover:bg-gray-100 rounded-full"
-                                                        data-testid={`edit-template-${template.id}`}
-                                                    >
-                                                        <Edit2 className="w-4 h-4 text-[#52525B]" />
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleDeleteTemplate(template.id)}
-                                                        className="p-2 hover:bg-red-50 rounded-full"
-                                                        data-testid={`delete-template-${template.id}`}
-                                                    >
-                                                        <Trash2 className="w-4 h-4 text-red-500" />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div className="bg-gray-50 p-3 rounded-lg">
-                                                <p className="text-sm text-[#52525B] whitespace-pre-wrap">{template.message}</p>
-                                            </div>
-                                            {template.media_type && (
-                                                <p className="text-xs text-[#52525B] mt-2 flex items-center gap-1">
-                                                    📎 {template.media_type} attached
-                                                </p>
-                                            )}
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
                             </div>
                         )}
                     </TabsContent>
