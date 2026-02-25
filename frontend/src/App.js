@@ -9,7 +9,7 @@ import {
     ArrowUpRight, ArrowDownRight, Gift, Phone, Mail,
     User, LogOut, Copy, Download, Check, X, Edit2, Trash2,
     Eye, EyeOff, Building2, Calendar, MapPin, Filter, Clock,
-    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers, Wallet
+    AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers, Wallet, KeyRound
 } from "lucide-react";
 import { AuthProvider as AuthProviderComponent } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
