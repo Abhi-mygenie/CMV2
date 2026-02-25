@@ -6062,6 +6062,9 @@ const WhatsAppAutomationPage = () => {
                                         </Card>
                                     );
                                 })}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         )}
                     </TabsContent>
