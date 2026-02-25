@@ -623,6 +623,19 @@ async def _find_or_create_customer(
         "festival_preference": [],
         "special_dates": [],
         
+        # Feedback & Flags
+        "last_rating": None,
+        "nps_score": None,
+        "complaint_flag": False,
+        "vip_flag": False,
+        "blacklist_flag": False,
+        
+        # AI/Advanced
+        "predicted_next_visit": None,
+        "churn_risk_score": None,
+        "recommended_offer_type": None,
+        "price_sensitivity_score": None,
+        
         # Custom Fields
         "custom_field_1": None,
         "custom_field_2": None,
