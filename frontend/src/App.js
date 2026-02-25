@@ -6212,6 +6212,9 @@ const WhatsAppAutomationPage = () => {
                                                 );
                                             })}
                                         </div>
+                                                </>
+                                            );
+                                        })()}
                                     </>
                                 )}
                             </>
