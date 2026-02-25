@@ -67,6 +67,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    await close_db_connection()
+# Scheduler admin routes are in the cron router
+from routers import cron
+api_router.include_router(cron.router)
