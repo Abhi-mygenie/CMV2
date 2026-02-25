@@ -3468,8 +3468,9 @@ const CouponsPage = () => {
                     </form>
                 </DialogContent>
             </Dialog>
-            </>
-            ) : (
+            </div>
+            )}
+            {customerTab === "segments" && (
                 <SegmentsPageContent />
             )}
             </div>
