@@ -1939,105 +1939,33 @@ const CustomersPage = () => {
                                         </ComingSoonOverlay>
                                     </AccordionContent>
                                 </AccordionItem>
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Diet Preference</Label>
-                                                <Select 
-                                                    value={newCustomer.diet_preference} 
-                                                    onValueChange={(v) => setNewCustomer({...newCustomer, diet_preference: v})}
-                                                >
-                                                    <SelectTrigger className="h-11 rounded-xl">
-                                                        <SelectValue placeholder="Select diet..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {DIET_OPTIONS.map(opt => (
-                                                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Spice Level</Label>
-                                                <div className="flex gap-2 mt-2">
-                                                    {SPICE_LEVELS.map(level => (
-                                                        <button
-                                                            key={level.value}
-                                                            type="button"
-                                                            onClick={() => setNewCustomer({...newCustomer, spice_level: level.value})}
-                                                            className={`flex-1 py-2 px-2 rounded-xl text-xs font-medium border-2 transition-all flex flex-col items-center gap-1 ${
-                                                                newCustomer.spice_level === level.value
-                                                                    ? "bg-red-500 text-white border-red-500"
-                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-red-300"
-                                                            }`}
-                                                        >
-                                                            <span>{level.icon}</span>
-                                                            <span className="text-[10px]">{level.label}</span>
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Cuisine Preference</Label>
-                                                <Input
-                                                    value={newCustomer.cuisine_preference}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, cuisine_preference: e.target.value})}
-                                                    placeholder="e.g., North Indian, Chinese, Italian"
-                                                    className="h-11 rounded-xl"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="form-label flex items-center gap-1">
-                                                    <AlertTriangle className="w-3.5 h-3.5" /> Allergies
-                                                </Label>
-                                                <div className="flex flex-wrap gap-2 mt-2">
-                                                    {COMMON_ALLERGIES.map((allergy) => (
-                                                        <button
-                                                            key={allergy}
-                                                            type="button"
-                                                            onClick={() => toggleAllergy(allergy)}
-                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                                                                newCustomer.allergies.includes(allergy)
-                                                                    ? "bg-red-500 text-white border-red-500"
-                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-red-300"
-                                                            }`}
-                                                            data-testid={`allergy-${allergy.toLowerCase()}`}
-                                                        >
-                                                            {allergy}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-
                                 {/* Special Occasions */}
                                 <AccordionItem value="occasions" className="border-b-0">
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-pink-50 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-pink-600">
                                             <Gift className="w-4 h-4" /> Special Occasions
+                                            <span className="ml-auto text-[10px] bg-pink-100 text-pink-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                         </span>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-1">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="form-label">Spouse/Partner Name</Label>
-                                                <Input
-                                                    value={newCustomer.spouse_name}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, spouse_name: e.target.value})}
-                                                    placeholder="Partner's name"
-                                                    className="h-11 rounded-xl"
-                                                />
+                                        <ComingSoonOverlay color="pink">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label className="form-label">Spouse/Partner Name</Label>
+                                                    <Input placeholder="Partner's name" className="h-11 rounded-xl" disabled />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Festival Preferences</Label>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {["Diwali", "Eid", "Christmas"].map(f => (
+                                                            <span key={f} className="px-3 py-1.5 rounded-full text-xs bg-gray-100 text-gray-400">{f}</span>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <Label className="form-label">Festival Preferences</Label>
-                                                <div className="flex flex-wrap gap-2 mt-2">
-                                                    {FESTIVAL_OPTIONS.map((festival) => (
-                                                        <button
-                                                            key={festival}
-                                                            type="button"
-                                                            onClick={() => {
+                                        </ComingSoonOverlay>
+                                    </AccordionContent>
+                                </AccordionItem>
                                                                 const current = newCustomer.festival_preference || [];
                                                                 const updated = current.includes(festival)
                                                                     ? current.filter(f => f !== festival)
