@@ -1031,6 +1031,19 @@ const CustomersPage = () => {
             // Preferences
             allergies: customer.allergies || [],
             favorites: customer.favorites || [],
+            // Dining Preferences
+            preferred_dining_type: customer.preferred_dining_type || "",
+            preferred_time_slot: customer.preferred_time_slot || "",
+            favorite_table: customer.favorite_table || "",
+            avg_party_size: customer.avg_party_size || "",
+            diet_preference: customer.diet_preference || "",
+            spice_level: customer.spice_level || "",
+            cuisine_preference: customer.cuisine_preference || "",
+            // Special Occasions
+            kids_birthday: customer.kids_birthday || [],
+            spouse_name: customer.spouse_name || "",
+            festival_preference: customer.festival_preference || [],
+            special_dates: customer.special_dates || [],
             // Custom Fields
             custom_field_1: customer.custom_field_1 || "",
             custom_field_2: customer.custom_field_2 || "",
