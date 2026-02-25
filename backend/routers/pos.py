@@ -929,8 +929,22 @@ async def pos_payment_received(
                 "total_spent": 0.0,
                 "avg_order_value": 0.0,
                 "last_visit": None,
+                "first_visit_date": now,
                 "favorite_category": None,
                 "preferred_payment_mode": None,
+                
+                # Customer Source & Journey
+                "lead_source": "POS",
+                "campaign_source": None,
+                "last_interaction_date": now,
+                "assigned_salesperson": None,
+                
+                # WhatsApp CRM Tracking
+                "last_whatsapp_sent": None,
+                "last_whatsapp_response": None,
+                "last_campaign_clicked": None,
+                "last_coupon_used": None,
+                "automation_status_tag": None,
                 
                 # Corporate Information
                 "gst_name": None,
