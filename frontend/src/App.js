@@ -3476,6 +3476,8 @@ const SegmentsPage = () => {
     const [variableModes, setVariableModes] = useState({});
     // WhatsApp configs for segments
     const [whatsappConfigs, setWhatsappConfigs] = useState({});
+    // Filter state for segments
+    const [segmentFilter, setSegmentFilter] = useState("all"); // "all", "active", "not_configured"
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
