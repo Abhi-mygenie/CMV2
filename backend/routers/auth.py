@@ -320,6 +320,9 @@ async def mygenie_login(credentials: UserLogin):
             }
             await db.loyalty_settings.insert_one(settings_doc)
             
+            # Create default WhatsApp templates and automation rules
+            await create_default_whatsapp_templates(user_id)
+            
             token = create_token(user_id)
             return TokenResponse(
                 access_token=token,
