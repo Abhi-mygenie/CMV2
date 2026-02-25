@@ -251,6 +251,109 @@ async def get_authkey_templates(user: dict = Depends(get_current_user)):
     return {"templates": data.get("data", [])}
 
 
+# ---- Custom Template CRUD ----
+
+@router.post("/custom-templates")
+async def create_custom_template(payload: dict, user: dict = Depends(get_current_user)):
+    """Create a new custom WhatsApp template (saved locally as Draft)."""
+    now = datetime.now(timezone.utc).isoformat()
+    template_id = str(uuid.uuid4())
+    
+    # Extract variables from body
+    import re
+    body = payload.get("body", "")
+    variables = list(set(re.findall(r'\{\{\d+\}\}', body)))
+    variables.sort(key=lambda v: int(v.strip('{}') or 0))
+    
+    doc = {
+        "id": template_id,
+        "user_id": user["id"],
+        "template_name": payload.get("template_name", "").strip(),
+        "category": payload.get("category", "utility"),
+        "language": payload.get("language", "en"),
+        "header_type": payload.get("header_type", "none"),
+        "header_content": payload.get("header_content", ""),
+        "body": body,
+        "footer": payload.get("footer", ""),
+        "buttons": payload.get("buttons", []),
+        "media_url": payload.get("media_url", ""),
+        "variables": variables,
+        "status": "draft",
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    await db.custom_templates.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@router.get("/custom-templates")
+async def list_custom_templates(user: dict = Depends(get_current_user)):
+    """List all custom templates for the user."""
+    templates = await db.custom_templates.find(
+        {"user_id": user["id"]}, {"_id": 0}
+    ).sort("created_at", -1).to_list(None)
+    return {"templates": templates}
+
+
+@router.put("/custom-templates/{template_id}")
+async def update_custom_template(template_id: str, payload: dict, user: dict = Depends(get_current_user)):
+    """Update a custom template. Sets status back to 'draft' on edit."""
+    import re
+    now = datetime.now(timezone.utc).isoformat()
+    body = payload.get("body", "")
+    variables = list(set(re.findall(r'\{\{\d+\}\}', body)))
+    variables.sort(key=lambda v: int(v.strip('{}') or 0))
+    
+    update_fields = {
+        "template_name": payload.get("template_name", "").strip(),
+        "category": payload.get("category", "utility"),
+        "language": payload.get("language", "en"),
+        "header_type": payload.get("header_type", "none"),
+        "header_content": payload.get("header_content", ""),
+        "body": body,
+        "footer": payload.get("footer", ""),
+        "buttons": payload.get("buttons", []),
+        "media_url": payload.get("media_url", ""),
+        "variables": variables,
+        "status": "draft",
+        "updated_at": now
+    }
+    
+    result = await db.custom_templates.update_one(
+        {"id": template_id, "user_id": user["id"]},
+        {"$set": update_fields}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"message": "Template updated", "id": template_id}
+
+
+@router.delete("/custom-templates/{template_id}")
+async def delete_custom_template(template_id: str, user: dict = Depends(get_current_user)):
+    """Delete a custom template."""
+    result = await db.custom_templates.delete_one(
+        {"id": template_id, "user_id": user["id"]}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found")
+    return {"message": "Template deleted"}
+
+
+@router.put("/custom-templates/{template_id}/submit")
+async def submit_custom_template(template_id: str, user: dict = Depends(get_current_user)):
+    """Submit a draft template for approval (changes status to pending)."""
+    now = datetime.now(timezone.utc).isoformat()
+    result = await db.custom_templates.update_one(
+        {"id": template_id, "user_id": user["id"], "status": "draft"},
+        {"$set": {"status": "pending", "updated_at": now}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Template not found or not in draft status")
+    return {"message": "Template submitted for approval", "id": template_id}
+
+
 @router.put("/event-template-map")
 async def save_event_template_map(payload: dict, user: dict = Depends(get_current_user)):
     """Save event→template mappings. Upserts per (user_id, event_key)."""
