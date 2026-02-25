@@ -4861,16 +4861,27 @@ const WhatsAppAutomationPage = () => {
     const handleSaveEventMapping = async (eventKey, templateId, templateName) => {
         setSavingMappings(true);
         try {
-            await api.put("/whatsapp/event-template-map", {
-                mappings: [{ event_key: eventKey, template_id: templateId, template_name: templateName, is_enabled: true }]
-            });
-            setEventMappings(prev => ({
-                ...prev,
-                [eventKey]: { template_id: templateId, template_name: templateName, is_enabled: true, saved: true },
-            }));
+            if (templateId === null) {
+                // Clear/unmap the template - send delete request or empty mapping
+                await api.delete(`/whatsapp/event-template-map/${eventKey}`);
+                setEventMappings(prev => {
+                    const newMappings = { ...prev };
+                    delete newMappings[eventKey];
+                    return newMappings;
+                });
+                toast.success(`Template removed from ${eventLabels[eventKey] || eventKey}`);
+            } else {
+                await api.put("/whatsapp/event-template-map", {
+                    mappings: [{ event_key: eventKey, template_id: templateId, template_name: templateName, is_enabled: true }]
+                });
+                setEventMappings(prev => ({
+                    ...prev,
+                    [eventKey]: { template_id: templateId, template_name: templateName, is_enabled: true, saved: true },
+                }));
+                toast.success(`Template saved for ${eventLabels[eventKey] || eventKey}`);
+            }
             setEditingEvent(null);
             setEditingEventValue(null);
-            toast.success(`Template saved for ${eventLabels[eventKey] || eventKey}`);
         } catch (err) {
             toast.error("Failed to save mapping");
         } finally {
