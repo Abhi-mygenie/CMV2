@@ -4406,7 +4406,6 @@ const SegmentsPage = () => {
                                         className="flex-1 bg-[#25D366] hover:bg-[#20BD5A] rounded-xl"
                                         disabled={
                                             !messageTemplate || 
-                                            !selectedCampaign ||
                                             (sendOption === "scheduled" && !scheduledDate) ||
                                             (sendOption === "recurring" && recurringFrequency === "weekly" && recurringDays.length === 0)
                                         }
