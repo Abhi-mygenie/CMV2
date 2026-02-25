@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from datetime import datetime, timezone
 import uuid
+import httpx
 
 from core.database import db
 from core.auth import get_current_user
