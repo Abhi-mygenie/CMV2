@@ -60,6 +60,78 @@ const CUSTOM_FIELD_1_OPTIONS = [
     "Other"
 ];
 
+// Gender options
+const GENDER_OPTIONS = [
+    { value: "male", label: "Male" },
+    { value: "female", label: "Female" },
+    { value: "other", label: "Other" },
+    { value: "prefer_not_to_say", label: "Prefer not to say" }
+];
+
+// Language options
+const LANGUAGE_OPTIONS = [
+    { value: "en", label: "English" },
+    { value: "hi", label: "Hindi" },
+    { value: "ta", label: "Tamil" },
+    { value: "te", label: "Telugu" },
+    { value: "mr", label: "Marathi" },
+    { value: "bn", label: "Bengali" },
+    { value: "gu", label: "Gujarati" },
+    { value: "kn", label: "Kannada" },
+    { value: "ml", label: "Malayalam" },
+    { value: "pa", label: "Punjabi" }
+];
+
+// Lead source options
+const LEAD_SOURCE_OPTIONS = [
+    "Walk-in", "Swiggy", "Zomato", "Instagram", "Facebook",
+    "Google", "Referral", "Airbnb", "WhatsApp", "Phone Call", "Other"
+];
+
+// Payment terms options
+const PAYMENT_TERMS_OPTIONS = [
+    { value: "immediate", label: "Immediate" },
+    { value: "net_7", label: "Net 7 Days" },
+    { value: "net_15", label: "Net 15 Days" },
+    { value: "net_30", label: "Net 30 Days" },
+    { value: "net_60", label: "Net 60 Days" }
+];
+
+// Dining type options
+const DINING_TYPE_OPTIONS = ["Dine-In", "Takeaway", "Delivery"];
+
+// Time slot options
+const TIME_SLOT_OPTIONS = [
+    { value: "breakfast", label: "Breakfast (8-11 AM)" },
+    { value: "lunch", label: "Lunch (12-3 PM)" },
+    { value: "evening", label: "Evening (4-7 PM)" },
+    { value: "dinner", label: "Dinner (7-11 PM)" },
+    { value: "late_night", label: "Late Night (11 PM+)" }
+];
+
+// Diet preference options
+const DIET_OPTIONS = [
+    { value: "veg", label: "Vegetarian" },
+    { value: "non_veg", label: "Non-Vegetarian" },
+    { value: "vegan", label: "Vegan" },
+    { value: "jain", label: "Jain" },
+    { value: "eggetarian", label: "Eggetarian" }
+];
+
+// Spice level options
+const SPICE_LEVELS = [
+    { value: "mild", label: "Mild", icon: "🌶️" },
+    { value: "medium", label: "Medium", icon: "🌶️🌶️" },
+    { value: "spicy", label: "Spicy", icon: "🌶️🌶️🌶️" },
+    { value: "extra_spicy", label: "Extra Spicy", icon: "🌶️🌶️🌶️🌶️" }
+];
+
+// Festival options
+const FESTIVAL_OPTIONS = [
+    "Diwali", "Holi", "Eid", "Christmas", "New Year", 
+    "Navratri", "Durga Puja", "Ganesh Chaturthi", "Onam", "Pongal"
+];
+
 // Re-export useAuth from AuthContext
 import { useAuth } from "@/contexts/AuthContext";
 
