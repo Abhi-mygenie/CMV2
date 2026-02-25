@@ -3825,7 +3825,7 @@ const SegmentsPage = () => {
                         return (
                             <Card 
                                 key={segment.id} 
-                                className={`rounded-xl hover:shadow-md transition-shadow ${hasConfig && isConfigActive ? 'border-2 border-[#25D366]/30 bg-[#25D366]/5' : ''}`}
+                                className={`rounded-xl hover:shadow-md transition-shadow ${hasConfig && isConfigActive ? 'border-l-4 border-l-[#25D366]' : ''}`}
                                 data-testid={`segment-card-${segment.id}`}
                             >
                                 <CardContent className="p-4">
