@@ -4743,18 +4743,6 @@ const SettingsPage = () => {
         fetchApiKey();
     }, []);
 
-    const handleSave = async () => {
-        setSaving(true);
-        try {
-            await api.put("/loyalty/settings", settings);
-            toast.success("Settings saved!");
-        } catch (err) {
-            toast.error("Failed to save settings");
-        } finally {
-            setSaving(false);
-        }
-    };
-
     const handleSaveApiKey = async () => {
         setSavingApiKey(true);
         try {
