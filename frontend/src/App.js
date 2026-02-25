@@ -10,7 +10,7 @@ import {
     User, LogOut, Copy, Download, Check, X, Edit2, Trash2,
     Eye, EyeOff, Building2, Calendar, MapPin, Filter, Clock,
     AlertTriangle, ChevronDown, Tag, ChevronLeft, Percent, Save, Layers, Wallet, KeyRound,
-    Pause, Play
+    Pause, Play, Send
 } from "lucide-react";
 import { AuthProvider as AuthProviderComponent } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
