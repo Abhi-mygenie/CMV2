@@ -3469,6 +3469,8 @@ const SegmentsPage = () => {
     // Templates from API
     const [templates, setTemplates] = useState([]);
     const [templatesLoading, setTemplatesLoading] = useState(false);
+    // Total customers count for "All Customers" segment
+    const [totalCustomersCount, setTotalCustomersCount] = useState(0);
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
