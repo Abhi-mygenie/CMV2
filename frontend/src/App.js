@@ -4909,6 +4909,52 @@ const WhatsAppAutomationPage = () => {
         }
     };
 
+    // Variable Mapping Functions
+    const openVariableMappingModal = (template) => {
+        const variables = (template.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+        setMappingTemplate({ ...template, variables });
+        // Load existing mappings for this template
+        const existingMappings = templateVariableMappings[template.wid] || {};
+        setVariableMappings(existingMappings);
+        setShowVariableMappingModal(true);
+    };
+
+    const handleSaveVariableMapping = async () => {
+        setSavingVariableMapping(true);
+        try {
+            await api.put(`/whatsapp/template-variable-map/${mappingTemplate.wid}`, {
+                template_id: mappingTemplate.wid,
+                template_name: mappingTemplate.temp_name,
+                mappings: variableMappings
+            });
+            setTemplateVariableMappings(prev => ({
+                ...prev,
+                [mappingTemplate.wid]: variableMappings
+            }));
+            toast.success("Variable mappings saved!");
+            setShowVariableMappingModal(false);
+            setMappingTemplate(null);
+            setVariableMappings({});
+        } catch (err) {
+            toast.error("Failed to save variable mappings");
+        } finally {
+            setSavingVariableMapping(false);
+        }
+    };
+
+    const fetchVariableMappings = async () => {
+        try {
+            const res = await api.get("/whatsapp/template-variable-map");
+            const mappingsObj = {};
+            (res.data.mappings || []).forEach(m => {
+                mappingsObj[m.template_id] = m.mappings || {};
+            });
+            setTemplateVariableMappings(mappingsObj);
+        } catch (err) {
+            console.error("Failed to load variable mappings:", err);
+        }
+    };
+
     const handleSaveTemplate = async () => {
         try {
             if (editingTemplate) {
