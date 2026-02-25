@@ -4809,7 +4809,7 @@ const WhatsAppAutomationPage = () => {
                     setAuthkeyTemplates(tplRes.data.templates || []);
                     const mapObj = {};
                     (mapRes.data.mappings || []).forEach(m => {
-                        mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name, saved: true };
+                        mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name, is_enabled: m.is_enabled !== false, saved: true };
                     });
                     setEventMappings(mapObj);
                 } catch (_) {}
