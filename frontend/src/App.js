@@ -896,9 +896,10 @@ const CustomersPage = () => {
             // Behavior & Preferences
             favorite_category: "", preferred_payment_mode: "",
             // Corporate Information
-            gst_name: "", gst_number: "",
+            gst_name: "", gst_number: "", billing_address: "", credit_limit: "", payment_terms: "",
             // Address
-            address: "", city: "", pincode: "",
+            address: "", address_line_2: "", city: "", state: "", pincode: "", country: "",
+            delivery_instructions: "", map_location: null,
             // Preferences
             allergies: [], favorites: [],
             // Custom Fields
