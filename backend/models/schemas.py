@@ -423,6 +423,7 @@ class AutomationRule(BaseModel):
 
 # Automation Events
 AUTOMATION_EVENTS = [
+    "send_bill",
     "points_earned",
     "points_redeemed",
     "bonus_points",
@@ -435,6 +436,5 @@ AUTOMATION_EVENTS = [
     "coupon_earned",
     "points_expiring",
     "feedback_received",
-    "inactive_reminder",
-    "send_bill"
+    "inactive_reminder"
 ]
