@@ -3825,13 +3825,11 @@ const SegmentsPageContent = () => {
 
     if (loading) {
         return (
-            <MobileLayout>
                 <div className="p-4 max-w-lg mx-auto">
                     <div className="flex items-center justify-center h-64">
                         <p className="text-[#52525B]">Loading segments...</p>
                     </div>
                 </div>
-            </MobileLayout>
         );
     }
 
@@ -3850,7 +3848,7 @@ const SegmentsPageContent = () => {
     });
 
     return (
-            <div data-testid="segments-page">
+            <div className="p-4 max-w-lg mx-auto" data-testid="segments-page">
                 {/* Info Card */}
                 <Card className="rounded-xl border-0 shadow-sm bg-[#25D366]/5 mb-4">
                     <CardContent className="p-4">
