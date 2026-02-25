@@ -260,6 +260,33 @@ async def create_customer(customer_data: CustomerCreate, user: dict = Depends(ge
     
     return Customer(**customer_doc)
 
+@router.get("/sample-data")
+async def get_sample_customer_data(user: dict = Depends(get_current_user)):
+    """Get the first customer's data as sample for template previews."""
+    customer = await db.customers.find_one(
+        {"user_id": user["id"]}, {"_id": 0}
+    )
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "restaurant_name": 1})
+    restaurant_name = user_doc.get("restaurant_name", "") if user_doc else ""
+    
+    if not customer:
+        return {"sample": {}, "restaurant_name": restaurant_name}
+    
+    return {
+        "sample": {
+            "customer_name": customer.get("name", ""),
+            "points_balance": str(customer.get("total_points", 0)),
+            "points_earned": str(customer.get("total_points_earned", 0)),
+            "points_redeemed": str(customer.get("total_points_redeemed", 0)),
+            "wallet_balance": f"₹{customer.get('wallet_balance', 0)}",
+            "amount": f"₹{customer.get('total_spent', 0)}",
+            "tier": customer.get("tier", ""),
+            "coupon_code": "",
+            "expiry_date": ""
+        },
+        "restaurant_name": restaurant_name
+    }
+
 @router.get("", response_model=List[Customer])
 async def list_customers(
     search: Optional[str] = None,
