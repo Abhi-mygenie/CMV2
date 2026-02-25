@@ -120,6 +120,16 @@ async def get_me(user: dict = Depends(get_current_user)):
         created_at=user["created_at"]
     )
 
+@router.put("/profile")
+async def update_profile(updates: dict, user: dict = Depends(get_current_user)):
+    allowed = {"restaurant_name", "phone", "address"}
+    filtered = {k: v for k, v in updates.items() if k in allowed and v is not None}
+    if not filtered:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    await db.users.update_one({"id": user["id"]}, {"$set": filtered})
+    updated = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+    return {"restaurant_name": updated.get("restaurant_name", ""), "phone": updated.get("phone", ""), "address": updated.get("address", ""), "email": updated.get("email", "")}
+
 @router.post("/demo-login", response_model=TokenResponse)
 async def demo_login():
     """
