@@ -4795,6 +4795,22 @@ const WhatsAppAutomationPage = () => {
             setAutomationRules(rulesRes.data);
             setAvailableEvents(eventsRes.data.events || []);
             setWhatsappApiKey(apiKeyRes.data.authkey_api_key || "");
+            // Auto-load authkey templates if api key exists
+            const apiKey = apiKeyRes.data.authkey_api_key || "";
+            if (apiKey) {
+                try {
+                    const [tplRes, mapRes] = await Promise.all([
+                        api.get("/whatsapp/authkey-templates"),
+                        api.get("/whatsapp/event-template-map")
+                    ]);
+                    setAuthkeyTemplates(tplRes.data.templates || []);
+                    const mapObj = {};
+                    (mapRes.data.mappings || []).forEach(m => {
+                        mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name };
+                    });
+                    setEventMappings(mapObj);
+                } catch (_) {}
+            }
         } catch (err) {
             toast.error("Failed to load WhatsApp settings");
         } finally {
