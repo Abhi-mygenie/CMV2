@@ -5,6 +5,7 @@ import os
 
 from core.database import db
 from core.auth import hash_password, verify_password, create_token, generate_api_key, get_current_user
+from core.helpers import get_default_templates_and_automation
 from models.schemas import UserCreate, UserLogin, UserResponse, TokenResponse
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -12,6 +13,20 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 # Demo user credentials
 DEMO_EMAIL = "test@restaurant.com"
 DEMO_PASSWORD = "Test123456"
+
+
+async def create_default_whatsapp_templates(user_id: str):
+    """Create default WhatsApp templates and automation rules for a new user"""
+    templates, automation_rules = get_default_templates_and_automation(user_id)
+    
+    # Insert templates
+    if templates:
+        await db.whatsapp_templates.insert_many(templates)
+    
+    # Insert automation rules
+    if automation_rules:
+        await db.automation_rules.insert_many(automation_rules)
+
 
 @router.post("/register", response_model=TokenResponse)
 async def register(user_data: UserCreate):
@@ -71,6 +86,9 @@ async def register(user_data: UserCreate):
         "feedback_bonus_points": 25
     }
     await db.loyalty_settings.insert_one(settings_doc)
+    
+    # Create default WhatsApp templates and automation rules
+    await create_default_whatsapp_templates(user_id)
     
     token = create_token(user_id)
     return TokenResponse(
