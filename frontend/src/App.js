@@ -1889,75 +1889,29 @@ const CustomersPage = () => {
                                             </ComingSoonOverlay>
                                         </AccordionContent>
                                     </AccordionItem>
-                                )}
-                                        <AccordionContent className="px-1">
-                                            <div className="space-y-4">
-                                                <div>
-                                                    <Label className="form-label">Company/GST Name</Label>
-                                                    <Input
-                                                        value={newCustomer.gst_name}
-                                                        onChange={(e) => setNewCustomer({...newCustomer, gst_name: e.target.value})}
-                                                        placeholder="Company/Business name"
-                                                        className="h-11 rounded-xl"
-                                                        data-testid="new-customer-gst-name"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label className="form-label">GST Number</Label>
-                                                    <Input
-                                                        value={newCustomer.gst_number}
-                                                        onChange={(e) => setNewCustomer({...newCustomer, gst_number: e.target.value.toUpperCase()})}
-                                                        placeholder="22AAAAA0000A1Z5"
-                                                        className="h-11 rounded-xl font-mono"
-                                                        maxLength={15}
-                                                        data-testid="new-customer-gst-number"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label className="form-label">Billing Address</Label>
-                                                    <Textarea
-                                                        value={newCustomer.billing_address}
-                                                        onChange={(e) => setNewCustomer({...newCustomer, billing_address: e.target.value})}
-                                                        placeholder="Billing address if different..."
-                                                        className="rounded-xl resize-none"
-                                                        rows={2}
-                                                    />
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div>
-                                                        <Label className="form-label">Credit Limit (₹)</Label>
-                                                        <Input
-                                                            type="number"
-                                                            value={newCustomer.credit_limit}
-                                                            onChange={(e) => setNewCustomer({...newCustomer, credit_limit: e.target.value})}
-                                                            placeholder="0"
-                                                            className="h-11 rounded-xl"
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <Label className="form-label">Payment Terms</Label>
-                                                        <Select 
-                                                            value={newCustomer.payment_terms} 
-                                                            onValueChange={(v) => setNewCustomer({...newCustomer, payment_terms: v})}
-                                                        >
-                                                            <SelectTrigger className="h-11 rounded-xl">
-                                                                <SelectValue placeholder="Select..." />
-                                                            </SelectTrigger>
-                                                            <SelectContent>
-                                                                {PAYMENT_TERMS_OPTIONS.map(opt => (
-                                                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                )}
-
                                 {/* Source & Journey */}
                                 <AccordionItem value="source" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-amber-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-amber-600">
+                                            <TrendingUp className="w-4 h-4" /> Source & Journey
+                                            <span className="ml-auto text-[10px] bg-amber-100 text-amber-500 px-2 py-0.5 rounded-full">Coming Soon</span>
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <ComingSoonOverlay color="amber">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label className="form-label">Lead Source</Label>
+                                                    <Input placeholder="How did they find you?" className="h-11 rounded-xl" disabled />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Campaign Source</Label>
+                                                    <Input placeholder="UTM or campaign name" className="h-11 rounded-xl" disabled />
+                                                </div>
+                                            </div>
+                                        </ComingSoonOverlay>
+                                    </AccordionContent>
+                                </AccordionItem>
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-amber-50 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-amber-600">
                                             <TrendingUp className="w-4 h-4" /> Source & Journey
