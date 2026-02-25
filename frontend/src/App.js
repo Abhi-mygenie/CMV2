@@ -5594,6 +5594,11 @@ const WhatsAppAutomationPage = () => {
                     setSampleCustomerData(sample);
                 } catch (_) {}
             }
+            // Also fetch custom templates
+            try {
+                const customRes = await api.get("/whatsapp/custom-templates");
+                setCustomTemplates(customRes.data.templates || []);
+            } catch (_) {}
         } catch (err) {
             toast.error("Failed to load WhatsApp settings");
         } finally {
