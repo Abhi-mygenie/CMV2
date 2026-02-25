@@ -5966,7 +5966,7 @@ const WhatsAppAutomationPage = () => {
                                                 return (
                                                     <Card 
                                                         key={eventKey} 
-                                                        className={`rounded-xl hover:shadow-md transition-shadow ${isSaved && isEnabled ? 'border-2 border-[#25D366]/30 bg-[#25D366]/5' : ''}`}
+                                                        className={`rounded-xl hover:shadow-md transition-shadow ${isSaved && isEnabled ? 'border-l-4 border-l-[#25D366]' : ''}`}
                                                         data-testid={`event-card-${eventKey}`}
                                                     >
                                                         <CardContent className="p-4">
