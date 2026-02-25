@@ -7408,6 +7408,7 @@ const TemplatesPage = () => {
                                                             })}
                                                         </div>
                                                     )}
+                                                    {expandedPreviews[tpl.wid] && (
                                                     <div className="bg-[#E5DDD5] p-3 rounded-lg mt-2">
                                                         <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm max-w-[90%] relative">
                                                             <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-12">
@@ -7425,9 +7426,10 @@ const TemplatesPage = () => {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    )}
                                                     <div className="flex gap-2 mt-3">
                                                         <Button size="sm" variant="outline" onClick={() => openVariableMappingModal(tpl)} data-testid={`map-vars-${tpl.wid}`}><Tag className="w-3 h-3 mr-1" /> Map Variables</Button>
-                                                        <Button size="sm" variant="ghost" onClick={() => { setPreviewTemplate(tpl); setShowTemplatePreview(true); }} data-testid={`preview-${tpl.wid}`}><Eye className="w-3 h-3 mr-1" /> Preview</Button>
+                                                        <Button size="sm" variant="ghost" onClick={() => setExpandedPreviews(prev => ({...prev, [tpl.wid]: !prev[tpl.wid]}))} data-testid={`preview-${tpl.wid}`}>{expandedPreviews[tpl.wid] ? <><EyeOff className="w-3 h-3 mr-1" /> Hide</> : <><Eye className="w-3 h-3 mr-1" /> Preview</>}</Button>
                                                     </div>
                                                 </CardContent>
                                             </Card>
