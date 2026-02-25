@@ -5471,12 +5471,15 @@ const WhatsAppAutomationPage = () => {
                         mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name, is_enabled: m.is_enabled !== false, saved: true };
                     });
                     setEventMappings(mapObj);
-                    // Load variable mappings
+                    // Load variable mappings and modes
                     const varMapObj = {};
+                    const varModesObj = {};
                     (varMapRes.data.mappings || []).forEach(m => {
                         varMapObj[m.template_id] = m.mappings || {};
+                        varModesObj[m.template_id] = m.modes || {};
                     });
                     setTemplateVariableMappings(varMapObj);
+                    setTemplateVariableModes(varModesObj);
                 } catch (_) {}
             }
         } catch (err) {
