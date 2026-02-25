@@ -65,3 +65,10 @@ https://cmv2-test.preview.emergentagent.com
 ### Automation Tab Dropdown Fix
 - Changed from matching event LABEL to event KEY
 - E.g., `wallet_credit` event now matches `wallet_credit` template (both start with "wal")
+
+### None Option in Template Dropdown (Feb 25, 2026)
+**Feature**: Added "None" option to unmap/clear templates from events
+- "None" option appears at top of dropdown in Automation tab
+- Selecting "None" and saving removes the template mapping
+- Status changes from "Mapped" → "Not Mapped"
+- Added DELETE endpoint: `/api/whatsapp/event-template-map/{event_key}`
