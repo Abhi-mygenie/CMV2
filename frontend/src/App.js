@@ -6084,63 +6084,99 @@ const WhatsAppAutomationPage = () => {
                                         return true; // "all"
                                     });
                                     
+                                    // Count statuses across custom templates
+                                    const draftCount = customTemplates.filter(ct => ct.status === "draft").length;
+                                    const pendingCount = customTemplates.filter(ct => ct.status === "pending").length;
+                                    const approvedCount = customTemplates.filter(ct => ct.status === "approved").length;
+                                    
+                                    // Filter custom templates
+                                    const filteredCustom = customTemplates.filter(ct => {
+                                        // Status filter
+                                        if (templateFilter === "mapped" || templateFilter === "not_mapped") return false; // mapped/not_mapped only applies to authkey
+                                        if (templateFilter === "draft" && ct.status !== "draft") return false;
+                                        if (templateFilter === "pending" && ct.status !== "pending") return false;
+                                        if (templateFilter === "approved" && ct.status !== "approved") return false;
+                                        // Category filter
+                                        if (categoryFilter !== "all" && ct.category !== categoryFilter) return false;
+                                        return true;
+                                    });
+                                    
+                                    // Filter authkey templates (they don't have status — treat as "approved")
+                                    const filteredAuthkey = filteredTemplates.filter(tpl => {
+                                        if (templateFilter === "draft" || templateFilter === "pending") return false;
+                                        // Category filter — authkey templates don't have category, show them under "all"
+                                        if (categoryFilter !== "all") return false;
+                                        return true;
+                                    });
+                                    
+                                    const totalCount = authkeyTemplates.length + customTemplates.length;
+                                    
                                     return (
                                         <>
-                                            <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => setTemplateFilter("all")}
-                                                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                                                            templateFilter === "all" 
-                                                                ? "bg-[#1A1A1A] text-white" 
-                                                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                                        }`}
-                                                        data-testid="filter-all-templates"
-                                                    >
-                                                        All ({authkeyTemplates.length + customTemplates.length})
+                                            {/* Status filter pills */}
+                                            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                                                <div className="flex gap-2 flex-wrap">
+                                                    <button onClick={() => setTemplateFilter("all")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "all" ? "bg-[#1A1A1A] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`} data-testid="filter-all-templates">
+                                                        All ({totalCount})
                                                     </button>
-                                                    <button
-                                                        onClick={() => setTemplateFilter("mapped")}
-                                                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                                                            templateFilter === "mapped" 
-                                                                ? "bg-[#25D366] text-white" 
-                                                                : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"
-                                                        }`}
-                                                        data-testid="filter-mapped-templates"
-                                                    >
+                                                    {draftCount > 0 && (
+                                                        <button onClick={() => setTemplateFilter("draft")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "draft" ? "bg-gray-500 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`} data-testid="filter-draft-templates">
+                                                            Draft ({draftCount})
+                                                        </button>
+                                                    )}
+                                                    {pendingCount > 0 && (
+                                                        <button onClick={() => setTemplateFilter("pending")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "pending" ? "bg-amber-500 text-white" : "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"}`} data-testid="filter-pending-templates">
+                                                            Pending ({pendingCount})
+                                                        </button>
+                                                    )}
+                                                    {approvedCount > 0 && (
+                                                        <button onClick={() => setTemplateFilter("approved")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "approved" ? "bg-[#25D366] text-white" : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"}`} data-testid="filter-approved-templates">
+                                                            Approved ({approvedCount + authkeyTemplates.length})
+                                                        </button>
+                                                    )}
+                                                    <button onClick={() => setTemplateFilter("mapped")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "mapped" ? "bg-[#25D366] text-white" : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"}`} data-testid="filter-mapped-templates">
                                                         Mapped ({mappedCount})
                                                     </button>
-                                                    <button
-                                                        onClick={() => setTemplateFilter("not_mapped")}
-                                                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                                                            templateFilter === "not_mapped" 
-                                                                ? "bg-amber-500 text-white" 
-                                                                : "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
-                                                        }`}
-                                                        data-testid="filter-not-mapped-templates"
-                                                    >
+                                                    <button onClick={() => setTemplateFilter("not_mapped")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "not_mapped" ? "bg-amber-500 text-white" : "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"}`} data-testid="filter-not-mapped-templates">
                                                         Not Mapped ({notMappedCount})
                                                     </button>
                                                 </div>
-                                                <Button
-                                                    onClick={() => {
-                                                        setEditingCustomTemplate(null);
-                                                        setNewTemplate({ template_name: "", category: "utility", language: "en", header_type: "none", header_content: "", body: "", footer: "", buttons: [], media_url: "" });
-                                                        setShowAddTemplate(true);
-                                                    }}
-                                                    className="bg-[#25D366] hover:bg-[#1da851] text-white"
-                                                    data-testid="add-template-btn"
-                                                >
-                                                    <Plus className="w-4 h-4 mr-1" /> Add Template
-                                                </Button>
+                                                <div className="flex items-center gap-2">
+                                                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                                        <SelectTrigger className="h-9 w-[140px] rounded-full text-sm" data-testid="category-filter">
+                                                            <Filter className="w-3.5 h-3.5 mr-1 text-gray-500" />
+                                                            <SelectValue placeholder="Category" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="all">All Categories</SelectItem>
+                                                            <SelectItem value="marketing">Marketing</SelectItem>
+                                                            <SelectItem value="utility">Utility</SelectItem>
+                                                            <SelectItem value="authentication">Authentication</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <Button
+                                                        onClick={() => {
+                                                            setEditingCustomTemplate(null);
+                                                            setNewTemplate({ template_name: "", category: "utility", language: "en", header_type: "none", header_content: "", body: "", footer: "", buttons: [], media_url: "" });
+                                                            setShowAddTemplate(true);
+                                                        }}
+                                                        className="bg-[#25D366] hover:bg-[#1da851] text-white rounded-full"
+                                                        data-testid="add-template-btn"
+                                                    >
+                                                        <Plus className="w-4 h-4 mr-1" /> Add Template
+                                                    </Button>
+                                                </div>
                                             </div>
+                                            <div className="border-b border-gray-200 mb-4"></div>
                                             
                                             {/* Custom Templates */}
-                                            {templateFilter === "all" && customTemplates.length > 0 && (
+                                            {filteredCustom.length > 0 && (
                                                 <div className="mb-4">
-                                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Custom Templates</p>
+                                                    {(templateFilter === "all" || templateFilter === "draft" || templateFilter === "pending" || templateFilter === "approved") && filteredAuthkey.length > 0 && (
+                                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Custom Templates</p>
+                                                    )}
                                                     <div className="space-y-3">
-                                                        {customTemplates.map(ct => (
+                                                        {filteredCustom.map(ct => (
                                                             <Card key={ct.id} className="rounded-xl border-0 shadow-sm overflow-hidden">
                                                                 <CardContent className="p-4">
                                                                     <div className="flex items-start justify-between mb-2">
