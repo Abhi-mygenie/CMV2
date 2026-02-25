@@ -1,44 +1,54 @@
-# DinePoints Loyalty & CRM - Product Requirements Document
+# CMV2 - DinePoints Loyalty & CRM System
 
 ## Original Problem Statement
-Full-stack "DinePoints Loyalty & CRM" application with WhatsApp marketing capabilities via Authkey.io integration. Major UI/UX overhaul for template management, dynamic previews, and navigation restructuring.
+Pull https://github.com/Abhi-mygenie/CMV2.git, set it up, run DB import, and list all users.
 
 ## Architecture
-- **Frontend**: React (monolithic App.js), Tailwind CSS
-- **Backend**: Python FastAPI
+- **Frontend**: React 19 with Tailwind CSS, Radix UI components
+- **Backend**: FastAPI with Motor (async MongoDB driver)
 - **Database**: MongoDB
-- **3rd Party**: Authkey.io (WhatsApp messaging)
 
-## Credentials
-- Email: owner@18march.com / Password: Qplazm@10
+## Tech Stack
+- React 19, TailwindCSS, Recharts
+- FastAPI, APScheduler, BCrypt
+- MongoDB with Motor async driver
 
-## What's Been Implemented
-- [x] Advanced Template Management with filtering (status, category, mapped status)
-- [x] Dynamic WhatsApp-style previews with live sample customer data
-- [x] Custom "Draft" template CRUD flow
-- [x] Navigation refactor: Templates as top-level page, Segments as tab in Customers
-- [x] Category labels on template cards (verified Feb 2026)
-- [x] Variable mapping UI with "Map to Field" / "Custom Text" toggle
+## Core Features
+- Loyalty points management
+- Customer management
+- Wallet transactions
+- Coupon system
+- Feedback management
+- WhatsApp automation
+- POS integration
 
-## Prioritized Backlog
+## What's Been Implemented (Feb 25, 2026)
+- [x] Repository cloned from GitHub
+- [x] Backend dependencies installed
+- [x] Frontend dependencies installed
+- [x] Database imported (2,508 documents)
+- [x] Services running (backend + frontend)
 
-### P0 - Critical
-- [ ] Implement "Send Bill" WhatsApp Automation (backend webhook -> Authkey.io)
+## Database Collections Imported
+- automation_rules: 70 documents
+- users: 6 documents
+- customers: 1,967 documents
+- whatsapp_templates: 70 documents
+- segments: 4 documents
+- loyalty_settings: 7 documents
+- feedback: 17 documents
+- points_transactions: 280 documents
+- coupons: 3 documents
+- wallet_transactions: 81 documents
 
-### P1 - High
-- [ ] Consume Template Status from Authkey API (instead of assuming all Approved)
+## Users
+1. owner@18march.com - 18march
+2. owner@kunafamahal.com - Kunafa Mahal
+3. owner@hungry.com - Hungry Keya??
+4. demo@restaurant.com - Demo Restaurant & Cafe
+5. owner@shimlatest.com - Shimla Test
+6. owner@companyclub.com - Company club
 
-### P2 - Medium
-- [ ] Refactor App.js monolith into modular components/pages/hooks
-
-## Key Files
-- `/app/frontend/src/App.js` - All frontend code (7000+ lines)
-- `/app/backend/routers/whatsapp.py` - Template & mapping endpoints
-- `/app/backend/routers/customers.py` - Customer endpoints + sample data
-- `/app/backend/routers/pos.py` - POS webhook (target for Send Bill)
-
-## Key API Endpoints
-- `GET /api/customers/sample` - Sample customer for previews
-- `POST /api/whatsapp/custom-templates` - Create draft template
-- `DELETE /api/whatsapp/custom-templates/{id}` - Delete draft
-- `POST /api/pos/webhook/payment-received` - Target for Send Bill automation
+## Backlog
+- P0: Core functionality testing
+- P1: Feature enhancements as per user requirements
