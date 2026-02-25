@@ -49,6 +49,10 @@ async def root():
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now(timezone.utc).isoformat()}
 
+# Scheduler admin routes
+from routers import cron
+api_router.include_router(cron.router)
+
 # Include the router in the main app
 app.include_router(api_router)
 
@@ -66,7 +70,3 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
-
-# Scheduler admin routes are in the cron router
-from routers import cron
-api_router.include_router(cron.router)
