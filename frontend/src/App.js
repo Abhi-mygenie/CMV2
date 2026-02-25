@@ -5151,11 +5151,7 @@ const WhatsAppAutomationPage = () => {
                             className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
                             data-testid="templates-tab"
                         >
-                            Templates ({authkeyTemplates.filter(tpl => {
-                                const templatePrefix = (tpl.temp_name || "").substring(0, 3).toLowerCase();
-                                const eventPrefixes = availableEvents.map(ek => ek.substring(0, 3).toLowerCase());
-                                return eventPrefixes.includes(templatePrefix);
-                            }).length || templates.length})
+                            Templates ({authkeyTemplates.length || templates.length})
                         </TabsTrigger>
                         <TabsTrigger 
                             value="automation" 
