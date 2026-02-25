@@ -6085,41 +6085,136 @@ const WhatsAppAutomationPage = () => {
                                     
                                     return (
                                         <>
-                                            <div className="flex gap-2 mb-4 border-b border-gray-200 pb-3">
-                                                <button
-                                                    onClick={() => setTemplateFilter("all")}
-                                                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                                                        templateFilter === "all" 
-                                                            ? "bg-[#1A1A1A] text-white" 
-                                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                                    }`}
-                                                    data-testid="filter-all-templates"
+                                            <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-3">
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => setTemplateFilter("all")}
+                                                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                            templateFilter === "all" 
+                                                                ? "bg-[#1A1A1A] text-white" 
+                                                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                        }`}
+                                                        data-testid="filter-all-templates"
+                                                    >
+                                                        All ({authkeyTemplates.length + customTemplates.length})
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setTemplateFilter("mapped")}
+                                                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                            templateFilter === "mapped" 
+                                                                ? "bg-[#25D366] text-white" 
+                                                                : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"
+                                                        }`}
+                                                        data-testid="filter-mapped-templates"
+                                                    >
+                                                        Mapped ({mappedCount})
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setTemplateFilter("not_mapped")}
+                                                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                            templateFilter === "not_mapped" 
+                                                                ? "bg-amber-500 text-white" 
+                                                                : "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
+                                                        }`}
+                                                        data-testid="filter-not-mapped-templates"
+                                                    >
+                                                        Not Mapped ({notMappedCount})
+                                                    </button>
+                                                </div>
+                                                <Button
+                                                    onClick={() => {
+                                                        setEditingCustomTemplate(null);
+                                                        setNewTemplate({ template_name: "", category: "utility", language: "en", header_type: "none", header_content: "", body: "", footer: "", buttons: [], media_url: "" });
+                                                        setShowAddTemplate(true);
+                                                    }}
+                                                    className="bg-[#25D366] hover:bg-[#1da851] text-white"
+                                                    data-testid="add-template-btn"
                                                 >
-                                                    All ({authkeyTemplates.length})
-                                                </button>
-                                                <button
-                                                    onClick={() => setTemplateFilter("mapped")}
-                                                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                                                        templateFilter === "mapped" 
-                                                            ? "bg-[#25D366] text-white" 
-                                                            : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"
-                                                    }`}
-                                                    data-testid="filter-mapped-templates"
-                                                >
-                                                    Mapped ({mappedCount})
-                                                </button>
-                                                <button
-                                                    onClick={() => setTemplateFilter("not_mapped")}
-                                                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                                                        templateFilter === "not_mapped" 
-                                                            ? "bg-amber-500 text-white" 
-                                                            : "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
-                                                    }`}
-                                                    data-testid="filter-not-mapped-templates"
-                                                >
-                                                    Not Mapped ({notMappedCount})
-                                                </button>
+                                                    <Plus className="w-4 h-4 mr-1" /> Add Template
+                                                </Button>
                                             </div>
+                                            
+                                            {/* Custom Templates */}
+                                            {templateFilter === "all" && customTemplates.length > 0 && (
+                                                <div className="mb-4">
+                                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Custom Templates</p>
+                                                    <div className="space-y-3">
+                                                        {customTemplates.map(ct => (
+                                                            <Card key={ct.id} className="rounded-xl border-0 shadow-sm overflow-hidden">
+                                                                <CardContent className="p-4">
+                                                                    <div className="flex items-start justify-between mb-2">
+                                                                        <div>
+                                                                            <h4 className="font-semibold text-[#1A1A1A]">{ct.template_name}</h4>
+                                                                            <div className="flex items-center gap-2 mt-1">
+                                                                                <span className="text-xs text-gray-500 capitalize">{ct.category}</span>
+                                                                                <span className="text-xs text-gray-400">|</span>
+                                                                                <span className="text-xs text-gray-500">{ct.language === "en" ? "English" : "Hindi"}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <Badge 
+                                                                            className={`text-xs ${
+                                                                                ct.status === "approved" ? "bg-[#25D366] text-white" :
+                                                                                ct.status === "pending" ? "bg-amber-500 text-white" :
+                                                                                "bg-gray-400 text-white"
+                                                                            }`}
+                                                                            data-testid={`status-${ct.id}`}
+                                                                        >
+                                                                            {ct.status === "approved" ? "Approved" : ct.status === "pending" ? "Pending" : "Draft"}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    
+                                                                    {/* Preview bubble */}
+                                                                    <div className="bg-[#E5DDD5] p-3 rounded-lg mt-2">
+                                                                        <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm max-w-[90%] relative">
+                                                                            <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-12">
+                                                                                {ct.body}
+                                                                            </p>
+                                                                            {ct.footer && (
+                                                                                <p className="text-xs text-gray-500 mt-2 border-t border-gray-200 pt-1">{ct.footer}</p>
+                                                                            )}
+                                                                            <div className="flex items-center justify-end gap-1 mt-1">
+                                                                                <span className="text-[10px] text-gray-500">
+                                                                                    {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                                                                </span>
+                                                                                <svg className="w-4 h-4 text-[#53BDEB]" viewBox="0 0 16 15" fill="currentColor">
+                                                                                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.51zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.89 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/>
+                                                                                </svg>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    {/* Actions */}
+                                                                    <div className="flex gap-2 mt-3">
+                                                                        {ct.status === "draft" && (
+                                                                            <>
+                                                                                <Button size="sm" variant="outline" onClick={() => openEditCustomTemplate(ct)} data-testid={`edit-ct-${ct.id}`}>
+                                                                                    <Edit2 className="w-3 h-3 mr-1" /> Edit
+                                                                                </Button>
+                                                                                <Button size="sm" className="bg-[#25D366] hover:bg-[#1da851] text-white" onClick={() => handleSubmitCustomTemplate(ct.id)} data-testid={`submit-ct-${ct.id}`}>
+                                                                                    <Send className="w-3 h-3 mr-1" /> Submit
+                                                                                </Button>
+                                                                            </>
+                                                                        )}
+                                                                        {ct.status === "pending" && (
+                                                                            <span className="text-xs text-amber-600 flex items-center gap-1">
+                                                                                <Clock className="w-3 h-3" /> Awaiting approval
+                                                                            </span>
+                                                                        )}
+                                                                        <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 ml-auto" onClick={() => handleDeleteCustomTemplate(ct.id)} data-testid={`delete-ct-${ct.id}`}>
+                                                                            <Trash2 className="w-3 h-3" />
+                                                                        </Button>
+                                                                    </div>
+                                                                </CardContent>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            
+                                            {/* Authkey Templates divider */}
+                                            {templateFilter === "all" && customTemplates.length > 0 && filteredTemplates.length > 0 && (
+                                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Authkey Templates</p>
+                                            )}
                                             
                                             {/* Template Cards */}
                                             {filteredTemplates.length === 0 ? (
