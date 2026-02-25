@@ -1816,29 +1816,22 @@ const CustomersPage = () => {
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-purple-50 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-purple-600">
                                             <Tag className="w-4 h-4" /> Membership
+                                            <span className="ml-auto text-[10px] bg-purple-100 text-purple-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                         </span>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-1">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="form-label">Membership ID</Label>
-                                                <Input
-                                                    value={newCustomer.membership_id}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, membership_id: e.target.value})}
-                                                    placeholder="External membership ID"
-                                                    className="h-11 rounded-xl"
-                                                />
+                                        <ComingSoonOverlay color="purple">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label className="form-label">Membership ID</Label>
+                                                    <Input placeholder="External membership ID" className="h-11 rounded-xl" disabled />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Membership Expiry</Label>
+                                                    <Input type="date" className="h-11 rounded-xl" disabled />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <Label className="form-label">Membership Expiry</Label>
-                                                <Input
-                                                    type="date"
-                                                    value={newCustomer.membership_expiry}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, membership_expiry: e.target.value})}
-                                                    className="h-11 rounded-xl"
-                                                />
-                                            </div>
-                                        </div>
+                                        </ComingSoonOverlay>
                                     </AccordionContent>
                                 </AccordionItem>
 
