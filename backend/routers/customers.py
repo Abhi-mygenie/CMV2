@@ -249,8 +249,22 @@ async def create_customer(customer_data: CustomerCreate, user: dict = Depends(ge
         "total_spent": 0.0,
         "avg_order_value": 0.0,
         "last_visit": None,
+        "first_visit_date": now,
         "favorite_category": customer_data.favorite_category,
         "preferred_payment_mode": customer_data.preferred_payment_mode,
+        
+        # Customer Source & Journey
+        "lead_source": customer_data.lead_source,
+        "campaign_source": customer_data.campaign_source,
+        "last_interaction_date": now,
+        "assigned_salesperson": customer_data.assigned_salesperson,
+        
+        # WhatsApp CRM Tracking
+        "last_whatsapp_sent": None,
+        "last_whatsapp_response": None,
+        "last_campaign_clicked": None,
+        "last_coupon_used": None,
+        "automation_status_tag": None,
         
         # Corporate Information
         "gst_name": customer_data.gst_name,
