@@ -5590,9 +5590,11 @@ const WhatsAppAutomationPage = () => {
     const openVariableMappingModal = (template) => {
         const variables = (template.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
         setMappingTemplate({ ...template, variables });
-        // Load existing mappings for this template
+        // Load existing mappings and modes for this template
         const existingMappings = templateVariableMappings[template.wid] || {};
+        const existingModes = templateVariableModes[template.wid] || {};
         setVariableMappings(existingMappings);
+        setVariableMappingModes(existingModes);
         setShowVariableMappingModal(true);
     };
 
