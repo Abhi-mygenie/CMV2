@@ -6328,24 +6328,7 @@ const WhatsAppAutomationPage = () => {
                                                                     <Settings className="w-4 h-4 mr-1" />
                                                                     {isSaved ? "Edit" : "Configure"}
                                                                 </Button>
-                                                                {isSaved && (
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => {
-                                                                            const tpl = authkeyTemplates.find(t => t.wid === mapped.template_id);
-                                                                            if (tpl) {
-                                                                                setMappingTemplate(tpl);
-                                                                                setVariableMappings(templateVariableMappings[tpl.wid] || {});
-                                                                                setShowVariableMappingModal(true);
-                                                                            }
-                                                                        }}
-                                                                        className="h-9"
-                                                                        data-testid={`variables-event-${eventKey}`}
-                                                                    >
-                                                                        <Layers className="w-4 h-4" />
-                                                                    </Button>
-                                                                )}
+                                                                
                                                             </div>
                                                         </CardContent>
                                                     </Card>
