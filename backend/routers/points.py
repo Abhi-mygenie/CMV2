@@ -158,204 +158,33 @@ async def get_expiring_points(customer_id: str, user: dict = Depends(get_current
 async def process_expiry_reminders(user: dict = Depends(get_current_user)):
     """
     Process points expiry reminders for all customers.
-    Identifies customers with points expiring within reminder window.
-    Should be called daily via cron job.
-    Returns list of customers needing reminders (for WhatsApp/SMS integration).
+    Now delegates to shared core logic (also used by cron scheduler).
     """
+    from core.loyalty_jobs import run_expiry_reminders
     settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
-    
-    expiry_months = settings.get("points_expiry_months", 6) if settings else 6
-    reminder_days = settings.get("expiry_reminder_days", 30) if settings else 30
-    
-    if expiry_months == 0:
-        return {
-            "message": "Points expiry is disabled",
-            "customers_to_remind": 0,
-            "reminders": []
-        }
-    
-    now = datetime.now(timezone.utc)
-    current_year = now.year
-    current_month = now.month
-    
-    # Get all customers with points
-    customers = await db.customers.find({
-        "user_id": user["id"],
-        "total_points": {"$gt": 0}
-    }, {"_id": 0}).to_list(10000)
-    
-    customers_to_remind = 0
-    reminders = []
-    
-    for customer in customers:
-        # Check if already reminded this month
-        last_reminder = customer.get("last_expiry_reminder")
-        if last_reminder:
-            last_reminder_date = datetime.fromisoformat(last_reminder.replace("Z", "+00:00")) if isinstance(last_reminder, str) else last_reminder
-            # Skip if reminded in the same month
-            if last_reminder_date.year == current_year and last_reminder_date.month == current_month:
-                continue
-        
-        # Calculate expiring points for this customer
-        # Points earned before (now - expiry_months + reminder_days) will expire within reminder_days
-        expiry_cutoff = now - timedelta(days=expiry_months * 30)
-        reminder_cutoff = now - timedelta(days=(expiry_months * 30) - reminder_days)
-        
-        transactions = await db.points_transactions.find({
-            "customer_id": customer["id"],
-            "user_id": user["id"],
-            "transaction_type": {"$in": ["earn", "bonus"]}
-        }, {"_id": 0}).to_list(1000)
-        
-        expiring_points = 0
-        earliest_expiry = None
-        
-        for tx in transactions:
-            try:
-                tx_date = datetime.fromisoformat(tx["created_at"].replace("Z", "+00:00")) if isinstance(tx["created_at"], str) else tx["created_at"]
-                
-                # Points that will expire within reminder window
-                if expiry_cutoff <= tx_date <= reminder_cutoff:
-                    expiring_points += tx["points"]
-                    expiry_date = tx_date + timedelta(days=expiry_months * 30)
-                    if earliest_expiry is None or expiry_date < earliest_expiry:
-                        earliest_expiry = expiry_date
-            except:
-                continue
-        
-        # Only remind if there are points expiring
-        if expiring_points > 0:
-            # Update last reminder timestamp
-            await db.customers.update_one(
-                {"id": customer["id"]},
-                {"$set": {"last_expiry_reminder": now.isoformat()}}
-            )
-            
-            customers_to_remind += 1
-            reminders.append({
-                "customer_id": customer["id"],
-                "name": customer.get("name"),
-                "phone": customer.get("phone"),
-                "email": customer.get("email"),
-                "total_points": customer.get("total_points", 0),
-                "expiring_points": expiring_points,
-                "expiry_date": earliest_expiry.isoformat() if earliest_expiry else None,
-                "days_until_expiry": (earliest_expiry - now).days if earliest_expiry else None
-            })
-    
+    if not settings:
+        settings = {"points_expiry_months": 6, "expiry_reminder_days": 30}
+    result = await run_expiry_reminders(user["id"], settings)
     return {
-        "message": f"Found {customers_to_remind} customers with expiring points",
-        "customers_to_remind": customers_to_remind,
-        "expiry_months": expiry_months,
-        "reminder_window_days": reminder_days,
-        "reminders": reminders
+        "message": f"Found {result['customers_to_remind']} customers with expiring points",
+        "customers_to_remind": result["customers_to_remind"],
+        "reminders": result["reminders"]
     }
 
 @router.post("/expire")
 async def expire_old_points(user: dict = Depends(get_current_user)):
     """
     Expire old points for all customers.
-    Only expires points from transactions not already processed.
-    Should be called daily via cron job.
+    Now delegates to shared core logic (also used by cron scheduler).
     """
+    from core.loyalty_jobs import run_points_expiry
     settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
-    expiry_months = settings.get("points_expiry_months", 6) if settings else 6
-    
-    if expiry_months == 0:
-        return {
-            "message": "Points expiry is disabled",
-            "total_expired": 0,
-            "customers_affected": 0,
-            "expired_details": []
-        }
-    
-    now = datetime.now(timezone.utc)
-    expiry_cutoff = now - timedelta(days=expiry_months * 30)
-    expiry_cutoff_str = expiry_cutoff.isoformat()
-    
-    customers = await db.customers.find({
-        "user_id": user["id"],
-        "total_points": {"$gt": 0}
-    }, {"_id": 0}).to_list(10000)
-    
-    total_expired = 0
-    customers_affected = 0
-    expired_details = []
-    
-    for customer in customers:
-        # Find earn/bonus transactions older than expiry cutoff that haven't been marked as expired
-        old_transactions = await db.points_transactions.find({
-            "customer_id": customer["id"],
-            "user_id": user["id"],
-            "transaction_type": {"$in": ["earn", "bonus"]},
-            "created_at": {"$lt": expiry_cutoff_str},
-            "points_expired": {"$ne": True}  # Not already processed
-        }, {"_id": 0}).to_list(1000)
-        
-        if not old_transactions:
-            continue
-        
-        points_to_expire = sum(tx["points"] for tx in old_transactions)
-        
-        if points_to_expire > 0:
-            # Don't expire more than customer has
-            current_points = customer.get("total_points", 0)
-            points_to_expire = min(points_to_expire, current_points)
-            
-            if points_to_expire > 0:
-                # Mark source transactions as expired
-                tx_ids = [tx["id"] for tx in old_transactions]
-                await db.points_transactions.update_many(
-                    {"id": {"$in": tx_ids}},
-                    {"$set": {"points_expired": True, "expired_at": now.isoformat()}}
-                )
-                
-                # Create expiry transaction
-                tx_doc = {
-                    "id": str(uuid.uuid4()),
-                    "user_id": user["id"],
-                    "customer_id": customer["id"],
-                    "points": points_to_expire,
-                    "transaction_type": "expired",
-                    "description": f"Points expired (older than {expiry_months} months)",
-                    "bill_amount": None,
-                    "balance_after": current_points - points_to_expire,
-                    "source_transaction_ids": tx_ids,
-                    "created_at": now.isoformat()
-                }
-                await db.points_transactions.insert_one(tx_doc)
-                
-                # Update customer total points and tier
-                new_points = current_points - points_to_expire
-                new_tier = calculate_tier(new_points, settings)
-                
-                await db.customers.update_one(
-                    {"id": customer["id"]},
-                    {"$set": {
-                        "total_points": new_points,
-                        "tier": new_tier,
-                        "last_points_expiry": now.isoformat()
-                    }}
-                )
-                
-                total_expired += points_to_expire
-                customers_affected += 1
-                expired_details.append({
-                    "customer_id": customer["id"],
-                    "name": customer.get("name"),
-                    "phone": customer.get("phone"),
-                    "points_expired": points_to_expire,
-                    "points_remaining": new_points,
-                    "new_tier": new_tier,
-                    "transactions_processed": len(tx_ids)
-                })
-    
+    if not settings:
+        settings = {"points_expiry_months": 6}
+    result = await run_points_expiry(user["id"], settings)
     return {
-        "message": f"Expired {total_expired} points from {customers_affected} customers",
-        "total_expired": total_expired,
-        "customers_affected": customers_affected,
-        "expiry_months": expiry_months,
-        "expired_details": expired_details
+        "message": f"Expired {result['total_expired']} points from {result['customers_affected']} customers",
+        **result
     }
 
 
