@@ -44,3 +44,14 @@ Restaurant loyalty and CRM application cloned from https://github.com/Abhi-mygen
 
 ## App URL
 https://cmv2-test.preview.emergentagent.com
+
+## Updates (Feb 25, 2026 - Session 2)
+
+### Template Dropdown Filtering in WhatsApp Automation
+**Feature**: Filter templates in dropdown based on event type
+- **Send Bill event**: Shows ALL templates (19 available)
+- **Other events**: Only shows templates where first 3 letters match event label
+  - E.g., "Wallet Top-up" → shows `wallet_credit` (both start with "wal")
+  - E.g., "Points Earned" → shows templates starting with "poi" (if any exist)
+
+**File Changed**: `/app/frontend/src/App.js` (lines 5210-5235)
