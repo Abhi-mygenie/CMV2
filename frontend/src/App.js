@@ -4862,11 +4862,11 @@ const WhatsAppAutomationPage = () => {
         setSavingMappings(true);
         try {
             await api.put("/whatsapp/event-template-map", {
-                mappings: [{ event_key: eventKey, template_id: templateId, template_name: templateName }]
+                mappings: [{ event_key: eventKey, template_id: templateId, template_name: templateName, is_enabled: true }]
             });
             setEventMappings(prev => ({
                 ...prev,
-                [eventKey]: { template_id: templateId, template_name: templateName, saved: true },
+                [eventKey]: { template_id: templateId, template_name: templateName, is_enabled: true, saved: true },
             }));
             setEditingEvent(null);
             setEditingEventValue(null);
@@ -4875,6 +4875,19 @@ const WhatsAppAutomationPage = () => {
             toast.error("Failed to save mapping");
         } finally {
             setSavingMappings(false);
+        }
+    };
+
+    const handleToggleEventMapping = async (eventKey) => {
+        try {
+            const res = await api.post(`/whatsapp/event-template-map/${eventKey}/toggle`);
+            setEventMappings(prev => ({
+                ...prev,
+                [eventKey]: { ...prev[eventKey], is_enabled: res.data.is_enabled },
+            }));
+            toast.success(`${eventLabels[eventKey] || eventKey} ${res.data.is_enabled ? "enabled" : "disabled"}`);
+        } catch (err) {
+            toast.error("Failed to toggle");
         }
     };
 
