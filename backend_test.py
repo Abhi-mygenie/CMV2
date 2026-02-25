@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 
 class DinePointsAPITester:
-    def __init__(self, base_url="https://segment-manager.preview.emergentagent.com"):
+    def __init__(self, base_url="https://whatsapp-templates.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.tests_run = 0
