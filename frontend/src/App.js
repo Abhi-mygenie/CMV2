@@ -399,7 +399,7 @@ const MobileLayout = ({ children }) => {
     const navItems = [
         { path: "/", icon: Home, label: "Home" },
         { path: "/customers", icon: Users, label: "Customers" },
-        { path: "/segments", icon: Layers, label: "Segments" },
+        { path: "/templates", icon: FileText, label: "Templates" },
         { path: "/feedback", icon: MessageSquare, label: "Feedback" },
         { path: "/settings", icon: Settings, label: "Settings" }
     ];
