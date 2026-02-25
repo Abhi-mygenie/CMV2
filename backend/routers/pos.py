@@ -6,7 +6,7 @@ import uuid
 
 from core.database import db
 from core.auth import get_current_user, generate_api_key
-from core.helpers import calculate_tier, get_earn_percent_for_tier
+from core.helpers import calculate_tier, get_earn_percent_for_tier, check_off_peak_bonus
 from models.schemas import (
     POSPaymentWebhook, POSCustomerLookup, POSResponse,
     MessageRequest
