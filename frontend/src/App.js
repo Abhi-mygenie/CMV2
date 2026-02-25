@@ -977,7 +977,8 @@ const CustomersPage = () => {
                     </button>
                 </div>
 
-                {customerTab === "customers" && (<React.Fragment>
+                {customerTab === "customers" && (
+                <>
                 {/* Search & Filter Row */}
                 <div className="flex gap-2 mb-4">
                     <div className="relative flex-1">
