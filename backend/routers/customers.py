@@ -640,11 +640,19 @@ async def register_via_qr(restaurant_id: str, customer_data: CustomerCreate):
         # Corporate Information
         "gst_name": customer_data.gst_name,
         "gst_number": customer_data.gst_number,
+        "billing_address": customer_data.billing_address,
+        "credit_limit": customer_data.credit_limit,
+        "payment_terms": customer_data.payment_terms,
         
         # Address
         "address": customer_data.address,
+        "address_line_2": customer_data.address_line_2,
         "city": customer_data.city,
+        "state": customer_data.state,
         "pincode": customer_data.pincode,
+        "country": customer_data.country,
+        "delivery_instructions": customer_data.delivery_instructions,
+        "map_location": customer_data.map_location,
         
         # Preferences
         "allergies": customer_data.allergies or [],
