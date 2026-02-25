@@ -3766,6 +3766,20 @@ const SegmentsPage = () => {
 
     // Count active WhatsApp configs
     const activeConfigsCount = Object.values(whatsappConfigs).filter(c => c?.is_active !== false).length;
+    const notConfiguredCount = allSegments.length - Object.keys(whatsappConfigs).length;
+    
+    // Filter state for segments
+    const [segmentFilter, setSegmentFilter] = useState("all"); // "all", "active", "not_configured"
+    
+    // Filtered segments based on filter
+    const filteredSegments = allSegments.filter(segment => {
+        const hasConfig = !!whatsappConfigs[segment.id];
+        const isConfigActive = hasConfig && whatsappConfigs[segment.id].is_active !== false;
+        
+        if (segmentFilter === "active") return isConfigActive;
+        if (segmentFilter === "not_configured") return !hasConfig;
+        return true; // "all"
+    });
 
     return (
         <MobileLayout>
@@ -3801,24 +3815,52 @@ const SegmentsPage = () => {
                     </CardContent>
                 </Card>
 
-                {/* Header Section with stats - matching WhatsApp Automation style */}
-                <div className="flex items-center justify-between mb-4">
-                    <div>
-                        <p className="text-sm text-[#52525B]">
-                            Manage saved customer segments
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                            {allSegments.length} segments available
-                        </p>
-                    </div>
-                    <Badge className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20">
-                        {activeConfigsCount} Active
-                    </Badge>
+                {/* Filter Tabs */}
+                <div className="flex gap-2 mb-4 border-b border-gray-200 pb-3">
+                    <button
+                        onClick={() => setSegmentFilter("all")}
+                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                            segmentFilter === "all" 
+                                ? "bg-[#1A1A1A] text-white" 
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                        data-testid="filter-all-segments"
+                    >
+                        All ({allSegments.length})
+                    </button>
+                    <button
+                        onClick={() => setSegmentFilter("active")}
+                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                            segmentFilter === "active" 
+                                ? "bg-[#25D366] text-white" 
+                                : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"
+                        }`}
+                        data-testid="filter-active-segments"
+                    >
+                        Active ({activeConfigsCount})
+                    </button>
+                    <button
+                        onClick={() => setSegmentFilter("not_configured")}
+                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                            segmentFilter === "not_configured" 
+                                ? "bg-gray-500 text-white" 
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                        data-testid="filter-not-configured-segments"
+                    >
+                        Not Configured ({notConfiguredCount})
+                    </button>
                 </div>
 
                 {/* Segments List */}
                 <div className="space-y-3" data-testid="segments-list">
-                    {allSegments.map(segment => {
+                    {filteredSegments.length === 0 ? (
+                        <Card className="rounded-xl">
+                            <CardContent className="p-8 text-center">
+                                <p className="text-[#52525B]">No segments match this filter</p>
+                            </CardContent>
+                        </Card>
+                    ) : filteredSegments.map(segment => {
                         const hasConfig = !!whatsappConfigs[segment.id];
                         const isConfigActive = hasConfig && whatsappConfigs[segment.id].is_active !== false;
                         
