@@ -294,6 +294,21 @@ class Customer(BaseModel):
     allergies: Optional[List[str]] = None
     favorites: Optional[List[str]] = None
     
+    # Dining Preferences
+    preferred_dining_type: Optional[str] = None
+    preferred_time_slot: Optional[str] = None
+    favorite_table: Optional[str] = None
+    avg_party_size: Optional[int] = None
+    diet_preference: Optional[str] = None
+    spice_level: Optional[str] = None
+    cuisine_preference: Optional[str] = None
+    
+    # Special Occasions
+    kids_birthday: Optional[List[str]] = None
+    spouse_name: Optional[str] = None
+    festival_preference: Optional[List[str]] = None
+    special_dates: Optional[List[dict]] = None
+    
     # Custom Fields
     custom_field_1: Optional[str] = None
     custom_field_2: Optional[str] = None
