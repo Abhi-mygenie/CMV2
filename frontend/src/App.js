@@ -3480,10 +3480,35 @@ const CouponsPage = () => {
 
 // ============ SETTINGS PAGE ============
 
-// ============ SEGMENTS PAGE ============
-const SegmentsPage = () => {
+// ============ SEGMENTS PAGE CONTENT (embedded in Customers tab) ============
+const SegmentsPageContent = () => {
     const { api } = useAuth();
     const navigate = useNavigate();
+    const [segments, setSegments] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedSegment, setSelectedSegment] = useState(null);
+    const [showSendMessage, setShowSendMessage] = useState(false);
+    const [messageTemplate, setMessageTemplate] = useState("");
+    const [selectedCampaign, setSelectedCampaign] = useState("");
+    const [showEditDialog, setShowEditDialog] = useState(false);
+    const [editingSegment, setEditingSegment] = useState(null);
+    const [segmentName, setSegmentName] = useState("");
+    const [templateVariables, setTemplateVariables] = useState({});
+    const [sendOption, setSendOption] = useState("now");
+    const [scheduledDate, setScheduledDate] = useState("");
+    const [scheduledTime, setScheduledTime] = useState("10:00");
+    const [recurringFrequency, setRecurringFrequency] = useState("daily");
+    const [recurringDays, setRecurringDays] = useState([]);
+    const [recurringDayOfMonth, setRecurringDayOfMonth] = useState("1");
+    const [recurringEndOption, setRecurringEndOption] = useState("never");
+    const [recurringEndDate, setRecurringEndDate] = useState("");
+    const [recurringOccurrences, setRecurringOccurrences] = useState("10");
+    const [templates, setTemplates] = useState([]);
+    const [templatesLoading, setTemplatesLoading] = useState(false);
+    const [totalCustomersCount, setTotalCustomersCount] = useState(0);
+    const [segmentTemplateVariableMappings, setSegmentTemplateVariableMappings] = useState({});
+    const [segmentSampleData, setSegmentSampleData] = useState({});
+    const [segmentTemplateVariableModes, setSegmentTemplateVariableModes] = useState({});
     const [segments, setSegments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedSegment, setSelectedSegment] = useState(null);
