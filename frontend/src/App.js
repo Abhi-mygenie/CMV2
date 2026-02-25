@@ -7386,7 +7386,10 @@ const TemplatesPage = () => {
                                             <Card key={tpl.wid} className="rounded-xl border-0 shadow-sm overflow-hidden">
                                                 <CardContent className="p-4">
                                                     <div className="flex items-start justify-between mb-2">
-                                                        <h4 className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</h4>
+                                                        <div>
+                                                            <h4 className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</h4>
+                                                            <span className="text-xs text-gray-500 capitalize">{tpl.meta_data?.category || "utility"}</span>
+                                                        </div>
                                                         <Badge className={`text-xs ${isMapped ? "bg-[#25D366] text-white" : "bg-amber-500 text-white"}`}>{isMapped ? "Mapped" : "Not Mapped"}</Badge>
                                                     </div>
                                                     {variables.length > 0 && (
