@@ -344,6 +344,7 @@ async def save_template_variable_mapping(
             "template_id": template_id,
             "template_name": data.get("template_name", ""),
             "mappings": clean_mappings,
+            "modes": data.get("modes") or {},
             "updated_at": now
         }},
         upsert=True
