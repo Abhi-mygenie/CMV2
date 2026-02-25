@@ -7166,7 +7166,7 @@ const TemplatesPage = () => {
             }
             // Get API key
             try {
-                const res = await api.get("/whatsapp/config");
+                const res = await api.get("/whatsapp/api-key");
                 setWhatsappApiKey(res.data.authkey_api_key || "");
             } catch (_) {}
         };
