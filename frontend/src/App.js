@@ -3511,8 +3511,13 @@ const SegmentsPage = () => {
     const fetchTemplates = async () => {
         setTemplatesLoading(true);
         try {
-            const res = await api.get("/whatsapp/authkey-templates");
-            const authkeyTemplates = res.data.templates || [];
+            // Fetch templates and variable mappings in parallel
+            const [templatesRes, mappingsRes] = await Promise.all([
+                api.get("/whatsapp/authkey-templates"),
+                api.get("/whatsapp/template-variable-map")
+            ]);
+            
+            const authkeyTemplates = templatesRes.data.templates || [];
             // Transform authkey templates to match expected format
             const formattedTemplates = authkeyTemplates.map(tpl => ({
                 id: tpl.wid?.toString() || tpl.id,
@@ -3523,6 +3528,13 @@ const SegmentsPage = () => {
                 mediaUrl: tpl.media_url || null
             }));
             setTemplates(formattedTemplates);
+            
+            // Process variable mappings
+            const mappingsObj = {};
+            (mappingsRes.data.mappings || []).forEach(m => {
+                mappingsObj[m.template_id] = m.mappings || {};
+            });
+            setSegmentTemplateVariableMappings(mappingsObj);
         } catch (err) {
             console.error("Failed to fetch templates:", err);
             // Fallback to empty array if API fails
@@ -3530,6 +3542,21 @@ const SegmentsPage = () => {
         } finally {
             setTemplatesLoading(false);
         }
+    };
+    
+    // Helper: Check if all template variables are mapped
+    const isSegmentTemplateFullyMapped = (template) => {
+        // If no variables in template, it's considered fully mapped
+        if (!template.variables || template.variables.length === 0) return true;
+        
+        // Get mappings for this template
+        const mappings = segmentTemplateVariableMappings[template.id] || {};
+        
+        // Check if ALL variables have a non-empty mapping
+        return template.variables.every(v => {
+            const mapping = mappings[v];
+            return mapping && mapping.trim() !== "";
+        });
     };
 
     // Fetch templates when modal opens
