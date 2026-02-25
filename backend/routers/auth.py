@@ -154,6 +154,8 @@ async def demo_login():
             email=user["email"],
             restaurant_name=user["restaurant_name"],
             phone=user["phone"],
+            pos_id=user.get("pos_id", ""),
+            pos_name=user.get("pos_name", ""),
             created_at=user["created_at"]
         ),
         is_demo=True
