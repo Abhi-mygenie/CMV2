@@ -1249,7 +1249,7 @@ const CustomersPage = () => {
                                 </Avatar>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className="font-medium text-[#1A1A1A] truncate">{customer.name}</p>
+                                        <p className="font-medium text-[#1A1A1A] truncate">{customer.name} <span className="text-[#52525B] font-normal">({customer.total_visits || 0})</span></p>
                                         <button
                                             onClick={(e) => openEditModal(customer, e)}
                                             className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#F26B33]/10 transition-colors"
