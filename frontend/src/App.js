@@ -4732,15 +4732,23 @@ const SettingsPage = () => {
     const navigate = useNavigate();
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [savingApiKey, setSavingApiKey] = useState(false);
+    const [activeSection, setActiveSection] = useState(null);
+    const [profile, setProfile] = useState({ restaurant_name: "", phone: "", address: "" });
+    const [savingProfile, setSavingProfile] = useState(false);
 
     useEffect(() => {
-        const fetchApiKey = async () => {
+        const fetchData = async () => {
             try {
                 const res = await api.get("/whatsapp/api-key");
                 setWhatsappApiKey(res.data.authkey_api_key || "");
             } catch (_) {}
+            setProfile({
+                restaurant_name: user?.restaurant_name || "",
+                phone: user?.phone || "",
+                address: user?.address || ""
+            });
         };
-        fetchApiKey();
+        fetchData();
     }, []);
 
     const handleSaveApiKey = async () => {
@@ -4755,81 +4763,104 @@ const SettingsPage = () => {
         }
     };
 
+    const handleSaveProfile = async () => {
+        setSavingProfile(true);
+        try {
+            await api.put("/auth/profile", profile);
+            toast.success("Profile updated!");
+        } catch (err) {
+            toast.error("Failed to update profile");
+        } finally {
+            setSavingProfile(false);
+        }
+    };
+
     const handleLogout = () => {
         logout();
         navigate("/login");
         toast.success("Logged out successfully");
     };
 
+    const toggleSection = (section) => {
+        setActiveSection(prev => prev === section ? null : section);
+    };
+
+    const sectionColors = {
+        coupons: { bg: "bg-[#F26B33]/10", border: "border-[#F26B33]", text: "text-[#F26B33]" },
+        whatsapp: { bg: "bg-[#25D366]/10", border: "border-[#25D366]", text: "text-[#25D366]" },
+        loyalty: { bg: "bg-[#329937]/10", border: "border-[#329937]", text: "text-[#329937]" }
+    };
+
     return (
         <MobileLayout>
             <div className="p-4 max-w-lg mx-auto">
-                <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6 font-['Montserrat']" data-testid="settings-title">
-                    Settings
-                </h1>
+                <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6 font-['Montserrat']" data-testid="settings-title">Settings</h1>
 
-                {/* Profile Section */}
-                <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="profile-card">
-                    <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                            <Avatar className="w-14 h-14 bg-[#F26B33]">
-                                <AvatarFallback className="bg-[#F26B33] text-white text-xl font-semibold">
-                                    {user?.restaurant_name?.charAt(0)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold text-[#1A1A1A] text-lg">{user?.restaurant_name}</p>
-                                <p className="text-sm text-[#52525B]">{user?.email}</p>
-                                <p className="text-sm text-[#52525B]">{user?.phone}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Quick Actions */}
+                {/* Tab Cards */}
                 <div className="grid grid-cols-3 gap-3 mb-4">
-                    <button 
-                        onClick={() => navigate("/coupons")}
-                        className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                        data-testid="go-to-coupons"
-                    >
-                        <div className="w-10 h-10 rounded-full bg-[#F26B33]/10 flex items-center justify-center">
-                            <Tag className="w-5 h-5 text-[#F26B33]" />
-                        </div>
-                        <div className="text-left">
-                            <p className="font-medium text-[#1A1A1A]">Coupons</p>
-                            <p className="text-xs text-[#52525B]">Manage discounts</p>
-                        </div>
-                    </button>
-                    <button 
-                        onClick={() => navigate("/whatsapp-automation")}
-                        className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                        data-testid="go-to-whatsapp"
-                    >
-                        <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center">
-                            <MessageSquare className="w-5 h-5 text-[#25D366]" />
-                        </div>
-                        <div className="text-left">
-                            <p className="font-medium text-[#1A1A1A]">WhatsApp</p>
-                            <p className="text-xs text-[#52525B]">Automation</p>
-                        </div>
-                    </button>
-                    <button 
-                        onClick={() => navigate("/loyalty-settings")}
-                        className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                        data-testid="go-to-loyalty-settings"
-                    >
-                        <div className="w-10 h-10 rounded-full bg-[#329937]/10 flex items-center justify-center">
-                            <Gift className="w-5 h-5 text-[#329937]" />
-                        </div>
-                        <div className="text-left">
-                            <p className="font-medium text-[#1A1A1A]">Loyalty</p>
-                            <p className="text-xs text-[#52525B]">Points & tiers</p>
-                        </div>
-                    </button>
+                    {[
+                        { key: "coupons", icon: Tag, label: "Coupons", sub: "Manage discounts", color: "#F26B33" },
+                        { key: "whatsapp", icon: MessageSquare, label: "WhatsApp", sub: "Automation", color: "#25D366" },
+                        { key: "loyalty", icon: Gift, label: "Loyalty", sub: "Points & tiers", color: "#329937" }
+                    ].map(({ key, icon: Icon, label, sub, color }) => (
+                        <button
+                            key={key}
+                            onClick={() => toggleSection(key)}
+                            className={`flex items-center gap-3 p-4 rounded-xl shadow-sm transition-all ${activeSection === key ? `bg-white border-l-4 ${sectionColors[key].border} shadow-md` : "bg-white border-l-4 border-transparent hover:shadow-md"}`}
+                            data-testid={`tab-${key}`}
+                        >
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center`} style={{ backgroundColor: `${color}15` }}>
+                                <Icon className="w-5 h-5" style={{ color }} />
+                            </div>
+                            <div className="text-left">
+                                <p className={`font-medium ${activeSection === key ? sectionColors[key].text : "text-[#1A1A1A]"}`}>{label}</p>
+                                <p className="text-xs text-[#52525B]">{sub}</p>
+                            </div>
+                        </button>
+                    ))}
                 </div>
 
-                {/* WhatsApp API Key */}
+                {/* Inline Section Content */}
+                {activeSection === "coupons" && (
+                    <Card className="rounded-xl border-0 shadow-sm mb-4 border-l-4 border-[#F26B33]">
+                        <CardContent className="p-4 text-center">
+                            <Tag className="w-10 h-10 text-[#F26B33] mx-auto mb-2" />
+                            <p className="font-medium text-[#1A1A1A] mb-1">Coupon Management</p>
+                            <p className="text-xs text-[#52525B] mb-3">Create and manage discount coupons for your customers</p>
+                            <Button onClick={() => navigate("/coupons")} className="bg-[#F26B33] hover:bg-[#D85A2A] text-white rounded-full" data-testid="open-coupons-btn">
+                                Open Coupons
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {activeSection === "whatsapp" && (
+                    <Card className="rounded-xl border-0 shadow-sm mb-4 border-l-4 border-[#25D366]">
+                        <CardContent className="p-4 text-center">
+                            <MessageSquare className="w-10 h-10 text-[#25D366] mx-auto mb-2" />
+                            <p className="font-medium text-[#1A1A1A] mb-1">WhatsApp Automation</p>
+                            <p className="text-xs text-[#52525B] mb-3">Configure event-based WhatsApp messages to customers</p>
+                            <Button onClick={() => navigate("/whatsapp-automation")} className="bg-[#25D366] hover:bg-[#1da851] text-white rounded-full" data-testid="open-whatsapp-btn">
+                                Open Automation
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {activeSection === "loyalty" && (
+                    <Card className="rounded-xl border-0 shadow-sm mb-4 border-l-4 border-[#329937]">
+                        <CardContent className="p-4 text-center">
+                            <Gift className="w-10 h-10 text-[#329937] mx-auto mb-2" />
+                            <p className="font-medium text-[#1A1A1A] mb-1">Loyalty Program</p>
+                            <p className="text-xs text-[#52525B] mb-3">Configure points earning, redemption, tiers & bonuses</p>
+                            <Button onClick={() => navigate("/loyalty-settings")} className="bg-[#329937] hover:bg-[#287a2d] text-white rounded-full" data-testid="open-loyalty-btn">
+                                Open Loyalty Settings
+                            </Button>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* WhatsApp API Key - always visible */}
                 <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="whatsapp-api-key-card">
                     <CardContent className="p-4 space-y-4">
                         <div className="flex items-start gap-3">
@@ -4843,34 +4874,52 @@ const SettingsPage = () => {
                         </div>
                         <div>
                             <Label className="form-label">API Key</Label>
-                            <Input
-                                type="password"
-                                value={whatsappApiKey}
-                                onChange={(e) => setWhatsappApiKey(e.target.value)}
-                                placeholder="Enter your AuthKey.io API key"
-                                className="h-12 rounded-xl font-mono"
-                                data-testid="whatsapp-api-key-input"
-                            />
+                            <Input type="password" value={whatsappApiKey} onChange={(e) => setWhatsappApiKey(e.target.value)} placeholder="Enter your AuthKey.io API key" className="h-12 rounded-xl font-mono" data-testid="whatsapp-api-key-input" />
                         </div>
-                        <Button
-                            onClick={handleSaveApiKey}
-                            disabled={savingApiKey}
-                            className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white"
-                            data-testid="save-whatsapp-api-key-btn"
-                        >
+                        <Button onClick={handleSaveApiKey} disabled={savingApiKey} className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white" data-testid="save-whatsapp-api-key-btn">
                             {savingApiKey ? "Saving..." : "Save API Key"}
                         </Button>
                     </CardContent>
                 </Card>
 
+                {/* Profile Section - always visible */}
+                <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="profile-card">
+                    <CardContent className="p-4 space-y-4">
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[#F26B33]/10 flex items-center justify-center flex-shrink-0">
+                                <User className="w-5 h-5 text-[#F26B33]" />
+                            </div>
+                            <div>
+                                <p className="font-medium text-[#1A1A1A]">Profile</p>
+                                <p className="text-xs text-[#52525B] mt-1">Manage your restaurant details</p>
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            <div>
+                                <Label className="form-label">Email</Label>
+                                <Input value={user?.email || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-email" />
+                            </div>
+                            <div>
+                                <Label className="form-label">Restaurant Name</Label>
+                                <Input value={profile.restaurant_name} onChange={(e) => setProfile(p => ({...p, restaurant_name: e.target.value}))} className="h-12 rounded-xl" data-testid="profile-name" />
+                            </div>
+                            <div>
+                                <Label className="form-label">Phone</Label>
+                                <Input value={profile.phone} onChange={(e) => setProfile(p => ({...p, phone: e.target.value}))} className="h-12 rounded-xl" data-testid="profile-phone" />
+                            </div>
+                            <div>
+                                <Label className="form-label">Address</Label>
+                                <Input value={profile.address} onChange={(e) => setProfile(p => ({...p, address: e.target.value}))} placeholder="Enter restaurant address" className="h-12 rounded-xl" data-testid="profile-address" />
+                            </div>
+                        </div>
+                        <Button onClick={handleSaveProfile} disabled={savingProfile} className="w-full h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A] text-white" data-testid="save-profile-btn">
+                            {savingProfile ? "Saving..." : "Save Profile"}
+                        </Button>
+                    </CardContent>
+                </Card>
 
                 {/* Logout */}
-                <Button 
-                    onClick={handleLogout}
-                    variant="outline"
-                    className="w-full h-12 rounded-full border-red-500 text-red-500 hover:bg-red-50"
-                    data-testid="logout-btn"
-                >
+                <Button onClick={handleLogout} variant="outline" className="w-full h-12 rounded-full border-red-500 text-red-500 hover:bg-red-50" data-testid="logout-btn">
                     <LogOut className="w-4 h-4 mr-2" /> Logout
                 </Button>
             </div>
