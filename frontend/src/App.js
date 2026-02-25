@@ -5622,6 +5622,25 @@ const WhatsAppAutomationPage = () => {
     };
 
     // Variable Mapping Functions
+    
+    // Helper: Check if all template variables are mapped
+    const isTemplateFullyMapped = (template) => {
+        // Extract variables from template body ({{1}}, {{2}}, etc.)
+        const variables = (template.temp_body?.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+        
+        // If no variables in template, it's considered fully mapped
+        if (variables.length === 0) return true;
+        
+        // Get mappings for this template
+        const mappings = templateVariableMappings[template.wid] || {};
+        
+        // Check if ALL variables have a non-empty mapping
+        return variables.every(v => {
+            const mapping = mappings[v];
+            return mapping && mapping.trim() !== "";
+        });
+    };
+    
     const openVariableMappingModal = (template) => {
         const variables = (template.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
         setMappingTemplate({ ...template, variables });
