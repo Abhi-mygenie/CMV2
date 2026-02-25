@@ -385,11 +385,28 @@ async def pos_order_webhook(
 ):
     """
     Webhook for MyGenie/POS to send order data.
+    - Validates pos_id and restaurant_id against user's stored values
     - Creates customer if not exists
     - Records order
     - Calculates and awards loyalty points
     """
     try:
+        # Validate pos_id matches user's registered pos_id
+        if user.get("pos_id") and order_data.pos_id != user.get("pos_id"):
+            return POSResponse(
+                success=False,
+                message=f"Invalid pos_id. Expected: {user.get('pos_id')}, Received: {order_data.pos_id}",
+                data=None
+            )
+        
+        # Validate restaurant_id matches user's registered restaurant_id
+        if user.get("restaurant_id") and order_data.restaurant_id != user.get("restaurant_id"):
+            return POSResponse(
+                success=False,
+                message=f"Invalid restaurant_id. Expected: {user.get('restaurant_id')}, Received: {order_data.restaurant_id}",
+                data=None
+            )
+        
         # Only process successful payments
         if order_data.payment_status != "success":
             return POSResponse(
@@ -398,9 +415,10 @@ async def pos_order_webhook(
                 data=None
             )
         
-        # Check for duplicate order
+        # Check for duplicate order (unique key: pos_id + restaurant_id + order_id)
         existing_order = await db.orders.find_one({
             "pos_id": order_data.pos_id,
+            "pos_restaurant_id": order_data.restaurant_id,
             "pos_order_id": order_data.order_id
         })
         if existing_order:
