@@ -278,6 +278,7 @@ async def mygenie_login(credentials: UserLogin):
             user_doc = {
                 "id": user_id,
                 "pos_id": pos_id,
+                "pos_name": pos_name,
                 "restaurant_id": restaurant_id,
                 "api_key": api_key,
                 "email": email,
