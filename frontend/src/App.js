@@ -6698,6 +6698,164 @@ const WhatsAppAutomationPage = () => {
                     </TabsContent>
                 </Tabs>
 
+                {/* Add Template Dialog */}
+                <Dialog open={showAddTemplate} onOpenChange={(open) => {
+                    setShowAddTemplate(open);
+                    if (!open) { setEditingCustomTemplate(null); setNewTemplate({ template_name: "", category: "utility", language: "en", header_type: "none", header_content: "", body: "", footer: "", buttons: [], media_url: "" }); }
+                }}>
+                    <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Plus className="w-5 h-5 text-[#25D366]" />
+                                {editingCustomTemplate ? "Edit Template" : "Add New Template"}
+                            </DialogTitle>
+                            <DialogDescription>
+                                {editingCustomTemplate ? "Update your template. Status will reset to Draft." : "Create a new WhatsApp message template."}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                            {/* Template Name */}
+                            <div className="space-y-1">
+                                <Label className="text-sm font-medium">Template Name</Label>
+                                <Input
+                                    value={newTemplate.template_name}
+                                    onChange={(e) => setNewTemplate(p => ({...p, template_name: e.target.value}))}
+                                    placeholder="e.g., order_confirmation"
+                                    className="rounded-lg"
+                                    data-testid="new-tpl-name"
+                                />
+                            </div>
+                            
+                            {/* Category & Language */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <Label className="text-sm font-medium">Category</Label>
+                                    <Select value={newTemplate.category} onValueChange={(val) => setNewTemplate(p => ({...p, category: val}))}>
+                                        <SelectTrigger className="rounded-lg" data-testid="new-tpl-category">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="marketing">Marketing</SelectItem>
+                                            <SelectItem value="utility">Utility</SelectItem>
+                                            <SelectItem value="authentication">Authentication</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-sm font-medium">Language</Label>
+                                    <Select value={newTemplate.language} onValueChange={(val) => setNewTemplate(p => ({...p, language: val}))}>
+                                        <SelectTrigger className="rounded-lg" data-testid="new-tpl-language">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="en">English</SelectItem>
+                                            <SelectItem value="hi">Hindi</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+
+                            {/* Header */}
+                            <div className="space-y-1">
+                                <Label className="text-sm font-medium">Header (optional)</Label>
+                                <Select value={newTemplate.header_type} onValueChange={(val) => setNewTemplate(p => ({...p, header_type: val, header_content: ""}))}>
+                                    <SelectTrigger className="rounded-lg" data-testid="new-tpl-header-type">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">None</SelectItem>
+                                        <SelectItem value="text">Text</SelectItem>
+                                        <SelectItem value="image">Image</SelectItem>
+                                        <SelectItem value="video">Video</SelectItem>
+                                        <SelectItem value="document">Document</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                {newTemplate.header_type === "text" && (
+                                    <Input
+                                        value={newTemplate.header_content}
+                                        onChange={(e) => setNewTemplate(p => ({...p, header_content: e.target.value}))}
+                                        placeholder="Header text..."
+                                        className="rounded-lg mt-2"
+                                        data-testid="new-tpl-header-text"
+                                    />
+                                )}
+                                {(newTemplate.header_type === "image" || newTemplate.header_type === "video" || newTemplate.header_type === "document") && (
+                                    <Input
+                                        value={newTemplate.media_url}
+                                        onChange={(e) => setNewTemplate(p => ({...p, media_url: e.target.value}))}
+                                        placeholder="Media URL..."
+                                        className="rounded-lg mt-2"
+                                        data-testid="new-tpl-media-url"
+                                    />
+                                )}
+                            </div>
+
+                            {/* Body */}
+                            <div className="space-y-1">
+                                <Label className="text-sm font-medium">Body</Label>
+                                <textarea
+                                    value={newTemplate.body}
+                                    onChange={(e) => setNewTemplate(p => ({...p, body: e.target.value}))}
+                                    placeholder={"Hi {{1}},\nYour order {{2}} is confirmed.\nTotal: ₹{{3}}"}
+                                    className="w-full min-h-[120px] rounded-lg border border-gray-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:border-transparent resize-y"
+                                    data-testid="new-tpl-body"
+                                />
+                                <p className="text-xs text-gray-400">Use {"{{1}}"}, {"{{2}}"}, etc. for variables</p>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="space-y-1">
+                                <Label className="text-sm font-medium">Footer (optional)</Label>
+                                <Input
+                                    value={newTemplate.footer}
+                                    onChange={(e) => setNewTemplate(p => ({...p, footer: e.target.value}))}
+                                    placeholder="e.g., Reply STOP to unsubscribe"
+                                    className="rounded-lg"
+                                    data-testid="new-tpl-footer"
+                                />
+                            </div>
+                            
+                            {/* Live Preview */}
+                            {newTemplate.body && (
+                                <div className="space-y-1">
+                                    <Label className="text-xs text-gray-500">Preview</Label>
+                                    <div className="bg-[#E5DDD5] p-3 rounded-lg">
+                                        <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm">
+                                            {newTemplate.header_type === "text" && newTemplate.header_content && (
+                                                <p className="text-sm font-bold text-[#1A1A1A] mb-1">{newTemplate.header_content}</p>
+                                            )}
+                                            <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap">{newTemplate.body}</p>
+                                            {newTemplate.footer && (
+                                                <p className="text-xs text-gray-500 mt-2 border-t border-gray-200 pt-1">{newTemplate.footer}</p>
+                                            )}
+                                            <div className="flex items-center justify-end gap-1 mt-1">
+                                                <span className="text-[10px] text-gray-500">
+                                                    {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                                </span>
+                                                <svg className="w-4 h-4 text-[#53BDEB]" viewBox="0 0 16 15" fill="currentColor">
+                                                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.51zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.89 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <DialogFooter className="gap-2">
+                                <Button variant="outline" onClick={() => setShowAddTemplate(false)}>Cancel</Button>
+                                <Button
+                                    onClick={handleSaveCustomTemplate}
+                                    disabled={savingTemplate}
+                                    className="bg-[#25D366] hover:bg-[#1da851] text-white"
+                                    data-testid="save-new-template-btn"
+                                >
+                                    {savingTemplate ? "Saving..." : editingCustomTemplate ? "Update Template" : "Save as Draft"}
+                                </Button>
+                            </DialogFooter>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
                 {/* Variable Mapping Modal */}
                 <Dialog open={showVariableMappingModal} onOpenChange={setShowVariableMappingModal}>
                     <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
