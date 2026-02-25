@@ -4730,28 +4730,17 @@ const SegmentsPage = () => {
 const SettingsPage = () => {
     const { user, api, logout } = useAuth();
     const navigate = useNavigate();
-    const [settings, setSettings] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [savingApiKey, setSavingApiKey] = useState(false);
 
     useEffect(() => {
-        const fetchSettings = async () => {
+        const fetchApiKey = async () => {
             try {
-                const [res, apiKeyRes] = await Promise.all([
-                    api.get("/loyalty/settings"),
-                    api.get("/whatsapp/api-key").catch(() => ({ data: {} }))
-                ]);
-                setSettings(res.data);
-                setWhatsappApiKey(apiKeyRes.data.authkey_api_key || "");
-            } catch (err) {
-                toast.error("Failed to load settings");
-            } finally {
-                setLoading(false);
-            }
+                const res = await api.get("/whatsapp/api-key");
+                setWhatsappApiKey(res.data.authkey_api_key || "");
+            } catch (_) {}
         };
-        fetchSettings();
+        fetchApiKey();
     }, []);
 
     const handleSave = async () => {
