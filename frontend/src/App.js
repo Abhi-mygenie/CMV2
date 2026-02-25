@@ -3467,7 +3467,7 @@ const CouponsPage = () => {
                     </form>
                 </DialogContent>
             </Dialog>
-            </div>
+            </React.Fragment>
             )}
             {customerTab === "segments" && (
                 <SegmentsPageContent />
