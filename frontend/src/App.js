@@ -6046,34 +6046,7 @@ const WhatsAppAutomationPage = () => {
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* Templates Tab */}
-                    <TabsContent value="templates" className="mt-4">
-                        {!whatsappApiKey ? (
-                            <Card className="rounded-xl border-0 shadow-sm">
-                                <CardContent className="p-8 text-center">
-                                    <KeyRound className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-                                    <p className="text-[#52525B]">API Key Required</p>
-                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to view templates</p>
-                                    <Button onClick={() => setActiveTab("settings")} variant="outline" className="mt-4">
-                                        Go to Settings
-                                    </Button>
-                                </CardContent>
-                            </Card>
-                        ) : loadingAuthkeyTemplates ? (
-                            <Card className="rounded-xl border-0 shadow-sm">
-                                <CardContent className="p-8 text-center">
-                                    <div className="w-8 h-8 border-3 border-[#25D366] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                                    <p className="text-[#52525B]">Fetching templates from AuthKey.io...</p>
-                                </CardContent>
-                            </Card>
-                        ) : authkeyTemplates.length === 0 ? (
-                            <Card className="rounded-xl border-0 shadow-sm">
-                                <CardContent className="p-8 text-center">
-                                    <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                    <p className="text-[#52525B]">No templates found</p>
-                                    <p className="text-xs text-gray-400 mt-1">No WhatsApp templates available for this API key</p>
-                                </CardContent>
-                            </Card>
+                    {/* Automation Tab - Card-based Layout */}
                         ) : (
                             <div className="space-y-3">
                                 {/* Filter Tabs for Templates */}
