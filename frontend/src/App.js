@@ -5206,20 +5206,50 @@ const WhatsAppAutomationPage = () => {
                                     })
                                     .map(tpl => {
                                     const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                    const hasMappings = templateVariableMappings[tpl.wid] && Object.keys(templateVariableMappings[tpl.wid]).length > 0;
                                     return (
                                         <Card key={tpl.wid} className="rounded-xl border-0 shadow-sm" data-testid={`authkey-tpl-${tpl.wid}`}>
                                             <CardContent className="p-4">
-                                                <p className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</p>
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <p className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</p>
+                                                    {variables.length > 0 && (
+                                                        <Badge className={`${hasMappings ? 'bg-[#25D366]' : 'bg-amber-500'} text-white text-xs`}>
+                                                            {hasMappings ? "Mapped" : "Not Mapped"}
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                                 {variables.length > 0 && (
                                                     <div className="flex flex-wrap gap-1 mt-1">
-                                                        {variables.map(v => (
-                                                            <Badge key={v} variant="outline" className="text-xs">{v}</Badge>
-                                                        ))}
+                                                        {variables.map(v => {
+                                                            const mappedField = templateVariableMappings[tpl.wid]?.[v];
+                                                            const fieldLabel = mappedField ? availableVariables.find(av => av.key === mappedField)?.label || mappedField : null;
+                                                            return (
+                                                                <Badge 
+                                                                    key={v} 
+                                                                    variant="outline" 
+                                                                    className={`text-xs ${mappedField ? 'border-[#25D366] text-[#25D366]' : ''}`}
+                                                                    title={fieldLabel ? `Mapped to: ${fieldLabel}` : 'Not mapped'}
+                                                                >
+                                                                    {v}{fieldLabel ? ` → ${fieldLabel}` : ''}
+                                                                </Badge>
+                                                            );
+                                                        })}
                                                     </div>
                                                 )}
                                                 <div className="bg-gray-50 p-3 rounded-lg mt-2">
                                                     <p className="text-sm text-[#52525B] whitespace-pre-wrap">{tpl.temp_body}</p>
                                                 </div>
+                                                {variables.length > 0 && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="mt-3 h-8 rounded-lg text-xs w-full"
+                                                        onClick={() => openVariableMappingModal(tpl)}
+                                                        data-testid={`map-variables-${tpl.wid}`}
+                                                    >
+                                                        <Edit2 className="w-3 h-3 mr-1" /> Map Variables
+                                                    </Button>
+                                                )}
                                             </CardContent>
                                         </Card>
                                     );
