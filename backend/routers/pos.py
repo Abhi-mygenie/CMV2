@@ -890,11 +890,19 @@ async def pos_payment_received(
                 # Corporate Information
                 "gst_name": None,
                 "gst_number": None,
+                "billing_address": None,
+                "credit_limit": None,
+                "payment_terms": None,
                 
                 # Address
                 "address": None,
+                "address_line_2": None,
                 "city": None,
+                "state": None,
                 "pincode": None,
+                "country": None,
+                "delivery_instructions": None,
+                "map_location": None,
                 
                 # Preferences
                 "allergies": [],
