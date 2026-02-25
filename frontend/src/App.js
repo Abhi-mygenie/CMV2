@@ -4809,9 +4809,10 @@ const WhatsAppAutomationPage = () => {
             const apiKey = apiKeyRes.data.authkey_api_key || "";
             if (apiKey) {
                 try {
-                    const [tplRes, mapRes] = await Promise.all([
+                    const [tplRes, mapRes, varMapRes] = await Promise.all([
                         api.get("/whatsapp/authkey-templates"),
-                        api.get("/whatsapp/event-template-map")
+                        api.get("/whatsapp/event-template-map"),
+                        api.get("/whatsapp/template-variable-map")
                     ]);
                     setAuthkeyTemplates(tplRes.data.templates || []);
                     const mapObj = {};
@@ -4819,6 +4820,12 @@ const WhatsAppAutomationPage = () => {
                         mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name, is_enabled: m.is_enabled !== false, saved: true };
                     });
                     setEventMappings(mapObj);
+                    // Load variable mappings
+                    const varMapObj = {};
+                    (varMapRes.data.mappings || []).forEach(m => {
+                        varMapObj[m.template_id] = m.mappings || {};
+                    });
+                    setTemplateVariableMappings(varMapObj);
                 } catch (_) {}
             }
         } catch (err) {
