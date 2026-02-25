@@ -814,31 +814,67 @@ async def pos_payment_received(
             customer = {
                 "id": customer_id,
                 "user_id": user["id"],
+                "created_at": now,
+                "updated_at": now,
+                
+                # Basic Info
                 "name": f"Customer {webhook_data.customer_phone[-4:]}",
                 "phone": webhook_data.customer_phone,
                 "country_code": "+91",
                 "email": None,
-                "notes": "Auto-created via POS",
+                "gender": None,
                 "dob": None,
                 "anniversary": None,
+                "preferred_language": None,
                 "customer_type": "normal",
+                "segment_tags": [],
+                
+                # Contact & Marketing Permissions
+                "whatsapp_opt_in": False,
+                "whatsapp_opt_in_date": None,
+                "promo_whatsapp_allowed": True,
+                "promo_sms_allowed": True,
+                "email_marketing_allowed": True,
+                "call_allowed": True,
+                "is_blocked": False,
+                
+                # Loyalty Information
+                "total_points": 0,
+                "wallet_balance": 0.0,
+                "tier": "Bronze",
+                "referral_code": None,
+                "referred_by": None,
+                "membership_id": None,
+                "membership_expiry": None,
+                
+                # Spending & Visit Behavior
+                "total_visits": 0,
+                "total_spent": 0.0,
+                "avg_order_value": 0.0,
+                "last_visit": None,
+                "favorite_category": None,
+                "preferred_payment_mode": None,
+                
+                # Corporate Information
                 "gst_name": None,
                 "gst_number": None,
+                
+                # Address
                 "address": None,
                 "city": None,
                 "pincode": None,
+                
+                # Preferences
                 "allergies": [],
+                "favorites": [],
+                
+                # Custom Fields
                 "custom_field_1": None,
                 "custom_field_2": None,
                 "custom_field_3": None,
-                "favorites": [],
-                "total_points": 0,
-                "wallet_balance": 0.0,
-                "total_visits": 0,
-                "total_spent": 0.0,
-                "tier": "Bronze",
-                "created_at": now,
-                "last_visit": None
+                
+                # Notes
+                "notes": "Auto-created via POS"
             }
             await db.customers.insert_one(customer)
         
