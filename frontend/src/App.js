@@ -6061,7 +6061,11 @@ const WhatsAppAutomationPage = () => {
                                 </CardContent>
                             </Card>
                         ) : (
-                                    // Currently Authkey doesn't send status, so all are approved
+                            <div className="space-y-3">
+
+                    {/* Automation Tab - Card-based Layout */}
+                    <TabsContent value="automation" className="mt-4">
+                        {!whatsappApiKey ? (
                                     // Later when Authkey provides status, filter here
                                     const approvedAuthkey = authkeyTemplates; // all approved for now
                                     const pendingAuthkey = []; // will come from Authkey later
