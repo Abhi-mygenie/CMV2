@@ -1912,102 +1912,33 @@ const CustomersPage = () => {
                                         </ComingSoonOverlay>
                                     </AccordionContent>
                                 </AccordionItem>
-                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-amber-50 rounded-xl mb-2">
-                                        <span className="flex items-center gap-2 text-sm font-semibold text-amber-600">
-                                            <TrendingUp className="w-4 h-4" /> Source & Journey
-                                        </span>
-                                    </AccordionTrigger>
-                                    <AccordionContent className="px-1">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="form-label">Lead Source</Label>
-                                                <Select 
-                                                    value={newCustomer.lead_source} 
-                                                    onValueChange={(v) => setNewCustomer({...newCustomer, lead_source: v})}
-                                                >
-                                                    <SelectTrigger className="h-11 rounded-xl">
-                                                        <SelectValue placeholder="How did they find you?" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {LEAD_SOURCE_OPTIONS.map(opt => (
-                                                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Campaign Source</Label>
-                                                <Input
-                                                    value={newCustomer.campaign_source}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, campaign_source: e.target.value})}
-                                                    placeholder="UTM or campaign name"
-                                                    className="h-11 rounded-xl"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Assigned Salesperson</Label>
-                                                <Input
-                                                    value={newCustomer.assigned_salesperson}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, assigned_salesperson: e.target.value})}
-                                                    placeholder="Staff name or ID"
-                                                    className="h-11 rounded-xl"
-                                                />
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-
                                 {/* Dining Preferences */}
                                 <AccordionItem value="dining" className="border-b-0">
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-rose-50 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-rose-600">
                                             <Home className="w-4 h-4" /> Dining Preferences
+                                            <span className="ml-auto text-[10px] bg-rose-100 text-rose-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                         </span>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-1">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="form-label">Preferred Dining Type</Label>
-                                                <div className="flex gap-2 mt-2">
-                                                    {DINING_TYPE_OPTIONS.map(type => (
-                                                        <button
-                                                            key={type}
-                                                            type="button"
-                                                            onClick={() => setNewCustomer({...newCustomer, preferred_dining_type: type})}
-                                                            className={`flex-1 py-2 px-3 rounded-xl text-xs font-medium border-2 transition-all ${
-                                                                newCustomer.preferred_dining_type === type
-                                                                    ? "bg-rose-500 text-white border-rose-500"
-                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-rose-300"
-                                                            }`}
-                                                        >
-                                                            {type}
-                                                        </button>
-                                                    ))}
+                                        <ComingSoonOverlay color="rose">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label className="form-label">Preferred Dining Type</Label>
+                                                    <div className="flex gap-2 mt-2">
+                                                        {["Dine-In", "Takeaway", "Delivery"].map(type => (
+                                                            <button key={type} type="button" disabled className="flex-1 py-2 px-3 rounded-xl text-xs font-medium border-2 bg-white text-gray-400 border-gray-200">{type}</button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Diet Preference</Label>
+                                                    <Input placeholder="Select diet..." className="h-11 rounded-xl" disabled />
                                                 </div>
                                             </div>
-                                            <div>
-                                                <Label className="form-label">Preferred Time Slot</Label>
-                                                <Select 
-                                                    value={newCustomer.preferred_time_slot} 
-                                                    onValueChange={(v) => setNewCustomer({...newCustomer, preferred_time_slot: v})}
-                                                >
-                                                    <SelectTrigger className="h-11 rounded-xl">
-                                                        <SelectValue placeholder="Select time slot..." />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {TIME_SLOT_OPTIONS.map(opt => (
-                                                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Favorite Table/Section</Label>
-                                                <Input
-                                                    value={newCustomer.favorite_table}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, favorite_table: e.target.value})}
-                                                    placeholder="e.g., Table 5, VIP Section, Outdoor"
-                                                    className="h-11 rounded-xl"
+                                        </ComingSoonOverlay>
+                                    </AccordionContent>
+                                </AccordionItem>
                                                 />
                                             </div>
                                             <div>
