@@ -5196,15 +5196,8 @@ const WhatsAppAutomationPage = () => {
                             </Card>
                         ) : (
                             <div className="space-y-3">
-                                {/* Filter templates: only show templates whose first 3 letters match any event key's first 3 letters */}
-                                {authkeyTemplates
-                                    .filter(tpl => {
-                                        const templatePrefix = (tpl.temp_name || "").substring(0, 3).toLowerCase();
-                                        // Get all event key prefixes
-                                        const eventPrefixes = availableEvents.map(eventKey => eventKey.substring(0, 3).toLowerCase());
-                                        return eventPrefixes.includes(templatePrefix);
-                                    })
-                                    .map(tpl => {
+                                {/* Show all templates */}
+                                {authkeyTemplates.map(tpl => {
                                     const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
                                     const hasMappings = templateVariableMappings[tpl.wid] && Object.keys(templateVariableMappings[tpl.wid]).length > 0;
                                     return (
