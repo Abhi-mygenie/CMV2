@@ -4246,7 +4246,41 @@ const SegmentsPage = () => {
                                                 
                                                 {/* Message Text */}
                                                 <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                                    {currentTemplate.message}
+                                                    {(() => {
+                                                        const mappings = segmentTemplateVariableMappings[currentTemplate.id] || {};
+                                                        const modes = segmentTemplateVariableModes[currentTemplate.id] || {};
+                                                        const templateBody = currentTemplate.message || "";
+                                                        const varRegex = /\{\{\d+\}\}/g;
+                                                        let match;
+                                                        let lastIndex = 0;
+                                                        const parts = [];
+                                                        while ((match = varRegex.exec(templateBody)) !== null) {
+                                                            if (match.index > lastIndex) {
+                                                                parts.push({ type: "text", value: templateBody.slice(lastIndex, match.index) });
+                                                            }
+                                                            const varKey = match[0];
+                                                            const mappedField = mappings[varKey];
+                                                            const mode = modes[varKey] || "map";
+                                                            if (mappedField && mappedField !== "none") {
+                                                                const sampleValue = mode === "text" ? mappedField : segmentSampleData[mappedField];
+                                                                if (sampleValue && String(sampleValue).trim() !== "") {
+                                                                    parts.push({ type: "data", value: String(sampleValue) });
+                                                                } else {
+                                                                    parts.push({ type: "na", value: "NA" });
+                                                                }
+                                                            } else {
+                                                                parts.push({ type: "var", value: varKey });
+                                                            }
+                                                            lastIndex = match.index + match[0].length;
+                                                        }
+                                                        if (lastIndex < templateBody.length) {
+                                                            parts.push({ type: "text", value: templateBody.slice(lastIndex) });
+                                                        }
+                                                        return parts.map((part, idx) => {
+                                                            if (part.type === "na") return <span key={idx} className="text-red-500 font-medium">NA</span>;
+                                                            return <span key={idx}>{part.value}</span>;
+                                                        });
+                                                    })()}
                                                 </p>
                                                 
                                                 {/* Timestamp */}
