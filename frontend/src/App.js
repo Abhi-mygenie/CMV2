@@ -721,6 +721,21 @@ const CustomersPage = () => {
         allergies: [],
         favorites: [],
         
+        // Dining Preferences
+        preferred_dining_type: "",
+        preferred_time_slot: "",
+        favorite_table: "",
+        avg_party_size: "",
+        diet_preference: "",
+        spice_level: "",
+        cuisine_preference: "",
+        
+        // Special Occasions
+        kids_birthday: [],
+        spouse_name: "",
+        festival_preference: [],
+        special_dates: [],
+        
         // Custom Fields
         custom_field_1: "",
         custom_field_2: "",
