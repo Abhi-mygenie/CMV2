@@ -4810,7 +4810,7 @@ const SettingsPage = () => {
                 </Card>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-3 gap-3 mb-4">
                     <button 
                         onClick={() => navigate("/coupons")}
                         className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
@@ -4834,11 +4834,9 @@ const SettingsPage = () => {
                         </div>
                         <div className="text-left">
                             <p className="font-medium text-[#1A1A1A]">WhatsApp</p>
-                            <p className="text-xs text-[#52525B]">Templates & automation</p>
+                            <p className="text-xs text-[#52525B]">Automation</p>
                         </div>
                     </button>
-                </div>
-                <div className="grid grid-cols-2 gap-3 mb-4">
                     <button 
                         onClick={() => document.getElementById('loyalty-settings')?.scrollIntoView({ behavior: 'smooth' })}
                         className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
@@ -4852,20 +4850,41 @@ const SettingsPage = () => {
                             <p className="text-xs text-[#52525B]">Points & tiers</p>
                         </div>
                     </button>
-                    <button 
-                        onClick={() => navigate("/qr")}
-                        className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
-                        data-testid="go-to-qr"
-                    >
-                        <div className="w-10 h-10 rounded-full bg-[#6366F1]/10 flex items-center justify-center">
-                            <QrCode className="w-5 h-5 text-[#6366F1]" />
-                        </div>
-                        <div className="text-left">
-                            <p className="font-medium text-[#1A1A1A]">QR Code</p>
-                            <p className="text-xs text-[#52525B]">Customer sign-up</p>
-                        </div>
-                    </button>
                 </div>
+
+                {/* WhatsApp API Key */}
+                <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="whatsapp-api-key-card">
+                    <CardContent className="p-4 space-y-4">
+                        <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0">
+                                <KeyRound className="w-5 h-5 text-[#25D366]" />
+                            </div>
+                            <div>
+                                <p className="font-medium text-[#1A1A1A]">WhatsApp API Key</p>
+                                <p className="text-xs text-[#52525B] mt-1">Enter your AuthKey.io API key to authenticate and send WhatsApp messages.</p>
+                            </div>
+                        </div>
+                        <div>
+                            <Label className="form-label">API Key</Label>
+                            <Input
+                                type="password"
+                                value={whatsappApiKey}
+                                onChange={(e) => setWhatsappApiKey(e.target.value)}
+                                placeholder="Enter your AuthKey.io API key"
+                                className="h-12 rounded-xl font-mono"
+                                data-testid="whatsapp-api-key-input"
+                            />
+                        </div>
+                        <Button
+                            onClick={handleSaveApiKey}
+                            disabled={savingApiKey}
+                            className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white"
+                            data-testid="save-whatsapp-api-key-btn"
+                        >
+                            {savingApiKey ? "Saving..." : "Save API Key"}
+                        </Button>
+                    </CardContent>
+                </Card>
 
                 {loading ? (
                     <div className="stats-card animate-pulse">
