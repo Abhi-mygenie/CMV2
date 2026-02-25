@@ -968,10 +968,18 @@ const CustomersPage = () => {
             // Corporate Information
             gst_name: customer.gst_name || "",
             gst_number: customer.gst_number || "",
+            billing_address: customer.billing_address || "",
+            credit_limit: customer.credit_limit || "",
+            payment_terms: customer.payment_terms || "",
             // Address
             address: customer.address || "",
+            address_line_2: customer.address_line_2 || "",
             city: customer.city || "",
+            state: customer.state || "",
             pincode: customer.pincode || "",
+            country: customer.country || "",
+            delivery_instructions: customer.delivery_instructions || "",
+            map_location: customer.map_location || null,
             // Preferences
             allergies: customer.allergies || [],
             favorites: customer.favorites || [],
