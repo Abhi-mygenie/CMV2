@@ -179,43 +179,77 @@ async def pos_create_customer(
     customer_doc = {
         "id": customer_id,
         "user_id": user["id"],
+        "created_at": now,
+        "updated_at": now,
+        
         # POS Identification
         "pos_id": customer_data.pos_id,
         "pos_restaurant_id": customer_data.restaurant_id,
+        
         # Basic Info
         "name": customer_data.name,
         "phone": customer_data.phone,
         "country_code": customer_data.country_code,
         "email": customer_data.email,
+        "gender": customer_data.gender,
+        
         # Personal Details
         "dob": customer_data.dob,
         "anniversary": customer_data.anniversary,
+        "preferred_language": customer_data.preferred_language,
+        
         # Customer Type
         "customer_type": customer_data.customer_type,
+        "segment_tags": customer_data.segment_tags or [],
+        
+        # Contact & Marketing Permissions
+        "whatsapp_opt_in": customer_data.whatsapp_opt_in,
+        "whatsapp_opt_in_date": None,
+        "promo_whatsapp_allowed": customer_data.promo_whatsapp_allowed,
+        "promo_sms_allowed": customer_data.promo_sms_allowed,
+        "email_marketing_allowed": customer_data.email_marketing_allowed,
+        "call_allowed": customer_data.call_allowed,
+        "is_blocked": False,
+        
+        # Loyalty Information
+        "total_points": 0,
+        "wallet_balance": 0.0,
+        "tier": "Bronze",
+        "referral_code": customer_data.referral_code,
+        "referred_by": customer_data.referred_by,
+        "membership_id": customer_data.membership_id,
+        "membership_expiry": customer_data.membership_expiry,
+        
+        # Spending & Visit Behavior
+        "total_visits": 0,
+        "total_spent": 0.0,
+        "avg_order_value": 0.0,
+        "last_visit": None,
+        "favorite_category": customer_data.favorite_category,
+        "preferred_payment_mode": customer_data.preferred_payment_mode,
+        
         # GST Details
         "gst_name": customer_data.gst_name,
         "gst_number": customer_data.gst_number,
+        
         # Address
         "address": customer_data.address,
         "city": customer_data.city,
         "pincode": customer_data.pincode,
+        
         # Preferences
         "allergies": customer_data.allergies or [],
         "favorites": customer_data.favorites or [],
+        
         # Custom Fields
         "custom_field_1": customer_data.custom_field_1,
         "custom_field_2": customer_data.custom_field_2,
         "custom_field_3": customer_data.custom_field_3,
+        
         # Notes
         "notes": customer_data.notes,
-        # System Fields (default values)
-        "total_points": 0,
-        "wallet_balance": 0.0,
-        "total_visits": 0,
-        "total_spent": 0.0,
-        "tier": "Bronze",
-        "created_at": now,
-        "last_visit": None,
+        
+        # Sync Status
         "pos_synced": True,
         "pos_synced_at": now
     }
