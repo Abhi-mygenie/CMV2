@@ -5382,6 +5382,9 @@ const WhatsAppAutomationPage = () => {
     const [templateVariableModes, setTemplateVariableModes] = useState({});
     const [savingVariableMapping, setSavingVariableMapping] = useState(false);
     
+    // Sample customer data for previews
+    const [sampleCustomerData, setSampleCustomerData] = useState({});
+    
     // Template preview state for Automation dropdown
     const [showTemplatePreview, setShowTemplatePreview] = useState(false);
     const [previewTemplate, setPreviewTemplate] = useState(null);
