@@ -5,6 +5,7 @@ import uuid
 
 from core.database import db
 from core.auth import get_current_user
+from core.helpers import get_default_templates_and_automation
 from models.schemas import (
     WhatsAppTemplate, WhatsAppTemplateCreate, WhatsAppTemplateUpdate,
     AutomationRule, AutomationRuleCreate, AutomationRuleUpdate,
@@ -12,6 +13,44 @@ from models.schemas import (
 )
 
 router = APIRouter(prefix="/whatsapp", tags=["WhatsApp"])
+
+
+@router.post("/setup-defaults")
+async def setup_default_templates(user: dict = Depends(get_current_user)):
+    """
+    Create default WhatsApp templates and automation rules for existing user.
+    Skips if templates already exist.
+    """
+    # Check if user already has templates
+    existing_count = await db.whatsapp_templates.count_documents({"user_id": user["id"]})
+    
+    if existing_count > 0:
+        return {
+            "message": "Templates already exist",
+            "templates_created": 0,
+            "automation_rules_created": 0
+        }
+    
+    templates, automation_rules = get_default_templates_and_automation(user["id"])
+    
+    # Insert templates
+    templates_created = 0
+    if templates:
+        await db.whatsapp_templates.insert_many(templates)
+        templates_created = len(templates)
+    
+    # Insert automation rules
+    rules_created = 0
+    if automation_rules:
+        await db.automation_rules.insert_many(automation_rules)
+        rules_created = len(automation_rules)
+    
+    return {
+        "message": "Default templates and automation rules created",
+        "templates_created": templates_created,
+        "automation_rules_created": rules_created
+    }
+
 
 # WhatsApp Template CRUD Endpoints
 @router.post("/templates", response_model=WhatsAppTemplate)
