@@ -477,6 +477,7 @@ async def update_customer(customer_id: str, update_data: CustomerUpdate, user: d
             raise HTTPException(status_code=400, detail="Another customer with this phone already exists")
     
     if update_dict:
+        update_dict["updated_at"] = datetime.now(timezone.utc).isoformat()
         await db.customers.update_one({"id": customer_id}, {"$set": update_dict})
     
     # Sync to MyGenie if user has token
