@@ -6057,9 +6057,10 @@ const WhatsAppAutomationPage = () => {
                                     <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to map templates to events</p>
                                     <Button onClick={() => setActiveTab("settings")} variant="outline" className="mt-4">
                                         Go to Settings
-                                    
-                                    // Count statuses — currently all Authkey are "approved", drafts are local
-                                    const draftCount = customTemplates.length;
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        ) : (
                                     // Currently Authkey doesn't send status, so all are approved
                                     // Later when Authkey provides status, filter here
                                     const approvedAuthkey = authkeyTemplates; // all approved for now
