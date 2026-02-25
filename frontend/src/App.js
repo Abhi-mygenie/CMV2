@@ -3831,6 +3831,15 @@ const SegmentsPage = () => {
                         setSelectedCampaign("");
                         setMessageTemplate("");
                         setTemplateVariables({});
+                        setSendOption("now");
+                        setScheduledDate("");
+                        setScheduledTime("10:00");
+                        setRecurringFrequency("daily");
+                        setRecurringDays([]);
+                        setRecurringDayOfMonth("1");
+                        setRecurringEndOption("never");
+                        setRecurringEndDate("");
+                        setRecurringOccurrences("10");
                     }}>
                         <DialogContent className="max-w-lg mx-4 rounded-2xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
