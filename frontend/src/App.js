@@ -5437,6 +5437,9 @@ const WhatsAppAutomationPage = () => {
     // Filter state for automation events
     const [automationFilter, setAutomationFilter] = useState("all"); // "all", "active", "not_configured"
     
+    // Filter state for templates tab
+    const [templateFilter, setTemplateFilter] = useState("all"); // "all", "mapped", "not_mapped"
+    
     // Template form state
     const [showTemplateModal, setShowTemplateModal] = useState(false);
     const [editingTemplate, setEditingTemplate] = useState(null);
