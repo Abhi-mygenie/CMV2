@@ -3468,6 +3468,12 @@ const CouponsPage = () => {
                     </form>
                 </DialogContent>
             </Dialog>
+            </>
+            )}
+            {customerTab === "segments" && (
+                <SegmentsPageContent />
+            )}
+            </div>
         </MobileLayout>
     );
 };
