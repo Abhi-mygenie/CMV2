@@ -3474,11 +3474,6 @@ const CouponsPage = () => {
                     </form>
                 </DialogContent>
             </Dialog>
-            </React.Fragment>
-            )}
-            {customerTab === "segments" && (
-                <SegmentsPageContent />
-            )}
             </div>
         </MobileLayout>
     );
