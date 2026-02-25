@@ -3950,27 +3950,145 @@ const SegmentsPage = () => {
                                     )}
                                 </div>
 
-                                {/* Template Variables */}
+                                {/* Template Preview - Shown immediately after template selection */}
+                                {messageTemplate && currentTemplate && (
+                                    <div className="rounded-xl border overflow-hidden bg-[#E5DDD5]">
+                                        <div className="p-3">
+                                            <p className="text-xs font-medium text-[#52525B] mb-2 bg-white/80 rounded px-2 py-1 inline-block">
+                                                📱 Message Preview
+                                            </p>
+                                            
+                                            {/* WhatsApp Style Message Bubble */}
+                                            <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm">
+                                                {/* Media Preview */}
+                                                {currentTemplate?.mediaType === "image" && currentTemplate.mediaUrl && (
+                                                    <div className="mb-2 rounded-lg overflow-hidden">
+                                                        <img 
+                                                            src={currentTemplate.mediaUrl} 
+                                                            alt="Template media" 
+                                                            className="w-full h-32 object-cover"
+                                                        />
+                                                    </div>
+                                                )}
+                                                {currentTemplate?.mediaType === "video" && currentTemplate.mediaUrl && (
+                                                    <div className="mb-2 rounded-lg overflow-hidden bg-black relative">
+                                                        <div className="w-full h-24 flex items-center justify-center bg-gray-900">
+                                                            <div className="text-center text-white">
+                                                                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-1">
+                                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M8 5v14l11-7z"/>
+                                                                    </svg>
+                                                                </div>
+                                                                <p className="text-xs">Video</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Message Text */}
+                                                <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                                                    {currentTemplate.message}
+                                                </p>
+                                                
+                                                {/* Timestamp */}
+                                                <div className="flex items-center justify-end gap-1 mt-1">
+                                                    <span className="text-[10px] text-gray-500">
+                                                        {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                                    </span>
+                                                    <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                                                        <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Variable Mapping Section */}
                                 {currentTemplate?.variables && currentTemplate.variables.length > 0 && (
-                                    <div className="space-y-3">
-                                        <Label className="text-sm font-medium">Template Variables</Label>
-                                        <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-3 border-t pt-4">
+                                        <Label className="text-sm font-medium flex items-center gap-2">
+                                            <Tag className="w-4 h-4" />
+                                            Map Template Variables
+                                        </Label>
+                                        <p className="text-xs text-gray-500">
+                                            Choose to map each variable to a customer field or enter custom text
+                                        </p>
+                                        
+                                        <div className="space-y-3">
                                             {currentTemplate.variables.map(variable => (
-                                                <div key={variable}>
-                                                    <Label className="text-xs text-[#52525B] capitalize">
-                                                        {variable.replace(/_/g, ' ')}
-                                                    </Label>
-                                                    <Input
-                                                        type="text"
-                                                        value={templateVariables[variable] || ""}
-                                                        onChange={(e) => setTemplateVariables({
-                                                            ...templateVariables,
-                                                            [variable]: e.target.value
-                                                        })}
-                                                        placeholder={`Enter ${variable.replace(/_/g, ' ')}`}
-                                                        className="h-9 rounded-lg mt-1 text-sm"
-                                                        data-testid={`var-${variable}`}
-                                                    />
+                                                <div key={variable} className="bg-gray-50 rounded-xl p-3 space-y-2">
+                                                    {/* Variable Badge */}
+                                                    <div className="flex items-center justify-between">
+                                                        <Badge variant="outline" className="bg-white font-mono text-sm">
+                                                            {variable}
+                                                        </Badge>
+                                                        
+                                                        {/* Toggle between Map and Text */}
+                                                        <div className="flex rounded-lg border bg-white overflow-hidden">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setVariableModes(prev => ({...prev, [variable]: "map"}))}
+                                                                className={`px-3 py-1 text-xs font-medium transition-colors ${
+                                                                    variableModes[variable] === "map" || !variableModes[variable]
+                                                                        ? "bg-[#F26B33] text-white"
+                                                                        : "bg-white text-gray-600 hover:bg-gray-100"
+                                                                }`}
+                                                                data-testid={`mode-map-${variable}`}
+                                                            >
+                                                                Map to Field
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setVariableModes(prev => ({...prev, [variable]: "text"}))}
+                                                                className={`px-3 py-1 text-xs font-medium transition-colors ${
+                                                                    variableModes[variable] === "text"
+                                                                        ? "bg-[#F26B33] text-white"
+                                                                        : "bg-white text-gray-600 hover:bg-gray-100"
+                                                                }`}
+                                                                data-testid={`mode-text-${variable}`}
+                                                            >
+                                                                Custom Text
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Input based on mode */}
+                                                    {variableModes[variable] === "text" ? (
+                                                        <Input
+                                                            type="text"
+                                                            value={templateVariables[variable] || ""}
+                                                            onChange={(e) => setTemplateVariables(prev => ({
+                                                                ...prev,
+                                                                [variable]: e.target.value
+                                                            }))}
+                                                            placeholder="Enter custom text..."
+                                                            className="h-10 rounded-lg"
+                                                            data-testid={`text-input-${variable}`}
+                                                        />
+                                                    ) : (
+                                                        <Select 
+                                                            value={templateVariables[variable] || ""} 
+                                                            onValueChange={(val) => setTemplateVariables(prev => ({
+                                                                ...prev,
+                                                                [variable]: val
+                                                            }))}
+                                                        >
+                                                            <SelectTrigger className="h-10 rounded-lg bg-white" data-testid={`field-select-${variable}`}>
+                                                                <SelectValue placeholder="Select a field..." />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {availableFields.map(field => (
+                                                                    <SelectItem key={field.key} value={field.key}>
+                                                                        <div className="flex items-center justify-between w-full">
+                                                                            <span>{field.label}</span>
+                                                                            <span className="text-xs text-gray-400 ml-2">e.g., {field.example}</span>
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
