@@ -4464,13 +4464,22 @@ const SegmentsPage = () => {
                                         Cancel
                                     </Button>
                                     <Button
-                                        onClick={() => {
+                                        onClick={async () => {
+                                            // Save the WhatsApp config
+                                            const saved = await saveWhatsappConfig(selectedSegment.id);
+                                            
                                             const scheduleInfo = sendOption === "now" 
-                                                ? "Sending now..." 
+                                                ? "Automation configured!" 
                                                 : sendOption === "scheduled" 
                                                     ? `Scheduled for ${new Date(`${scheduledDate}T${scheduledTime}`).toLocaleString()}`
                                                     : `Recurring ${recurringFrequency}`;
-                                            toast.success(`Message ${sendOption === "now" ? "sent" : "scheduled"}! ${scheduleInfo}`);
+                                            
+                                            if (saved) {
+                                                toast.success(`WhatsApp automation saved! ${scheduleInfo}`);
+                                            } else {
+                                                toast.error("Failed to save automation");
+                                            }
+                                            
                                             setShowSendMessage(false);
                                             setSelectedSegment(null);
                                             setSelectedCampaign("");
