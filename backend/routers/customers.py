@@ -658,4 +658,79 @@ async def delete_segment(segment_id: str, user: dict = Depends(get_current_user)
     result = await db.segments.delete_one({"id": segment_id, "user_id": user["id"]})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Segment not found")
+    # Also delete any WhatsApp config for this segment
+    await db.segment_whatsapp_config.delete_one({"segment_id": segment_id, "user_id": user["id"]})
     return {"message": "Segment deleted"}
+
+# WhatsApp Configuration for Segments
+@segments_router.get("/{segment_id}/whatsapp-config")
+async def get_segment_whatsapp_config(segment_id: str, user: dict = Depends(get_current_user)):
+    """Get WhatsApp automation config for a segment"""
+    config = await db.segment_whatsapp_config.find_one(
+        {"segment_id": segment_id, "user_id": user["id"]},
+        {"_id": 0}
+    )
+    if not config:
+        return {"configured": False}
+    return {"configured": True, "config": config}
+
+@segments_router.post("/{segment_id}/whatsapp-config")
+async def save_segment_whatsapp_config(segment_id: str, config: dict, user: dict = Depends(get_current_user)):
+    """Save WhatsApp automation config for a segment"""
+    from datetime import datetime, timezone
+    
+    # Verify segment exists
+    segment = await db.segments.find_one({"id": segment_id, "user_id": user["id"]})
+    if not segment:
+        raise HTTPException(status_code=404, detail="Segment not found")
+    
+    now = datetime.now(timezone.utc).isoformat()
+    config_doc = {
+        "segment_id": segment_id,
+        "user_id": user["id"],
+        "template_id": config.get("template_id"),
+        "template_name": config.get("template_name"),
+        "variable_mappings": config.get("variable_mappings", {}),
+        "variable_modes": config.get("variable_modes", {}),
+        "schedule_type": config.get("schedule_type", "now"),  # now, scheduled, recurring
+        "scheduled_date": config.get("scheduled_date"),
+        "scheduled_time": config.get("scheduled_time", "10:00"),
+        "recurring_frequency": config.get("recurring_frequency"),  # daily, weekly, monthly
+        "recurring_days": config.get("recurring_days", []),
+        "recurring_day_of_month": config.get("recurring_day_of_month"),
+        "recurring_end_option": config.get("recurring_end_option", "never"),
+        "recurring_end_date": config.get("recurring_end_date"),
+        "recurring_occurrences": config.get("recurring_occurrences"),
+        "is_active": True,
+        "created_at": now,
+        "updated_at": now
+    }
+    
+    # Upsert the config
+    await db.segment_whatsapp_config.update_one(
+        {"segment_id": segment_id, "user_id": user["id"]},
+        {"$set": config_doc},
+        upsert=True
+    )
+    
+    return {"message": "WhatsApp config saved", "config": config_doc}
+
+@segments_router.delete("/{segment_id}/whatsapp-config")
+async def delete_segment_whatsapp_config(segment_id: str, user: dict = Depends(get_current_user)):
+    """Remove WhatsApp automation config for a segment"""
+    result = await db.segment_whatsapp_config.delete_one(
+        {"segment_id": segment_id, "user_id": user["id"]}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="WhatsApp config not found")
+    return {"message": "WhatsApp config removed"}
+
+@segments_router.get("/whatsapp-configs/all")
+async def get_all_segment_whatsapp_configs(user: dict = Depends(get_current_user)):
+    """Get all WhatsApp configs for user's segments"""
+    configs = await db.segment_whatsapp_config.find(
+        {"user_id": user["id"]},
+        {"_id": 0}
+    ).to_list(100)
+    return {"configs": configs}
+
