@@ -6366,16 +6366,16 @@ const WhatsAppAutomationPage = () => {
                                                     const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
                                                     if (!tpl) return null;
                                                     const varMappings = templateVariableMappings[tpl.wid] || {};
-                                                    let previewText = tpl.temp_body || "";
-                                                    // Replace {{1}}, {{2}}, etc. with mapped field labels
-                                                    Object.entries(varMappings).forEach(([key, value]) => {
-                                                        const varInfo = availableVariables.find(v => v.key === value);
-                                                        const displayValue = varInfo ? varInfo.label : value;
-                                                        previewText = previewText.replace(new RegExp(key.replace(/[{}]/g, '\\$&'), 'g'), displayValue);
-                                                    });
+                                                    const varModes = templateVariableModes[tpl.wid] || {};
+                                                    const parts = resolvePreviewWithSampleData(tpl.temp_body, varMappings, varModes);
                                                     return (
                                                         <>
-                                                            <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-10">{previewText}</p>
+                                                            <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-10">
+                                                                {parts.map((part, idx) => {
+                                                                    if (part.type === "na") return <span key={idx} className="text-red-500 font-medium">NA</span>;
+                                                                    return <span key={idx}>{part.value}</span>;
+                                                                })}
+                                                            </p>
                                                             <div className="flex items-center justify-end gap-1 mt-1">
                                                                 <span className="text-[10px] text-gray-500">
                                                                     {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
