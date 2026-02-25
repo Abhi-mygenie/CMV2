@@ -3473,6 +3473,8 @@ const SegmentsPage = () => {
     const [totalCustomersCount, setTotalCustomersCount] = useState(0);
     // Variable mapping modes: { "{{1}}": "map" | "text" }
     const [variableModes, setVariableModes] = useState({});
+    // WhatsApp configs for segments
+    const [whatsappConfigs, setWhatsappConfigs] = useState({});
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
