@@ -3509,43 +3509,9 @@ const SegmentsPageContent = () => {
     const [segmentTemplateVariableMappings, setSegmentTemplateVariableMappings] = useState({});
     const [segmentSampleData, setSegmentSampleData] = useState({});
     const [segmentTemplateVariableModes, setSegmentTemplateVariableModes] = useState({});
-    const [segments, setSegments] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedSegment, setSelectedSegment] = useState(null);
-    const [showSendMessage, setShowSendMessage] = useState(false);
-    const [messageTemplate, setMessageTemplate] = useState("");
-    const [selectedCampaign, setSelectedCampaign] = useState("");
-    const [showEditDialog, setShowEditDialog] = useState(false);
-    const [editingSegment, setEditingSegment] = useState(null);
-    const [segmentName, setSegmentName] = useState("");
-    const [templateVariables, setTemplateVariables] = useState({});
-    // Scheduling state
-    const [sendOption, setSendOption] = useState("now"); // "now", "scheduled", "recurring"
-    const [scheduledDate, setScheduledDate] = useState("");
-    const [scheduledTime, setScheduledTime] = useState("10:00");
-    const [recurringFrequency, setRecurringFrequency] = useState("daily"); // "daily", "weekly", "monthly"
-    const [recurringDays, setRecurringDays] = useState([]); // For weekly: ["mon", "wed", "fri"]
-    const [recurringDayOfMonth, setRecurringDayOfMonth] = useState("1"); // For monthly
-    const [recurringEndOption, setRecurringEndOption] = useState("never"); // "never", "date", "occurrences"
-    const [recurringEndDate, setRecurringEndDate] = useState("");
-    const [recurringOccurrences, setRecurringOccurrences] = useState("10");
-    // Templates from API
-    const [templates, setTemplates] = useState([]);
-    const [templatesLoading, setTemplatesLoading] = useState(false);
-    // Total customers count for "All Customers" segment
-    const [totalCustomersCount, setTotalCustomersCount] = useState(0);
-    // Variable mapping modes: { "{{1}}": "map" | "text" }
     const [variableModes, setVariableModes] = useState({});
-    // WhatsApp configs for segments
     const [whatsappConfigs, setWhatsappConfigs] = useState({});
-    // Filter state for segments
-    const [segmentFilter, setSegmentFilter] = useState("all"); // "all", "active", "not_configured"
-    // Template variable mappings for filtering
-    const [segmentTemplateVariableMappings, setSegmentTemplateVariableMappings] = useState({});
-    // Sample customer data for previews
-    const [segmentSampleData, setSegmentSampleData] = useState({});
-    // Template variable modes for segments
-    const [segmentTemplateVariableModes, setSegmentTemplateVariableModes] = useState({});
+    const [segmentFilter, setSegmentFilter] = useState("all");
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
