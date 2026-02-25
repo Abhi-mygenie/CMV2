@@ -4838,7 +4838,7 @@ const SettingsPage = () => {
                         </div>
                     </button>
                     <button 
-                        onClick={() => document.getElementById('loyalty-settings')?.scrollIntoView({ behavior: 'smooth' })}
+                        onClick={() => navigate("/loyalty-settings")}
                         className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow"
                         data-testid="go-to-loyalty-settings"
                     >
