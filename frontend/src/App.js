@@ -4799,6 +4799,18 @@ const WhatsAppAutomationPage = () => {
     };
 
     // Template CRUD
+    const handleSaveApiKey = async () => {
+        setSavingApiKey(true);
+        try {
+            await api.put("/whatsapp/api-key", { authkey_api_key: whatsappApiKey });
+            toast.success("WhatsApp API key saved!");
+        } catch (err) {
+            toast.error("Failed to save API key");
+        } finally {
+            setSavingApiKey(false);
+        }
+    };
+
     const handleSaveTemplate = async () => {
         try {
             if (editingTemplate) {
