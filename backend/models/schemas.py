@@ -63,6 +63,19 @@ class CustomerBase(BaseModel):
     favorite_category: Optional[str] = None
     preferred_payment_mode: Optional[str] = None  # cash, card, upi
     
+    # Customer Source & Journey
+    lead_source: Optional[str] = None  # Walk-in, Swiggy, Zomato, Instagram, Referral, Airbnb
+    campaign_source: Optional[str] = None  # UTM tracking
+    last_interaction_date: Optional[str] = None
+    assigned_salesperson: Optional[str] = None  # staff_id reference
+    
+    # WhatsApp CRM Tracking
+    last_whatsapp_sent: Optional[str] = None  # datetime
+    last_whatsapp_response: Optional[str] = None  # datetime
+    last_campaign_clicked: Optional[str] = None  # campaign_id
+    last_coupon_used: Optional[str] = None  # coupon_id
+    automation_status_tag: Optional[str] = None  # automation rule status
+    
     # Corporate Information
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
