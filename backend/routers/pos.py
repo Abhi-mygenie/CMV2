@@ -344,8 +344,198 @@ async def pos_max_redeemable(
 
 
 # ============================================
-# Order Webhook (for MyGenie to call on every order)
+# Order Webhook helpers
 # ============================================
+
+async def _validate_order(order_data: "POSOrderWebhook", user: dict) -> Optional[POSResponse]:
+    """Validate pos_id, restaurant_id, payment status, and duplicate order.
+    Returns a POSResponse on failure, or None if valid."""
+    if user.get("pos_id") and order_data.pos_id != user["pos_id"]:
+        return POSResponse(
+            success=False,
+            message=f"Invalid pos_id. Expected: {user['pos_id']}, Received: {order_data.pos_id}",
+            data=None,
+        )
+    if user.get("restaurant_id") and order_data.restaurant_id != user["restaurant_id"]:
+        return POSResponse(
+            success=False,
+            message=f"Invalid restaurant_id. Expected: {user['restaurant_id']}, Received: {order_data.restaurant_id}",
+            data=None,
+        )
+    if order_data.payment_status != "success":
+        return POSResponse(
+            success=False,
+            message=f"Order not processed - payment status: {order_data.payment_status}",
+            data=None,
+        )
+    existing = await db.orders.find_one({
+        "pos_id": order_data.pos_id,
+        "pos_restaurant_id": order_data.restaurant_id,
+        "pos_order_id": order_data.order_id,
+    })
+    if existing:
+        return POSResponse(
+            success=False,
+            message="Duplicate order - already processed",
+            data={"order_id": existing["id"], "duplicate": True},
+        )
+    return None
+
+
+async def _find_or_create_customer(
+    order_data: "POSOrderWebhook", user: dict, settings: dict, now: str
+) -> tuple:
+    """Lookup customer by phone; auto-create if missing.
+    Returns (customer_doc, is_new, first_visit_bonus_points)."""
+    customer = await db.customers.find_one({
+        "user_id": user["id"], "phone": order_data.cust_mobile
+    })
+
+    if customer:
+        return customer, False, 0
+
+    first_visit_bonus = 0
+    if settings.get("first_visit_bonus_enabled", False):
+        first_visit_bonus = settings.get("first_visit_bonus_points", 50)
+
+    customer_id = str(uuid.uuid4())
+    customer = {
+        "id": customer_id,
+        "user_id": user["id"],
+        "name": order_data.cust_name or f"Customer {order_data.cust_mobile[-4:]}",
+        "phone": order_data.cust_mobile,
+        "country_code": "+91",
+        "email": None,
+        "customer_type": "normal",
+        "pos_id": order_data.pos_id,
+        "pos_restaurant_id": order_data.restaurant_id,
+        "total_points": first_visit_bonus,
+        "wallet_balance": 0.0,
+        "total_visits": 0,
+        "total_spent": 0.0,
+        "tier": "Bronze",
+        "allergies": [],
+        "favorites": [],
+        "notes": "Auto-created via POS order",
+        "created_at": now,
+        "last_visit": None,
+        "first_visit_bonus_awarded": first_visit_bonus > 0,
+    }
+    await db.customers.insert_one(customer)
+
+    if first_visit_bonus > 0:
+        await db.points_transactions.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "customer_id": customer_id,
+            "points": first_visit_bonus,
+            "transaction_type": "bonus",
+            "description": "First visit bonus - Welcome reward",
+            "bill_amount": None,
+            "balance_after": first_visit_bonus,
+            "created_at": now,
+        })
+
+    return customer, True, first_visit_bonus
+
+
+def _calculate_points(order_amount: float, customer: dict, settings: dict) -> dict:
+    """Calculate points earned including off-peak bonus.
+    Returns dict with base_points, off_peak_bonus, total_points, description."""
+    min_order = settings.get("min_order_value", 100.0)
+    if order_amount < min_order:
+        return {"base_points": 0, "off_peak_bonus": 0, "total_points": 0, "description": ""}
+
+    tier = customer.get("tier", "Bronze")
+    earn_percent = get_earn_percent_for_tier(tier, settings)
+    base_points = int(order_amount * earn_percent / 100)
+
+    # Off-peak bonus
+    is_off_peak, bonus_value, bonus_type, off_peak_msg = check_off_peak_bonus(settings)
+    off_peak_bonus = 0
+
+    if is_off_peak and base_points > 0:
+        if bonus_type == "multiplier":
+            off_peak_bonus = int(base_points * (bonus_value - 1))
+        else:
+            off_peak_bonus = int(bonus_value)
+
+    total = base_points + off_peak_bonus
+    desc = f"Earned {earn_percent}% on order of Rs.{order_amount}"
+    if off_peak_bonus > 0:
+        desc += f" (+{off_peak_bonus} off-peak bonus)"
+
+    return {
+        "base_points": base_points,
+        "off_peak_bonus": off_peak_bonus,
+        "total_points": total,
+        "description": desc,
+        "off_peak_message": off_peak_msg if off_peak_bonus > 0 else None,
+    }
+
+
+async def _save_order_and_transactions(
+    order_data: "POSOrderWebhook",
+    user: dict,
+    customer: dict,
+    points_earned: int,
+    new_points: int,
+    wallet_used: float,
+    new_wallet_balance: float,
+    off_peak_bonus: int,
+    now: str,
+) -> str:
+    """Persist order, points transaction, and wallet transaction. Returns order id."""
+    order_id = str(uuid.uuid4())
+    await db.orders.insert_one({
+        "id": order_id,
+        "user_id": user["id"],
+        "customer_id": customer["id"],
+        "pos_id": order_data.pos_id,
+        "pos_restaurant_id": order_data.restaurant_id,
+        "pos_order_id": order_data.order_id,
+        "order_amount": order_data.order_amount,
+        "wallet_used": wallet_used,
+        "coupon_code": order_data.coupon_code,
+        "coupon_discount": order_data.coupon_discount or 0.0,
+        "points_earned": points_earned,
+        "off_peak_bonus": off_peak_bonus,
+        "payment_method": order_data.payment_method,
+        "payment_status": order_data.payment_status,
+        "order_type": order_data.order_type,
+        "created_at": now,
+    })
+
+    if points_earned > 0:
+        desc = f"Earned on order {order_data.order_id} (Rs.{order_data.order_amount})"
+        if off_peak_bonus > 0:
+            desc += f" [includes {off_peak_bonus} off-peak bonus]"
+        await db.points_transactions.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "customer_id": customer["id"],
+            "points": points_earned,
+            "transaction_type": "earn",
+            "description": desc,
+            "order_id": order_id,
+            "balance_after": new_points,
+            "created_at": now,
+        })
+
+    if wallet_used > 0:
+        await db.wallet_transactions.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "customer_id": customer["id"],
+            "amount": wallet_used,
+            "transaction_type": "debit",
+            "description": f"Used on order {order_data.order_id}",
+            "order_id": order_id,
+            "balance_after": new_wallet_balance,
+            "created_at": now,
+        })
+
+    return order_id
 
 class POSOrderWebhook(BaseModel):
     """Schema for order data from MyGenie/POS systems"""
