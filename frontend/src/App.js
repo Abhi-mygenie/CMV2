@@ -1313,9 +1313,9 @@ const CustomersPage = () => {
                         ))}
                     </div>
                 )}
-            </div>
             </>
             )}
+            </div>
             
             {customerTab === "segments" && (
                 <SegmentsPageContent />
