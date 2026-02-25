@@ -575,156 +575,54 @@ async def pos_order_webhook(
 ):
     """
     Webhook for MyGenie/POS to send order data.
-    - Validates pos_id and restaurant_id against user's stored values
-    - Creates customer if not exists
-    - Records order
-    - Calculates and awards loyalty points
+    Validates, finds/creates customer, calculates points (with off-peak bonus),
+    records order and transactions.
     """
     try:
-        # Validate pos_id matches user's registered pos_id
-        if user.get("pos_id") and order_data.pos_id != user.get("pos_id"):
-            return POSResponse(
-                success=False,
-                message=f"Invalid pos_id. Expected: {user.get('pos_id')}, Received: {order_data.pos_id}",
-                data=None
-            )
-        
-        # Validate restaurant_id matches user's registered restaurant_id
-        if user.get("restaurant_id") and order_data.restaurant_id != user.get("restaurant_id"):
-            return POSResponse(
-                success=False,
-                message=f"Invalid restaurant_id. Expected: {user.get('restaurant_id')}, Received: {order_data.restaurant_id}",
-                data=None
-            )
-        
-        # Only process successful payments
-        if order_data.payment_status != "success":
-            return POSResponse(
-                success=False,
-                message=f"Order not processed - payment status: {order_data.payment_status}",
-                data=None
-            )
-        
-        # Check for duplicate order (unique key: pos_id + restaurant_id + order_id)
-        existing_order = await db.orders.find_one({
-            "pos_id": order_data.pos_id,
-            "pos_restaurant_id": order_data.restaurant_id,
-            "pos_order_id": order_data.order_id
-        })
-        if existing_order:
-            return POSResponse(
-                success=False,
-                message="Duplicate order - already processed",
-                data={"order_id": existing_order["id"], "duplicate": True}
-            )
-        
-        # Find or create customer by phone
-        customer = await db.customers.find_one({
-            "user_id": user["id"],
-            "phone": order_data.cust_mobile
-        })
-        
+        # 1. Validate
+        error = await _validate_order(order_data, user)
+        if error:
+            return error
+
         now = datetime.now(timezone.utc).isoformat()
-        
-        # Get loyalty settings early (needed for first visit bonus)
+
+        # 2. Loyalty settings
         settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
         if not settings:
             settings = {
                 "min_order_value": 100.0,
-                "bronze_earn_percent": 5.0,
-                "silver_earn_percent": 7.0,
-                "gold_earn_percent": 10.0,
-                "platinum_earn_percent": 15.0,
+                "bronze_earn_percent": 5.0, "silver_earn_percent": 7.0,
+                "gold_earn_percent": 10.0, "platinum_earn_percent": 15.0,
                 "redemption_value": 0.25,
-                "tier_silver_min": 500,
-                "tier_gold_min": 1500,
-                "tier_platinum_min": 5000,
-                "first_visit_bonus_enabled": False,
-                "first_visit_bonus_points": 50
+                "tier_silver_min": 500, "tier_gold_min": 1500, "tier_platinum_min": 5000,
+                "first_visit_bonus_enabled": False, "first_visit_bonus_points": 50,
             }
-        
-        first_visit_bonus = 0
-        if not customer:
-            # Check for first visit bonus
-            if settings.get("first_visit_bonus_enabled", False):
-                first_visit_bonus = settings.get("first_visit_bonus_points", 50)
-            
-            # Auto-create customer
-            customer_id = str(uuid.uuid4())
-            customer_name = order_data.cust_name or f"Customer {order_data.cust_mobile[-4:]}"
-            
-            customer = {
-                "id": customer_id,
-                "user_id": user["id"],
-                "name": customer_name,
-                "phone": order_data.cust_mobile,
-                "country_code": "+91",
-                "email": None,
-                "customer_type": "normal",
-                "pos_id": order_data.pos_id,
-                "pos_restaurant_id": order_data.restaurant_id,
-                "total_points": first_visit_bonus,
-                "wallet_balance": 0.0,
-                "total_visits": 0,
-                "total_spent": 0.0,
-                "tier": "Bronze",
-                "allergies": [],
-                "favorites": [],
-                "notes": "Auto-created via POS order",
-                "created_at": now,
-                "last_visit": None,
-                "first_visit_bonus_awarded": first_visit_bonus > 0
-            }
-            await db.customers.insert_one(customer)
-            
-            # Record first visit bonus transaction if awarded
-            if first_visit_bonus > 0:
-                tx_doc = {
-                    "id": str(uuid.uuid4()),
-                    "user_id": user["id"],
-                    "customer_id": customer_id,
-                    "points": first_visit_bonus,
-                    "transaction_type": "bonus",
-                    "description": "First visit bonus - Welcome reward",
-                    "bill_amount": None,
-                    "balance_after": first_visit_bonus,
-                    "created_at": now
-                }
-                await db.points_transactions.insert_one(tx_doc)
-            
-            is_new_customer = True
-        else:
-            customer_id = customer["id"]
-            is_new_customer = False
-        
-        # Calculate points earned
-        points_earned = 0
-        min_order = settings.get("min_order_value", 100.0)
-        
-        if order_data.order_amount >= min_order:
-            customer_tier = customer.get("tier", "Bronze")
-            earn_percent = get_earn_percent_for_tier(customer_tier, settings)
-            points_earned = int(order_data.order_amount * earn_percent / 100)
-        
-        # Update customer stats
-        current_points = customer.get("total_points", 0)
-        new_points = current_points + points_earned
-        new_tier = calculate_tier(new_points, settings)
-        
-        # Handle wallet deduction
+
+        # 3. Find or create customer
+        customer, is_new, first_visit_bonus = await _find_or_create_customer(
+            order_data, user, settings, now
+        )
+
+        # 4. Calculate points (includes off-peak bonus)
+        pts = _calculate_points(order_data.order_amount, customer, settings)
+        points_earned = pts["total_points"]
+
+        # 5. Wallet validation
         wallet_used = order_data.wallet_used or 0.0
         current_wallet = customer.get("wallet_balance", 0.0)
-        
-        # Validate wallet usage
         if wallet_used > current_wallet:
             return POSResponse(
                 success=False,
                 message=f"Insufficient wallet balance. Available: {current_wallet}, Requested: {wallet_used}",
-                data={"available_balance": current_wallet}
+                data={"available_balance": current_wallet},
             )
-        
         new_wallet_balance = current_wallet - wallet_used
-        
+
+        # 6. Update customer stats
+        current_points = customer.get("total_points", 0)
+        new_points = current_points + points_earned
+        new_tier = calculate_tier(new_points, settings)
+
         await db.customers.update_one(
             {"id": customer["id"]},
             {"$set": {
@@ -733,81 +631,39 @@ async def pos_order_webhook(
                 "wallet_balance": new_wallet_balance,
                 "total_visits": customer.get("total_visits", 0) + 1,
                 "total_spent": customer.get("total_spent", 0) + order_data.order_amount,
-                "last_visit": now
-            }}
+                "last_visit": now,
+            }},
         )
-        
-        # Record order
-        order_doc = {
-            "id": str(uuid.uuid4()),
-            "user_id": user["id"],
-            "customer_id": customer["id"],
-            "pos_id": order_data.pos_id,
-            "pos_restaurant_id": order_data.restaurant_id,
-            "pos_order_id": order_data.order_id,
-            "order_amount": order_data.order_amount,
-            "wallet_used": order_data.wallet_used or 0.0,
-            "coupon_code": order_data.coupon_code,
-            "coupon_discount": order_data.coupon_discount or 0.0,
-            "points_earned": points_earned,
-            "payment_method": order_data.payment_method,
-            "payment_status": order_data.payment_status,
-            "order_type": order_data.order_type,
-            "created_at": now
-        }
-        await db.orders.insert_one(order_doc)
-        
-        # Record points transaction if points earned
-        if points_earned > 0:
-            tx_doc = {
-                "id": str(uuid.uuid4()),
-                "user_id": user["id"],
-                "customer_id": customer["id"],
-                "points": points_earned,
-                "transaction_type": "earn",
-                "description": f"Earned on order {order_data.order_id} (Rs.{order_data.order_amount})",
-                "order_id": order_doc["id"],
-                "balance_after": new_points,
-                "created_at": now
-            }
-            await db.points_transactions.insert_one(tx_doc)
-        
-        # Record wallet transaction if wallet was used
-        if wallet_used > 0:
-            wallet_tx_doc = {
-                "id": str(uuid.uuid4()),
-                "user_id": user["id"],
-                "customer_id": customer["id"],
-                "amount": wallet_used,
-                "transaction_type": "debit",
-                "description": f"Used on order {order_data.order_id}",
-                "order_id": order_doc["id"],
-                "balance_after": new_wallet_balance,
-                "created_at": now
-            }
-            await db.wallet_transactions.insert_one(wallet_tx_doc)
-        
+
+        # 7. Save order + transactions
+        order_id = await _save_order_and_transactions(
+            order_data, user, customer, points_earned, new_points,
+            wallet_used, new_wallet_balance, pts["off_peak_bonus"], now,
+        )
+
         return POSResponse(
             success=True,
             message="Order processed successfully",
             data={
-                "order_id": order_doc["id"],
+                "order_id": order_id,
                 "pos_order_id": order_data.order_id,
                 "customer_id": customer["id"],
                 "customer_name": customer.get("name"),
-                "is_new_customer": is_new_customer,
-                "first_visit_bonus_awarded": first_visit_bonus if is_new_customer else 0,
+                "is_new_customer": is_new,
+                "first_visit_bonus_awarded": first_visit_bonus if is_new else 0,
                 "order_amount": order_data.order_amount,
                 "points_earned": points_earned,
+                "off_peak_bonus": pts["off_peak_bonus"],
+                "off_peak_message": pts.get("off_peak_message"),
                 "total_points": new_points,
                 "tier": new_tier,
                 "wallet_used": wallet_used,
                 "wallet_balance_after": new_wallet_balance,
                 "coupon_applied": order_data.coupon_code,
-                "coupon_discount": order_data.coupon_discount or 0.0
-            }
+                "coupon_discount": order_data.coupon_discount or 0.0,
+            },
         )
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Order processing failed: {str(e)}")
 
