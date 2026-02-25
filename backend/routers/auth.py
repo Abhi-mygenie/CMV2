@@ -11,8 +11,8 @@ from models.schemas import UserCreate, UserLogin, UserResponse, TokenResponse
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 # Demo user credentials
-DEMO_EMAIL = "test@restaurant.com"
-DEMO_PASSWORD = "Test123456"
+DEMO_EMAIL = "demo@restaurant.com"
+DEMO_PASSWORD = "demo123"
 
 
 async def create_default_whatsapp_templates(user_id: str):
