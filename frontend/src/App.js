@@ -6029,20 +6029,13 @@ const WhatsAppAutomationPage = () => {
 
                 {/* Tabs */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-                    <TabsList className="w-full grid grid-cols-3 h-12 bg-gray-100 rounded-xl p-1">
+                    <TabsList className="w-full grid grid-cols-2 h-12 bg-gray-100 rounded-xl p-1">
                         <TabsTrigger 
                             value="settings" 
                             className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
                             data-testid="whatsapp-settings-tab"
                         >
                             Settings
-                        </TabsTrigger>
-                        <TabsTrigger 
-                            value="templates" 
-                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                            data-testid="templates-tab"
-                        >
-                            Templates ({authkeyTemplates.length || templates.length})
                         </TabsTrigger>
                         <TabsTrigger 
                             value="automation" 
