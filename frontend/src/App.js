@@ -2016,39 +2016,6 @@ const CustomersPage = () => {
 
                             </Accordion>
                         </ScrollArea>
-                                                    onChange={(e) => setNewCustomer({...newCustomer, custom_field_2: e.target.value})}
-                                                    placeholder="e.g., HR, Table 5, VIP Section"
-                                                    className="h-11 rounded-xl"
-                                                    data-testid="new-customer-custom-2"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Special Instructions</Label>
-                                                <Input
-                                                    value={newCustomer.custom_field_3}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, custom_field_3: e.target.value})}
-                                                    placeholder="Any special requests..."
-                                                    className="h-11 rounded-xl"
-                                                    data-testid="new-customer-custom-3"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Notes</Label>
-                                                <Textarea
-                                                    value={newCustomer.notes}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, notes: e.target.value})}
-                                                    placeholder="Any special notes about this customer..."
-                                                    className="rounded-xl resize-none"
-                                                    rows={3}
-                                                    data-testid="new-customer-notes"
-                                                />
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-
-                            </Accordion>
-                        </ScrollArea>
                         <DialogFooter className="gap-2 pt-4 border-t">
                             <Button 
                                 type="button" 
