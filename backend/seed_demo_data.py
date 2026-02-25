@@ -48,6 +48,7 @@ demo_user = {
     "id": demo_user_id,
     "email": "demo@restaurant.com",
     "password_hash": hashed_password,
+    "api_key": "demo-api-key-12345",
     "restaurant_name": "Demo Restaurant & Cafe",
     "phone": "+919876543210",
     "created_at": datetime.utcnow().isoformat()
