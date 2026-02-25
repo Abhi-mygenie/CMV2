@@ -6419,45 +6419,6 @@ const WhatsAppAutomationPage = () => {
                         </DialogContent>
                     </Dialog>
 
-                    {/* Settings Tab */}
-                    <TabsContent value="settings" className="mt-4">
-                        <Card className="rounded-xl border-0 shadow-sm" data-testid="whatsapp-api-key-card">
-                            <CardContent className="p-4 space-y-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0">
-                                        <KeyRound className="w-5 h-5 text-[#25D366]" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-[#1A1A1A]">WhatsApp API Key</p>
-                                        <p className="text-xs text-[#52525B] mt-1">
-                                            Enter your AuthKey.io API key to authenticate and send WhatsApp messages to customers.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <Label className="form-label">API Key</Label>
-                                    <Input
-                                        type="password"
-                                        value={whatsappApiKey}
-                                        onChange={(e) => setWhatsappApiKey(e.target.value)}
-                                        placeholder="Enter your AuthKey.io API key"
-                                        className="h-12 rounded-xl font-mono"
-                                        data-testid="whatsapp-api-key-input"
-                                    />
-                                </div>
-                                <Button
-                                    onClick={handleSaveApiKey}
-                                    disabled={savingApiKey}
-                                    className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white"
-                                    data-testid="save-whatsapp-api-key-btn"
-                                >
-                                    {savingApiKey ? "Saving..." : "Save API Key"}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-                </Tabs>
-
                 {/* Add Template Dialog */}
                 <Dialog open={showAddTemplate} onOpenChange={(open) => {
                     setShowAddTemplate(open);
