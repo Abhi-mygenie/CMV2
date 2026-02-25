@@ -20,6 +20,8 @@ class UserResponse(BaseModel):
     email: str
     restaurant_name: str
     phone: str
+    pos_id: str = ""
+    pos_name: str = ""
     created_at: str
 
 class TokenResponse(BaseModel):
