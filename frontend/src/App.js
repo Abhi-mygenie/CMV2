@@ -3599,12 +3599,31 @@ const SegmentsPage = () => {
     const viewSegmentCustomers = async (segment) => {
         setSelectedSegment(segment);
         try {
-            const res = await api.get(`/segments/${segment.id}/customers`);
-            setSelectedSegment({...segment, customers: res.data});
+            // For "All Customers" segment, fetch all customers
+            if (segment.id === "all-customers") {
+                const res = await api.get('/customers?limit=500');
+                setSelectedSegment({...segment, customers: res.data.customers || res.data});
+            } else {
+                const res = await api.get(`/segments/${segment.id}/customers`);
+                setSelectedSegment({...segment, customers: res.data});
+            }
         } catch (err) {
             toast.error("Failed to load customers");
         }
     };
+
+    // Default "All Customers" segment
+    const allCustomersSegment = {
+        id: "all-customers",
+        name: "All Customers",
+        customer_count: totalCustomersCount,
+        created_at: null, // No creation date for default segment
+        filters: {},
+        isDefault: true
+    };
+
+    // Combined segments list with "All Customers" at top
+    const allSegments = [allCustomersSegment, ...segments];
 
     if (loading) {
         return (
