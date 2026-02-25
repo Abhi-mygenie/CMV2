@@ -4733,6 +4733,8 @@ const SettingsPage = () => {
     const [settings, setSettings] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [whatsappApiKey, setWhatsappApiKey] = useState("");
+    const [savingApiKey, setSavingApiKey] = useState(false);
 
     useEffect(() => {
         const fetchSettings = async () => {
