@@ -5398,6 +5398,23 @@ const WhatsAppAutomationPage = () => {
     // Filter state for templates tab
     const [templateFilter, setTemplateFilter] = useState("all"); // "all", "mapped", "not_mapped"
     
+    // Custom template state
+    const [customTemplates, setCustomTemplates] = useState([]);
+    const [showAddTemplate, setShowAddTemplate] = useState(false);
+    const [editingCustomTemplate, setEditingCustomTemplate] = useState(null);
+    const [newTemplate, setNewTemplate] = useState({
+        template_name: "",
+        category: "utility",
+        language: "en",
+        header_type: "none",
+        header_content: "",
+        body: "",
+        footer: "",
+        buttons: [],
+        media_url: ""
+    });
+    const [savingTemplate, setSavingTemplate] = useState(false);
+    
     // Template form state
     const [showTemplateModal, setShowTemplateModal] = useState(false);
     const [editingTemplate, setEditingTemplate] = useState(null);
