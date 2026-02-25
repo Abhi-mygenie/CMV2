@@ -88,24 +88,57 @@ class CustomerCreate(CustomerBase):
     pass
 
 class CustomerUpdate(BaseModel):
+    # Basic Information
     name: Optional[str] = None
     phone: Optional[str] = None
     country_code: Optional[str] = None
     email: Optional[str] = None
-    notes: Optional[str] = None
+    gender: Optional[str] = None
     dob: Optional[str] = None
     anniversary: Optional[str] = None
+    preferred_language: Optional[str] = None
     customer_type: Optional[str] = None
+    segment_tags: Optional[List[str]] = None
+    
+    # Contact & Marketing Permissions
+    whatsapp_opt_in: Optional[bool] = None
+    whatsapp_opt_in_date: Optional[str] = None
+    promo_whatsapp_allowed: Optional[bool] = None
+    promo_sms_allowed: Optional[bool] = None
+    email_marketing_allowed: Optional[bool] = None
+    call_allowed: Optional[bool] = None
+    is_blocked: Optional[bool] = None
+    
+    # Loyalty Information
+    referral_code: Optional[str] = None
+    referred_by: Optional[str] = None
+    membership_id: Optional[str] = None
+    membership_expiry: Optional[str] = None
+    
+    # Behavior & Preferences
+    favorite_category: Optional[str] = None
+    preferred_payment_mode: Optional[str] = None
+    
+    # Corporate Information
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
+    
+    # Address
     address: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
+    
+    # Preferences
     allergies: Optional[List[str]] = None
+    favorites: Optional[List[str]] = None
+    
+    # Custom Fields
     custom_field_1: Optional[str] = None
     custom_field_2: Optional[str] = None
     custom_field_3: Optional[str] = None
-    favorites: Optional[List[str]] = None
+    
+    # Notes
+    notes: Optional[str] = None
 
 class Customer(BaseModel):
     model_config = ConfigDict(extra="ignore")
