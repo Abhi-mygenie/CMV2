@@ -5403,6 +5403,47 @@ const WhatsAppAutomationPage = () => {
         { key: "expiry_date", label: "Expiry Date", example: "31 Dec 2025" }
     ];
 
+    // Helper: Resolve preview text using sample customer data
+    const resolvePreviewWithSampleData = (templateBody, mappings, modes) => {
+        if (!templateBody) return { text: "", parts: [] };
+        const parts = [];
+        let remaining = templateBody;
+        const varRegex = /\{\{\d+\}\}/g;
+        let match;
+        let lastIndex = 0;
+        
+        while ((match = varRegex.exec(templateBody)) !== null) {
+            // Add text before this variable
+            if (match.index > lastIndex) {
+                parts.push({ type: "text", value: templateBody.slice(lastIndex, match.index) });
+            }
+            const varKey = match[0]; // e.g., "{{1}}"
+            const mappedField = mappings?.[varKey];
+            const mode = modes?.[varKey] || "map";
+            
+            if (mappedField && mappedField !== "none") {
+                let sampleValue;
+                if (mode === "text") {
+                    sampleValue = mappedField; // custom text is the value itself
+                } else {
+                    sampleValue = sampleCustomerData[mappedField];
+                }
+                if (sampleValue && String(sampleValue).trim() !== "") {
+                    parts.push({ type: "data", value: String(sampleValue) });
+                } else {
+                    parts.push({ type: "na", value: "NA" });
+                }
+            } else {
+                parts.push({ type: "var", value: varKey });
+            }
+            lastIndex = match.index + match[0].length;
+        }
+        if (lastIndex < templateBody.length) {
+            parts.push({ type: "text", value: templateBody.slice(lastIndex) });
+        }
+        return parts;
+    };
+
     // Event labels for better display
     const eventLabels = {
         "points_earned": "Points Earned (Purchase)",
