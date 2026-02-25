@@ -725,6 +725,30 @@ async def delete_segment_whatsapp_config(segment_id: str, user: dict = Depends(g
         raise HTTPException(status_code=404, detail="WhatsApp config not found")
     return {"message": "WhatsApp config removed"}
 
+@segments_router.patch("/{segment_id}/whatsapp-config/toggle")
+async def toggle_segment_whatsapp_config(segment_id: str, user: dict = Depends(get_current_user)):
+    """Pause or resume WhatsApp automation for a segment"""
+    from datetime import datetime, timezone
+    
+    config = await db.segment_whatsapp_config.find_one(
+        {"segment_id": segment_id, "user_id": user["id"]}
+    )
+    if not config:
+        raise HTTPException(status_code=404, detail="WhatsApp config not found")
+    
+    new_status = not config.get("is_active", True)
+    now = datetime.now(timezone.utc).isoformat()
+    
+    await db.segment_whatsapp_config.update_one(
+        {"segment_id": segment_id, "user_id": user["id"]},
+        {"$set": {"is_active": new_status, "updated_at": now}}
+    )
+    
+    return {
+        "message": f"WhatsApp automation {'resumed' if new_status else 'paused'}",
+        "is_active": new_status
+    }
+
 @segments_router.get("/whatsapp-configs/all")
 async def get_all_segment_whatsapp_configs(user: dict = Depends(get_current_user)):
     """Get all WhatsApp configs for user's segments"""
@@ -733,4 +757,5 @@ async def get_all_segment_whatsapp_configs(user: dict = Depends(get_current_user
         {"_id": 0}
     ).to_list(100)
     return {"configs": configs}
+
 
