@@ -1061,6 +1061,17 @@ const CustomersPage = () => {
             spouse_name: customer.spouse_name || "",
             festival_preference: customer.festival_preference || [],
             special_dates: customer.special_dates || [],
+            // Feedback & Flags
+            last_rating: customer.last_rating || "",
+            nps_score: customer.nps_score || "",
+            complaint_flag: customer.complaint_flag || false,
+            vip_flag: customer.vip_flag || false,
+            blacklist_flag: customer.blacklist_flag || false,
+            // AI/Advanced
+            predicted_next_visit: customer.predicted_next_visit || "",
+            churn_risk_score: customer.churn_risk_score || "",
+            recommended_offer_type: customer.recommended_offer_type || "",
+            price_sensitivity_score: customer.price_sensitivity_score || "",
             // Custom Fields
             custom_field_1: customer.custom_field_1 || "",
             custom_field_2: customer.custom_field_2 || "",
