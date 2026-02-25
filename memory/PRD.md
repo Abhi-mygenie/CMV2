@@ -72,3 +72,25 @@ https://cmv2-test.preview.emergentagent.com
 - Selecting "None" and saving removes the template mapping
 - Status changes from "Mapped" → "Not Mapped"
 - Added DELETE endpoint: `/api/whatsapp/event-template-map/{event_key}`
+
+### Variable Mapping Feature (Feb 25, 2026)
+**Feature**: Map template placeholders ({{1}}, {{2}}, etc.) to database fields
+
+**UI Components Added**:
+- "Map Variables" button on each template card
+- "Mapped" / "Not Mapped" badge showing mapping status
+- Variable badges showing current mapping (e.g., `{{1}} → Customer Name`)
+- Modal with dropdowns for each variable
+
+**Available Database Fields**:
+- customer_name, points_balance, points_earned, points_redeemed
+- wallet_balance, amount, tier, restaurant_name
+- coupon_code, expiry_date
+
+**Backend Endpoints Added**:
+- `GET /api/whatsapp/template-variable-map` - Get all mappings
+- `PUT /api/whatsapp/template-variable-map/{template_id}` - Save mappings
+
+**Files Changed**:
+- `/app/frontend/src/App.js` - Added modal, state, and functions
+- `/app/backend/routers/whatsapp.py` - Added endpoints
