@@ -7259,7 +7259,11 @@ const TemplatesPage = () => {
                     </div>
                 </div>
                 
-                {!whatsappApiKey ? (
+                {initialLoading ? (
+                    <div className="flex items-center justify-center py-16">
+                        <Loader2 className="w-8 h-8 animate-spin text-[#22C55E]" />
+                    </div>
+                ) : !whatsappApiKey ? (
                     <Card className="rounded-xl border-0 shadow-sm">
                         <CardContent className="p-8 text-center">
                             <KeyRound className="w-12 h-12 text-amber-400 mx-auto mb-3" />
