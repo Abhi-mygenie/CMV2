@@ -5948,37 +5948,100 @@ const WhatsAppAutomationPage = () => {
                             </Card>
                         ) : (
                             <div className="space-y-3">
-                                {/* Show all templates */}
-                                {authkeyTemplates.map(tpl => {
-                                    const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
-                                    const hasMappings = templateVariableMappings[tpl.wid] && Object.keys(templateVariableMappings[tpl.wid]).length > 0;
+                                {/* Filter Tabs for Templates */}
+                                {(() => {
+                                    const mappedCount = authkeyTemplates.filter(tpl => {
+                                        const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                        if (variables.length === 0) return true;
+                                        return isTemplateFullyMapped(tpl);
+                                    }).length;
+                                    const notMappedCount = authkeyTemplates.length - mappedCount;
+                                    
+                                    // Filter templates based on filter
+                                    const filteredTemplates = authkeyTemplates.filter(tpl => {
+                                        const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                        const isMapped = variables.length === 0 || isTemplateFullyMapped(tpl);
+                                        
+                                        if (templateFilter === "mapped") return isMapped;
+                                        if (templateFilter === "not_mapped") return !isMapped;
+                                        return true; // "all"
+                                    });
+                                    
                                     return (
-                                        <Card key={tpl.wid} className="rounded-xl border-0 shadow-sm" data-testid={`authkey-tpl-${tpl.wid}`}>
-                                            <CardContent className="p-4">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <p className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</p>
-                                                    {variables.length > 0 && (
-                                                        <Badge className={`${hasMappings ? 'bg-[#25D366]' : 'bg-amber-500'} text-white text-xs`}>
-                                                            {hasMappings ? "Mapped" : "Not Mapped"}
-                                                        </Badge>
-                                                    )}
-                                                </div>
-                                                {variables.length > 0 && (
-                                                    <div className="flex flex-wrap gap-1 mt-1">
-                                                        {variables.map(v => {
-                                                            const mappedField = templateVariableMappings[tpl.wid]?.[v];
-                                                            const fieldLabel = mappedField ? availableVariables.find(av => av.key === mappedField)?.label || mappedField : null;
-                                                            return (
-                                                                <Badge 
-                                                                    key={v} 
-                                                                    variant="outline" 
-                                                                    className={`text-xs ${mappedField ? 'border-[#25D366] text-[#25D366]' : ''}`}
-                                                                    title={fieldLabel ? `Mapped to: ${fieldLabel}` : 'Not mapped'}
-                                                                >
-                                                                    {v}{fieldLabel ? ` → ${fieldLabel}` : ''}
-                                                                </Badge>
-                                                            );
-                                                        })}
+                                        <>
+                                            <div className="flex gap-2 mb-4 border-b border-gray-200 pb-3">
+                                                <button
+                                                    onClick={() => setTemplateFilter("all")}
+                                                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                        templateFilter === "all" 
+                                                            ? "bg-[#1A1A1A] text-white" 
+                                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                    }`}
+                                                    data-testid="filter-all-templates"
+                                                >
+                                                    All ({authkeyTemplates.length})
+                                                </button>
+                                                <button
+                                                    onClick={() => setTemplateFilter("mapped")}
+                                                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                        templateFilter === "mapped" 
+                                                            ? "bg-[#25D366] text-white" 
+                                                            : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"
+                                                    }`}
+                                                    data-testid="filter-mapped-templates"
+                                                >
+                                                    Mapped ({mappedCount})
+                                                </button>
+                                                <button
+                                                    onClick={() => setTemplateFilter("not_mapped")}
+                                                    className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                        templateFilter === "not_mapped" 
+                                                            ? "bg-amber-500 text-white" 
+                                                            : "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
+                                                    }`}
+                                                    data-testid="filter-not-mapped-templates"
+                                                >
+                                                    Not Mapped ({notMappedCount})
+                                                </button>
+                                            </div>
+                                            
+                                            {/* Template Cards */}
+                                            {filteredTemplates.length === 0 ? (
+                                                <Card className="rounded-xl border-0 shadow-sm">
+                                                    <CardContent className="p-8 text-center">
+                                                        <p className="text-[#52525B]">No templates match this filter</p>
+                                                    </CardContent>
+                                                </Card>
+                                            ) : filteredTemplates.map(tpl => {
+                                                const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                                const hasMappings = templateVariableMappings[tpl.wid] && Object.keys(templateVariableMappings[tpl.wid]).length > 0;
+                                                return (
+                                                    <Card key={tpl.wid} className="rounded-xl border-0 shadow-sm" data-testid={`authkey-tpl-${tpl.wid}`}>
+                                                        <CardContent className="p-4">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <p className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</p>
+                                                                {variables.length > 0 && (
+                                                                    <Badge className={`${hasMappings ? 'bg-[#25D366]' : 'bg-amber-500'} text-white text-xs`}>
+                                                                        {hasMappings ? "Mapped" : "Not Mapped"}
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                            {variables.length > 0 && (
+                                                                <div className="flex flex-wrap gap-1 mt-1">
+                                                                    {variables.map(v => {
+                                                                        const mappedField = templateVariableMappings[tpl.wid]?.[v];
+                                                                        const fieldLabel = mappedField ? availableVariables.find(av => av.key === mappedField)?.label || mappedField : null;
+                                                                        return (
+                                                                            <Badge 
+                                                                                key={v} 
+                                                                                variant="outline" 
+                                                                                className={`text-xs ${mappedField ? 'border-[#25D366] text-[#25D366]' : ''}`}
+                                                                                title={fieldLabel ? `Mapped to: ${fieldLabel}` : 'Not mapped'}
+                                                                            >
+                                                                                {v}{fieldLabel ? ` → ${fieldLabel}` : ''}
+                                                                            </Badge>
+                                                                        );
+                                                                    })}
                                                     </div>
                                                 )}
                                                 <div className="bg-gray-50 p-3 rounded-lg mt-2">
