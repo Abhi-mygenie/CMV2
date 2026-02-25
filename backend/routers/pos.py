@@ -436,7 +436,29 @@ async def pos_order_webhook(
         
         now = datetime.now(timezone.utc).isoformat()
         
+        # Get loyalty settings early (needed for first visit bonus)
+        settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
+        if not settings:
+            settings = {
+                "min_order_value": 100.0,
+                "bronze_earn_percent": 5.0,
+                "silver_earn_percent": 7.0,
+                "gold_earn_percent": 10.0,
+                "platinum_earn_percent": 15.0,
+                "redemption_value": 0.25,
+                "tier_silver_min": 500,
+                "tier_gold_min": 1500,
+                "tier_platinum_min": 5000,
+                "first_visit_bonus_enabled": False,
+                "first_visit_bonus_points": 50
+            }
+        
+        first_visit_bonus = 0
         if not customer:
+            # Check for first visit bonus
+            if settings.get("first_visit_bonus_enabled", False):
+                first_visit_bonus = settings.get("first_visit_bonus_points", 50)
+            
             # Auto-create customer
             customer_id = str(uuid.uuid4())
             customer_name = order_data.cust_name or f"Customer {order_data.cust_mobile[-4:]}"
@@ -451,7 +473,7 @@ async def pos_order_webhook(
                 "customer_type": "normal",
                 "pos_id": order_data.pos_id,
                 "pos_restaurant_id": order_data.restaurant_id,
-                "total_points": 0,
+                "total_points": first_visit_bonus,
                 "wallet_balance": 0.0,
                 "total_visits": 0,
                 "total_spent": 0.0,
@@ -460,28 +482,30 @@ async def pos_order_webhook(
                 "favorites": [],
                 "notes": "Auto-created via POS order",
                 "created_at": now,
-                "last_visit": None
+                "last_visit": None,
+                "first_visit_bonus_awarded": first_visit_bonus > 0
             }
             await db.customers.insert_one(customer)
+            
+            # Record first visit bonus transaction if awarded
+            if first_visit_bonus > 0:
+                tx_doc = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": user["id"],
+                    "customer_id": customer_id,
+                    "points": first_visit_bonus,
+                    "transaction_type": "bonus",
+                    "description": "First visit bonus - Welcome reward",
+                    "bill_amount": None,
+                    "balance_after": first_visit_bonus,
+                    "created_at": now
+                }
+                await db.points_transactions.insert_one(tx_doc)
+            
             is_new_customer = True
         else:
             customer_id = customer["id"]
             is_new_customer = False
-        
-        # Get loyalty settings
-        settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
-        if not settings:
-            settings = {
-                "min_order_value": 100.0,
-                "bronze_earn_percent": 5.0,
-                "silver_earn_percent": 7.0,
-                "gold_earn_percent": 10.0,
-                "platinum_earn_percent": 15.0,
-                "redemption_value": 0.25,
-                "tier_silver_min": 500,
-                "tier_gold_min": 1500,
-                "tier_platinum_min": 5000
-            }
         
         # Calculate points earned
         points_earned = 0
