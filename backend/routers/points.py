@@ -406,215 +406,25 @@ async def update_loyalty_settings(update_data: LoyaltySettingsUpdate, user: dict
 async def process_birthday_bonus(user: dict = Depends(get_current_user)):
     """
     Process birthday bonus for all eligible customers.
-    Awards points to customers whose birthday falls within the configured window.
-    Should be called daily via cron job.
+    Now delegates to shared core logic (also used by cron scheduler).
     """
+    from core.loyalty_jobs import run_birthday_bonus
     settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
-    
-    if not settings or not settings.get("birthday_bonus_enabled", False):
-        return {
-            "message": "Birthday bonus is disabled",
-            "customers_awarded": 0,
-            "total_points_awarded": 0
-        }
-    
-    bonus_points = settings.get("birthday_bonus_points", 100)
-    days_before = settings.get("birthday_bonus_days_before", 0)
-    days_after = settings.get("birthday_bonus_days_after", 7)
-    
-    today = datetime.now(timezone.utc).date()
-    current_year = today.year
-    
-    # Get all customers with DOB set
-    customers = await db.customers.find({
-        "user_id": user["id"],
-        "dob": {"$exists": True, "$ne": None, "$ne": ""}
-    }, {"_id": 0}).to_list(10000)
-    
-    customers_awarded = 0
-    total_points_awarded = 0
-    awarded_list = []
-    
-    for customer in customers:
-        try:
-            # Parse DOB (expected format: YYYY-MM-DD)
-            dob_str = customer.get("dob")
-            if not dob_str:
-                continue
-                
-            dob = datetime.strptime(dob_str[:10], "%Y-%m-%d").date()
-            
-            # Create this year's birthday date
-            try:
-                birthday_this_year = dob.replace(year=current_year)
-            except ValueError:
-                # Handle Feb 29 for non-leap years
-                birthday_this_year = dob.replace(year=current_year, day=28)
-            
-            # Calculate window
-            window_start = birthday_this_year - timedelta(days=days_before)
-            window_end = birthday_this_year + timedelta(days=days_after)
-            
-            # Check if today falls within window
-            if window_start <= today <= window_end:
-                # Check if already awarded this year
-                last_awarded_year = customer.get("last_birthday_bonus_year")
-                if last_awarded_year == current_year:
-                    continue
-                
-                # Award bonus points
-                current_points = customer.get("total_points", 0)
-                new_points = current_points + bonus_points
-                
-                # Update customer
-                await db.customers.update_one(
-                    {"id": customer["id"]},
-                    {"$set": {
-                        "total_points": new_points,
-                        "last_birthday_bonus_year": current_year
-                    }}
-                )
-                
-                # Record transaction
-                tx_doc = {
-                    "id": str(uuid.uuid4()),
-                    "user_id": user["id"],
-                    "customer_id": customer["id"],
-                    "points": bonus_points,
-                    "transaction_type": "bonus",
-                    "description": f"Birthday bonus ({current_year})",
-                    "bill_amount": None,
-                    "balance_after": new_points,
-                    "created_at": datetime.now(timezone.utc).isoformat()
-                }
-                await db.points_transactions.insert_one(tx_doc)
-                
-                customers_awarded += 1
-                total_points_awarded += bonus_points
-                awarded_list.append({
-                    "customer_id": customer["id"],
-                    "name": customer.get("name"),
-                    "phone": customer.get("phone"),
-                    "dob": dob_str,
-                    "points_awarded": bonus_points
-                })
-                
-        except Exception as e:
-            # Skip invalid DOB formats
-            continue
-    
-    return {
-        "message": f"Birthday bonus processed for {customers_awarded} customers",
-        "customers_awarded": customers_awarded,
-        "total_points_awarded": total_points_awarded,
-        "awarded_customers": awarded_list
-    }
+    if not settings:
+        return {"message": "Birthday bonus is disabled", "customers_awarded": 0, "total_points_awarded": 0}
+    result = await run_birthday_bonus(user["id"], settings)
+    return {"message": f"Birthday bonus processed for {result['customers_awarded']} customers", **result}
 
 
 @router.post("/process-anniversary-bonus")
 async def process_anniversary_bonus(user: dict = Depends(get_current_user)):
     """
     Process anniversary bonus for all eligible customers.
-    Awards points to customers whose anniversary falls within the configured window.
-    Should be called daily via cron job.
+    Now delegates to shared core logic (also used by cron scheduler).
     """
+    from core.loyalty_jobs import run_anniversary_bonus
     settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
-    
-    if not settings or not settings.get("anniversary_bonus_enabled", False):
-        return {
-            "message": "Anniversary bonus is disabled",
-            "customers_awarded": 0,
-            "total_points_awarded": 0
-        }
-    
-    bonus_points = settings.get("anniversary_bonus_points", 150)
-    days_before = settings.get("anniversary_bonus_days_before", 0)
-    days_after = settings.get("anniversary_bonus_days_after", 7)
-    
-    today = datetime.now(timezone.utc).date()
-    current_year = today.year
-    
-    # Get all customers with anniversary set
-    customers = await db.customers.find({
-        "user_id": user["id"],
-        "anniversary": {"$exists": True, "$ne": None, "$ne": ""}
-    }, {"_id": 0}).to_list(10000)
-    
-    customers_awarded = 0
-    total_points_awarded = 0
-    awarded_list = []
-    
-    for customer in customers:
-        try:
-            # Parse anniversary (expected format: YYYY-MM-DD)
-            anniversary_str = customer.get("anniversary")
-            if not anniversary_str:
-                continue
-                
-            anniversary = datetime.strptime(anniversary_str[:10], "%Y-%m-%d").date()
-            
-            # Create this year's anniversary date
-            try:
-                anniversary_this_year = anniversary.replace(year=current_year)
-            except ValueError:
-                # Handle Feb 29 for non-leap years
-                anniversary_this_year = anniversary.replace(year=current_year, day=28)
-            
-            # Calculate window
-            window_start = anniversary_this_year - timedelta(days=days_before)
-            window_end = anniversary_this_year + timedelta(days=days_after)
-            
-            # Check if today falls within window
-            if window_start <= today <= window_end:
-                # Check if already awarded this year
-                last_awarded_year = customer.get("last_anniversary_bonus_year")
-                if last_awarded_year == current_year:
-                    continue
-                
-                # Award bonus points
-                current_points = customer.get("total_points", 0)
-                new_points = current_points + bonus_points
-                
-                # Update customer
-                await db.customers.update_one(
-                    {"id": customer["id"]},
-                    {"$set": {
-                        "total_points": new_points,
-                        "last_anniversary_bonus_year": current_year
-                    }}
-                )
-                
-                # Record transaction
-                tx_doc = {
-                    "id": str(uuid.uuid4()),
-                    "user_id": user["id"],
-                    "customer_id": customer["id"],
-                    "points": bonus_points,
-                    "transaction_type": "bonus",
-                    "description": f"Anniversary bonus ({current_year})",
-                    "bill_amount": None,
-                    "balance_after": new_points,
-                    "created_at": datetime.now(timezone.utc).isoformat()
-                }
-                await db.points_transactions.insert_one(tx_doc)
-                
-                customers_awarded += 1
-                total_points_awarded += bonus_points
-                awarded_list.append({
-                    "customer_id": customer["id"],
-                    "name": customer.get("name"),
-                    "phone": customer.get("phone"),
-                    "anniversary": anniversary_str,
-                    "points_awarded": bonus_points
-                })
-                
-        except Exception as e:
-            # Skip invalid anniversary formats
-            continue
-    
-    return {
-        "message": f"Anniversary bonus processed for {customers_awarded} customers",
-        "customers_awarded": customers_awarded,
-        "total_points_awarded": total_points_awarded,
-        "awarded_customers": awarded_list
-    }
+    if not settings:
+        return {"message": "Anniversary bonus is disabled", "customers_awarded": 0, "total_points_awarded": 0}
+    result = await run_anniversary_bonus(user["id"], settings)
+    return {"message": f"Anniversary bonus processed for {result['customers_awarded']} customers", **result}
