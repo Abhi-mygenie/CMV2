@@ -3480,6 +3480,8 @@ const SegmentsPage = () => {
     const [segmentFilter, setSegmentFilter] = useState("all"); // "all", "active", "not_configured"
     // Template variable mappings for filtering
     const [segmentTemplateVariableMappings, setSegmentTemplateVariableMappings] = useState({});
+    // Sample customer data for previews
+    const [segmentSampleData, setSegmentSampleData] = useState({});
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
