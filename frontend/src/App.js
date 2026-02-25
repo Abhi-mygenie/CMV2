@@ -3474,7 +3474,6 @@ const CouponsPage = () => {
                     </form>
                 </DialogContent>
             </Dialog>
-            </div>
         </MobileLayout>
     );
 };
