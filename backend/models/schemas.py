@@ -112,6 +112,19 @@ class CustomerBase(BaseModel):
     festival_preference: Optional[List[str]] = None  # Diwali, Eid, Christmas, etc.
     special_dates: Optional[List[dict]] = None  # [{date, label}]
     
+    # Feedback & Flags
+    last_rating: Optional[int] = None  # 1-5 stars
+    nps_score: Optional[int] = None  # -100 to 100
+    complaint_flag: bool = False
+    vip_flag: bool = False
+    blacklist_flag: bool = False
+    
+    # AI/Advanced (MyGenie CRM Differentiator)
+    predicted_next_visit: Optional[str] = None  # datetime
+    churn_risk_score: Optional[int] = None  # 0-100
+    recommended_offer_type: Optional[str] = None  # Discount, Freebie, Points
+    price_sensitivity_score: Optional[str] = None  # Low, Medium, High
+    
     # Custom Fields
     custom_field_1: Optional[str] = None
     custom_field_2: Optional[str] = None
