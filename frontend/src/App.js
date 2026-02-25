@@ -6046,6 +6046,7 @@ const WhatsAppAutomationPage = () => {
                         </TabsTrigger>
                     </TabsList>
 
+
                     {/* Automation Tab - Card-based Layout */}
                     <TabsContent value="automation" className="mt-4">
                         {!whatsappApiKey ? (
@@ -6055,16 +6056,7 @@ const WhatsAppAutomationPage = () => {
                                     <p className="text-[#52525B]">API Key Required</p>
                                     <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to map templates to events</p>
                                     <Button onClick={() => setActiveTab("settings")} variant="outline" className="mt-4">
-                                    
-                                    // Filter templates based on filter
-                                    const filteredTemplates = authkeyTemplates.filter(tpl => {
-                                        const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
-                                        const isMapped = variables.length === 0 || isTemplateFullyMapped(tpl);
-                                        
-                                        if (templateFilter === "mapped") return isMapped;
-                                        if (templateFilter === "not_mapped") return !isMapped;
-                                        return true; // "all"
-                                    });
+                                        Go to Settings
                                     
                                     // Count statuses — currently all Authkey are "approved", drafts are local
                                     const draftCount = customTemplates.length;
