@@ -1,45 +1,67 @@
-# DinePoints - Loyalty & CRM for Restaurants
+# Dine-In Rewards - Product Requirements Document
 
 ## Original Problem Statement
-Pull code from `https://github.com/parth-mygenie/dine-in-rewards.git` and extend a full-stack loyalty rewards application for restaurants (React + FastAPI + MongoDB). Features include customer management, points/wallet transactions, coupon management, POS integration, and WhatsApp automation.
+Pull code from `https://github.com/parth-mygenie/dine-in-rewards.git` and set up a full-stack loyalty rewards application for restaurants. The app features customer management, points/wallet transactions, coupon management, POS integration, and WhatsApp automation.
 
 ## Architecture
-- **Frontend:** React.js (port 3000)
-- **Backend:** FastAPI (port 8001)
-- **Database:** MongoDB (loyalty_app)
+- **Frontend:** React.js (Vite + Shadcn UI)
+- **Backend:** FastAPI + Motor (async MongoDB)
+- **Database:** MongoDB
 - **Auth:** JWT + MyGenie external API
-- **Scheduler:** APScheduler (AsyncIOScheduler)
+- **Background Jobs:** APScheduler
 
 ## What's Been Implemented
-- Application setup from GitHub repo
-- Webhook validation for `pos_id` and `restaurant_id` in POS orders
-- Birthday & Anniversary bonus endpoints with duplicate prevention
-- First Visit bonus on customer creation
-- Points expiry reminders and expiry processing
-- Default WhatsApp templates/automations for new users
-- Frontend bug fix on WhatsApp Automation page
-- **[2026-02-25] Automated Cron Jobs:** APScheduler-based daily cron (00:30 UTC) running birthday bonus, anniversary bonus, expiry reminders, and points expiry for ALL users. Includes admin endpoints: `GET /api/cron/status`, `POST /api/cron/trigger`, `POST /api/cron/trigger-all-users`. Run logs persisted to `cron_job_logs` collection.
 
-## Key API Endpoints
-- `POST /api/pos/orders` — POS webhook
-- `POST /api/auth/mygenie-login` — MyGenie auth
-- `POST /api/points/process-birthday-bonus` — Manual birthday bonus
-- `POST /api/points/process-anniversary-bonus` — Manual anniversary bonus
-- `POST /api/points/process-expiry-reminders` — Manual expiry reminders
-- `POST /api/points/expire` — Manual points expiry
-- `GET /api/cron/status` — Scheduler status + recent logs
-- `POST /api/cron/trigger` — Trigger jobs for current user
-- `POST /api/cron/trigger-all-users` — Trigger jobs for all users
+### Core Features
+- Customer management with tiers (Bronze, Silver, Gold, Platinum)
+- Points earning/redemption system
+- Wallet transactions
+- Coupon management
+- POS order webhook integration
+- QR code customer sign-up
+- Feedback system
+- Segments for customer grouping
 
-## Known Issues
-- **Hardcoded `pos_id`:** MyGenie login in `auth.py` hardcodes `pos_id="0001"` (should be dynamic)
-- **Mocked messaging:** `/api/messaging/send` does not send real messages
+### WhatsApp Automation
+- 10 default templates per user (Welcome, Order Confirmation, Birthday, Anniversary, Points Redeemed, Bonus Points, Tier Upgrade, Points Expiring, Feedback, Wallet Top-up)
+- 10 automation rules per user linked to templates
+- Template CRUD
+- Automation rule CRUD with toggle
+- **WhatsApp API Key (AuthKey.io) settings** — added 2026-02-25
 
-## Backlog (P0-P2)
-- **P1:** Fix hardcoded `pos_id` in MyGenie login
-- **P1:** Implement Off-Peak Bonus Logic in POS webhook
-- **P2:** Refactor monolithic `pos_order_webhook` into helpers
+### Loyalty Event Automation (Cron Jobs)
+- APScheduler daily jobs for birthday/anniversary bonus and points expiry
+- Admin endpoints: `/api/cron/status`, `/api/cron/trigger/{job_id}`, `/api/cron/trigger-all`
+- Business logic in `backend/core/loyalty_jobs.py`
 
-## Credentials
-- Demo: `demo@restaurant.com` / `demo123` (via `/api/auth/demo-login`)
+### POS Webhook
+- Refactored into helper functions (_validate_order, _find_or_create_customer, etc.)
+- Off-peak bonus logic integrated
+- Validation for pos_id and restaurant_id
+
+### Recent Changes (2026-02-25)
+- Added WhatsApp API Key (AuthKey.io) input in WhatsApp Settings tab
+- Backend: `GET/PUT /api/whatsapp/api-key` endpoints
+- Frontend: New "Settings" tab in WhatsApp Automation page
+
+## Pending Issues
+- **P0:** Hardcoded `pos_id="0001"` in `backend/routers/auth.py` (~line 240) during MyGenie login
+
+## Known Mocks
+- `/api/messaging/send` — does not send real WhatsApp messages
+
+## Key Credentials
+- Demo: `demo@restaurant.com` / `demo123`
 - MyGenie: `owner@kunafamahal.com` / `Qplazm@10`
+
+## Key Files
+- `/app/backend/routers/whatsapp.py` — WhatsApp templates, automation, API key
+- `/app/backend/routers/pos.py` — POS webhook (refactored)
+- `/app/backend/routers/auth.py` — Auth + MyGenie login
+- `/app/backend/core/scheduler.py` — APScheduler config
+- `/app/backend/core/loyalty_jobs.py` — Cron job business logic
+- `/app/backend/routers/cron.py` — Cron admin endpoints
+
+## Backlog
+- P0: Fix hardcoded pos_id in MyGenie login
+- P2: Integrate AuthKey.io for real WhatsApp message sending (replace mock)
