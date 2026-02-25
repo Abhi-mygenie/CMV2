@@ -4719,7 +4719,7 @@ const WhatsAppAutomationPage = () => {
     const [automationRules, setAutomationRules] = useState([]);
     const [availableEvents, setAvailableEvents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("templates");
+    const [activeTab, setActiveTab] = useState("settings");
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [savingApiKey, setSavingApiKey] = useState(false);
     
@@ -4989,6 +4989,13 @@ const WhatsAppAutomationPage = () => {
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
                     <TabsList className="w-full grid grid-cols-3 h-12 bg-gray-100 rounded-xl p-1">
                         <TabsTrigger 
+                            value="settings" 
+                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                            data-testid="whatsapp-settings-tab"
+                        >
+                            Settings
+                        </TabsTrigger>
+                        <TabsTrigger 
                             value="templates" 
                             className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
                             data-testid="templates-tab"
@@ -5001,13 +5008,6 @@ const WhatsAppAutomationPage = () => {
                             data-testid="automation-tab"
                         >
                             Automation ({automationRules.length})
-                        </TabsTrigger>
-                        <TabsTrigger 
-                            value="settings" 
-                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                            data-testid="whatsapp-settings-tab"
-                        >
-                            Settings
                         </TabsTrigger>
                     </TabsList>
 
