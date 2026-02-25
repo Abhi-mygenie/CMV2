@@ -4174,12 +4174,12 @@ const SegmentsPage = () => {
                                                 <div className="p-4 text-center text-sm text-gray-500">
                                                     Loading templates...
                                                 </div>
-                                            ) : templates.length === 0 ? (
+                                            ) : templates.filter(t => isSegmentTemplateFullyMapped(t)).length === 0 ? (
                                                 <div className="p-4 text-center text-sm text-gray-500">
-                                                    No templates available. Please configure WhatsApp API key in Settings.
+                                                    No templates available. Please map variables in WhatsApp Settings.
                                                 </div>
                                             ) : (
-                                                templates.map(template => (
+                                                templates.filter(t => isSegmentTemplateFullyMapped(t)).map(template => (
                                                     <SelectItem key={template.id} value={template.id}>
                                                         <div className="flex items-center gap-2">
                                                             {template.mediaType === "image" && <span>🖼️</span>}
