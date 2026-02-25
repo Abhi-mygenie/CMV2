@@ -4857,20 +4857,21 @@ const WhatsAppAutomationPage = () => {
         }
     };
 
-    const handleSaveMappings = async () => {
+    const handleSaveEventMapping = async (eventKey, templateId, templateName) => {
         setSavingMappings(true);
         try {
-            const mappings = Object.entries(eventMappings)
-                .filter(([, v]) => v.template_id)
-                .map(([event_key, v]) => ({
-                    event_key,
-                    template_id: v.template_id,
-                    template_name: v.template_name,
-                }));
-            await api.put("/whatsapp/event-template-map", { mappings });
-            toast.success("Template mappings saved!");
+            await api.put("/whatsapp/event-template-map", {
+                mappings: [{ event_key: eventKey, template_id: templateId, template_name: templateName }]
+            });
+            setEventMappings(prev => ({
+                ...prev,
+                [eventKey]: { template_id: templateId, template_name: templateName, saved: true },
+            }));
+            setEditingEvent(null);
+            setEditingEventValue(null);
+            toast.success(`Template saved for ${eventLabels[eventKey] || eventKey}`);
         } catch (err) {
-            toast.error("Failed to save mappings");
+            toast.error("Failed to save mapping");
         } finally {
             setSavingMappings(false);
         }
