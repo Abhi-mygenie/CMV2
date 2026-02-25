@@ -3549,13 +3549,13 @@ const SegmentsPage = () => {
 
     const fetchSegments = async () => {
         try {
-            const [segmentsRes, customersRes] = await Promise.all([
+            const [segmentsRes, statsRes] = await Promise.all([
                 api.get('/segments'),
-                api.get('/customers?limit=1') // Just to get total count
+                api.get('/customers/segments/stats')
             ]);
             setSegments(segmentsRes.data);
-            // Get total customers count from response headers or data
-            const totalCount = customersRes.data.total || customersRes.data.length || 0;
+            // Get total customers count from stats endpoint
+            const totalCount = statsRes.data.total || 0;
             setTotalCustomersCount(totalCount);
         } catch (err) {
             toast.error("Failed to load segments");
