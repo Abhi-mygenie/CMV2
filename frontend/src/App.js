@@ -6311,7 +6311,7 @@ const WhatsAppAutomationPage = () => {
                                 )}
                             </>
                         )}
-                    </TabsContent>
+                    </div>
 
                     {/* Automation Configuration Modal */}
                     <Dialog open={showAutomationConfigModal} onOpenChange={setShowAutomationConfigModal}>
