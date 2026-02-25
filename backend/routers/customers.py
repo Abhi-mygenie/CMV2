@@ -287,6 +287,21 @@ async def create_customer(customer_data: CustomerCreate, user: dict = Depends(ge
         "allergies": customer_data.allergies or [],
         "favorites": customer_data.favorites or [],
         
+        # Dining Preferences
+        "preferred_dining_type": customer_data.preferred_dining_type,
+        "preferred_time_slot": customer_data.preferred_time_slot,
+        "favorite_table": customer_data.favorite_table,
+        "avg_party_size": customer_data.avg_party_size,
+        "diet_preference": customer_data.diet_preference,
+        "spice_level": customer_data.spice_level,
+        "cuisine_preference": customer_data.cuisine_preference,
+        
+        # Special Occasions
+        "kids_birthday": customer_data.kids_birthday or [],
+        "spouse_name": customer_data.spouse_name,
+        "festival_preference": customer_data.festival_preference or [],
+        "special_dates": customer_data.special_dates or [],
+        
         # Custom Fields
         "custom_field_1": customer_data.custom_field_1,
         "custom_field_2": customer_data.custom_field_2,
