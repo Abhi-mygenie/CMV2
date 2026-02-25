@@ -985,19 +985,11 @@ const CustomersPage = () => {
                 phone: newCustomer.phone,
                 country_code: newCustomer.country_code,
                 email: newCustomer.email || null,
-                notes: newCustomer.notes || null,
+                gender: newCustomer.gender || null,
                 dob: newCustomer.dob || null,
                 anniversary: newCustomer.anniversary || null,
+                preferred_language: newCustomer.preferred_language || null,
                 customer_type: newCustomer.customer_type,
-                gst_name: newCustomer.customer_type === "corporate" ? newCustomer.gst_name || null : null,
-                gst_number: newCustomer.customer_type === "corporate" ? newCustomer.gst_number || null : null,
-                address: newCustomer.address || null,
-                city: newCustomer.city || null,
-                pincode: newCustomer.pincode || null,
-                allergies: newCustomer.allergies.length > 0 ? newCustomer.allergies : null,
-                custom_field_1: newCustomer.custom_field_1 || null,
-                custom_field_2: newCustomer.custom_field_2 || null,
-                custom_field_3: newCustomer.custom_field_3 || null
             };
             await api.post("/customers", customerData);
             toast.success("Customer added!");
