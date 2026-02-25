@@ -6245,12 +6245,6 @@ const WhatsAppAutomationPage = () => {
                                                 <span className="text-gray-500">None (Remove template)</span>
                                             </SelectItem>
                                             {authkeyTemplates
-                                                .filter(tpl => {
-                                                    if (configuringEvent === "send_bill") return true;
-                                                    const eventPrefix = (configuringEvent || "").substring(0, 3).toLowerCase();
-                                                    const templatePrefix = (tpl.temp_name || "").substring(0, 3).toLowerCase();
-                                                    return templatePrefix === eventPrefix;
-                                                })
                                                 .map(tpl => (
                                                     <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
                                                         {tpl.temp_name}
