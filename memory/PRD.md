@@ -62,6 +62,12 @@ Pull code from `https://github.com/parth-mygenie/dine-in-rewards.git` and set up
 - `/app/backend/core/loyalty_jobs.py` — Cron job business logic
 - `/app/backend/routers/cron.py` — Cron admin endpoints
 
+### DB Export/Import (2026-02-25)
+- Created `scripts/db_export.py` — exports all MongoDB collections to `/app/db_export/*.json`
+- Created `scripts/db_import.py` — imports data back with `--drop` (replace) or `--merge` (skip duplicates) modes
+- All 13 collections exported (1967 customers, 6 users, 70 automation rules, etc.)
+
 ## Backlog
 - P0: Fix hardcoded pos_id in MyGenie login
-- P2: Integrate AuthKey.io for real WhatsApp message sending (replace mock)
+- P1: Implement WhatsApp message sending logic via AuthKey.io
+- P2: Refactor App.js into smaller components
