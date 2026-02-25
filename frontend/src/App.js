@@ -3478,6 +3478,8 @@ const SegmentsPage = () => {
     const [whatsappConfigs, setWhatsappConfigs] = useState({});
     // Filter state for segments
     const [segmentFilter, setSegmentFilter] = useState("all"); // "all", "active", "not_configured"
+    // Template variable mappings for filtering
+    const [segmentTemplateVariableMappings, setSegmentTemplateVariableMappings] = useState({});
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
