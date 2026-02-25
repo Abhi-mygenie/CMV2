@@ -5890,7 +5890,7 @@ const WhatsAppAutomationPage = () => {
                         )}
                     </TabsContent>
 
-                    {/* Automation Tab */}
+                    {/* Automation Tab - Card-based Layout */}
                     <TabsContent value="automation" className="mt-4">
                         {!whatsappApiKey ? (
                             <Card className="rounded-xl border-0 shadow-sm">
@@ -5923,142 +5923,182 @@ const WhatsAppAutomationPage = () => {
                                     </Card>
                                 ) : authkeyTemplates.length > 0 && (
                                     <>
-                                        <p className="text-sm text-[#52525B] mb-3">
-                                            Map a WhatsApp template to each event. {authkeyTemplates.length} templates available.
-                                        </p>
-                                        <div className="space-y-3">
+                                        {/* Header Section */}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <p className="text-sm text-[#52525B]">
+                                                    Configure automated WhatsApp messages for customer events
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-0.5">
+                                                    {authkeyTemplates.length} templates available
+                                                </p>
+                                            </div>
+                                            <Badge className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20">
+                                                {Object.keys(eventMappings).filter(k => eventMappings[k]?.saved).length} Active
+                                            </Badge>
+                                        </div>
+
+                                        {/* Event Cards Grid */}
+                                        <div className="space-y-3" data-testid="automation-events-list">
                                             {availableEvents.map(eventKey => {
                                                 const mapped = eventMappings[eventKey];
                                                 const isSaved = mapped?.saved;
-                                                const isEditing = editingEvent === eventKey;
                                                 const isEnabled = mapped?.is_enabled !== false;
 
                                                 return (
-                                                    <Card key={eventKey} className="rounded-xl border-0 shadow-sm" data-testid={`event-map-${eventKey}`}>
+                                                    <Card 
+                                                        key={eventKey} 
+                                                        className={`rounded-xl hover:shadow-md transition-shadow ${isSaved && isEnabled ? 'border-2 border-[#25D366]/30 bg-[#25D366]/5' : ''}`}
+                                                        data-testid={`event-card-${eventKey}`}
+                                                    >
                                                         <CardContent className="p-4">
-                                                            {/* Row 1: Event name + badge */}
-                                                            <div className="flex items-center justify-between mb-2">
-                                                                <p className="font-semibold text-[#1A1A1A] text-sm">{eventLabels[eventKey] || eventKey}</p>
-                                                                <Badge className={`${isSaved ? 'bg-[#25D366]' : 'bg-gray-400'} text-white text-xs`}>
-                                                                    {isSaved ? "Mapped" : "Not Mapped"}
-                                                                </Badge>
+                                                            {/* Row 1: Event name, description & badge */}
+                                                            <div className="flex items-start justify-between mb-3">
+                                                                <div className="flex-1">
+                                                                    <div className="flex items-center gap-2 mb-1">
+                                                                        <svg className={`w-4 h-4 ${isSaved && isEnabled ? 'text-[#25D366]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="currentColor">
+                                                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                                                        </svg>
+                                                                        <h3 className="font-semibold text-[#1A1A1A]" data-testid={`event-name-${eventKey}`}>
+                                                                            {eventLabels[eventKey] || eventKey}
+                                                                        </h3>
+                                                                        <Badge className={`${isSaved ? (isEnabled ? 'bg-[#25D366]' : 'bg-amber-500') : 'bg-gray-400'} text-white text-xs`}>
+                                                                            {isSaved ? (isEnabled ? "Active" : "Paused") : "Not Configured"}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <p className="text-xs text-[#52525B] ml-6">
+                                                                        {eventDescriptions[eventKey] || "Send WhatsApp message on this event"}
+                                                                    </p>
+                                                                </div>
                                                             </div>
 
-                                                            {/* Row 2: Template name */}
-                                                            {!isEditing && (
-                                                                <p className="text-sm text-[#52525B] mb-2">
-                                                                    Template: <span className="font-medium">{isSaved ? mapped.template_name : "None"}</span>
-                                                                </p>
+                                                            {/* WhatsApp Configuration Status */}
+                                                            {isSaved ? (
+                                                                <div className={`rounded-lg p-3 mb-3 border ${
+                                                                    isEnabled 
+                                                                        ? 'bg-[#25D366]/10 border-[#25D366]/20' 
+                                                                        : 'bg-gray-100 border-gray-300'
+                                                                }`}>
+                                                                    <div className="flex items-start justify-between">
+                                                                        <div className="flex-1">
+                                                                            <div className="flex items-center gap-2 mb-1">
+                                                                                <svg className={`w-4 h-4 ${isEnabled ? 'text-[#25D366]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="currentColor">
+                                                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                                                                </svg>
+                                                                                <span className={`text-sm font-medium ${isEnabled ? 'text-[#25D366]' : 'text-gray-500'}`}>
+                                                                                    WhatsApp Template
+                                                                                </span>
+                                                                                {!isEnabled && (
+                                                                                    <Badge variant="outline" className="text-xs bg-gray-200 text-gray-600">Paused</Badge>
+                                                                                )}
+                                                                            </div>
+                                                                            <p className={`text-xs ml-6 ${isEnabled ? 'text-gray-700' : 'text-gray-500'}`}>
+                                                                                <span className="font-medium">Template:</span> {mapped.template_name}
+                                                                            </p>
+                                                                            <p className={`text-xs ml-6 ${isEnabled ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                                                <span className="font-medium">Trigger:</span> Automatic on event
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-1">
+                                                                            {/* Preview Button */}
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    const tpl = authkeyTemplates.find(t => t.wid === mapped.template_id);
+                                                                                    if (tpl) {
+                                                                                        setPreviewTemplate(tpl);
+                                                                                        setShowTemplatePreview(true);
+                                                                                    }
+                                                                                }}
+                                                                                className="text-gray-500 hover:text-[#25D366] p-1.5 rounded transition-colors hover:bg-[#25D366]/10"
+                                                                                title="Preview template"
+                                                                                data-testid={`preview-event-${eventKey}`}
+                                                                            >
+                                                                                <Eye className="w-4 h-4" />
+                                                                            </button>
+                                                                            {/* Pause/Resume Button */}
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleToggleEventMapping(eventKey);
+                                                                                }}
+                                                                                className={`p-1.5 rounded transition-colors ${
+                                                                                    isEnabled 
+                                                                                        ? 'text-gray-500 hover:text-amber-600 hover:bg-amber-50' 
+                                                                                        : 'text-[#25D366] hover:text-[#20BD5A] hover:bg-[#25D366]/10'
+                                                                                }`}
+                                                                                title={isEnabled ? "Pause automation" : "Resume automation"}
+                                                                                data-testid={`toggle-event-${eventKey}`}
+                                                                            >
+                                                                                {isEnabled ? (
+                                                                                    <Pause className="w-4 h-4" />
+                                                                                ) : (
+                                                                                    <Play className="w-4 h-4" />
+                                                                                )}
+                                                                            </button>
+                                                                            {/* Delete Button */}
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    if (window.confirm(`Remove template from "${eventLabels[eventKey]}"?`)) {
+                                                                                        handleSaveEventMapping(eventKey, null, null);
+                                                                                    }
+                                                                                }}
+                                                                                className="text-gray-400 hover:text-red-500 p-1.5 rounded transition-colors hover:bg-red-50"
+                                                                                title="Remove template"
+                                                                                data-testid={`delete-event-${eventKey}`}
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200">
+                                                                    <div className="flex items-center gap-2 text-gray-500">
+                                                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                            <circle cx="12" cy="12" r="10"/>
+                                                                        </svg>
+                                                                        <span className="text-xs">No WhatsApp template configured for this event</span>
+                                                                    </div>
+                                                                </div>
                                                             )}
 
-                                                            {/* Editing state: dropdown */}
-                                                            {isEditing && (
-                                                                <>
-                                                                    <Select
-                                                                        value={editingEventValue || ""}
-                                                                        onValueChange={(val) => setEditingEventValue(val)}
-                                                                    >
-                                                                        <SelectTrigger className="h-10 rounded-xl" data-testid={`select-template-${eventKey}`}>
-                                                                            <SelectValue placeholder="Select template" />
-                                                                        </SelectTrigger>
-                                                                        <SelectContent>
-                                                                            {/* None option to clear/unmap template */}
-                                                                            <SelectItem value="none">None</SelectItem>
-                                                                            {/* Filter templates: send_bill shows all, others match first 3 letters of event KEY */}
-                                                                            {authkeyTemplates
-                                                                                .filter(tpl => {
-                                                                                    // Send Bill event shows ALL templates
-                                                                                    if (eventKey === "send_bill") return true;
-                                                                                    // Other events: match first 3 letters of event KEY with template name
-                                                                                    const eventPrefix = eventKey.substring(0, 3).toLowerCase();
-                                                                                    const templatePrefix = (tpl.temp_name || "").substring(0, 3).toLowerCase();
-                                                                                    return templatePrefix === eventPrefix;
-                                                                                })
-                                                                                .map(tpl => (
-                                                                                <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
-                                                                                    <div className="flex items-center justify-between w-full">
-                                                                                        <span>{tpl.temp_name}</span>
-                                                                                    </div>
-                                                                                </SelectItem>
-                                                                            ))}
-                                                                        </SelectContent>
-                                                                    </Select>
-                                                                    
-                                                                    {/* Preview button for selected template */}
-                                                                    {editingEventValue && editingEventValue !== "none" && (
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            className="mt-2 h-8 w-full rounded-lg text-xs"
-                                                                            onClick={() => {
-                                                                                const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
-                                                                                if (tpl) {
-                                                                                    setPreviewTemplate(tpl);
-                                                                                    setShowTemplatePreview(true);
-                                                                                }
-                                                                            }}
-                                                                            data-testid={`preview-template-${eventKey}`}
-                                                                        >
-                                                                            <Eye className="w-3 h-3 mr-1" /> Preview Template
-                                                                        </Button>
-                                                                    )}
-                                                                    
-                                                                    <div className="flex justify-end gap-2 mt-2">
-                                                                        <Button
-                                                                            variant="outline"
-                                                                            size="sm"
-                                                                            className="h-8 rounded-lg text-xs"
-                                                                            onClick={() => { setEditingEvent(null); setEditingEventValue(null); }}
-                                                                        >
-                                                                            Cancel
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="sm"
-                                                                            className="h-8 rounded-lg text-xs bg-[#25D366] hover:bg-[#1da851] text-white"
-                                                                            disabled={savingMappings || !editingEventValue}
-                                                                            onClick={() => {
-                                                                                if (editingEventValue === "none") {
-                                                                                    // Clear/unmap the template
-                                                                                    handleSaveEventMapping(eventKey, null, null);
-                                                                                } else {
-                                                                                    const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
-                                                                                    if (tpl) handleSaveEventMapping(eventKey, tpl.wid, tpl.temp_name);
-                                                                                }
-                                                                            }}
-                                                                            data-testid={`save-event-${eventKey}`}
-                                                                        >
-                                                                            {savingMappings ? "Saving..." : "Save"}
-                                                                        </Button>
-                                                                    </div>
-                                                                </>
-                                                            )}
-
-                                                            {/* Row 3: Toggle + Edit (always visible when not editing) */}
-                                                            {!isEditing && (
-                                                                <div className="flex items-center justify-between mt-1">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <Switch
-                                                                            checked={isSaved && isEnabled}
-                                                                            disabled={!isSaved}
-                                                                            onCheckedChange={() => handleToggleEventMapping(eventKey)}
-                                                                            data-testid={`toggle-event-${eventKey}`}
-                                                                        />
-                                                                        <span className="text-xs text-[#52525B]">Send on event</span>
-                                                                    </div>
+                                                            {/* Action Buttons */}
+                                                            <div className="flex gap-2">
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => {
+                                                                        setConfiguringEvent(eventKey);
+                                                                        setEditingEventValue(mapped?.template_id?.toString() || "");
+                                                                        setShowAutomationConfigModal(true);
+                                                                    }}
+                                                                    className="flex-1 h-9"
+                                                                    data-testid={`configure-event-${eventKey}`}
+                                                                >
+                                                                    <Settings className="w-4 h-4 mr-1" />
+                                                                    {isSaved ? "Edit" : "Configure"}
+                                                                </Button>
+                                                                {isSaved && (
                                                                     <Button
                                                                         variant="outline"
                                                                         size="sm"
-                                                                        className="h-8 rounded-lg text-xs"
                                                                         onClick={() => {
-                                                                            setEditingEvent(eventKey);
-                                                                            setEditingEventValue(mapped?.template_id?.toString() || "");
+                                                                            const tpl = authkeyTemplates.find(t => t.wid === mapped.template_id);
+                                                                            if (tpl) {
+                                                                                setMappingTemplate(tpl);
+                                                                                setVariableMappings(templateVariableMappings[tpl.wid] || {});
+                                                                                setShowVariableMappingModal(true);
+                                                                            }
                                                                         }}
-                                                                        data-testid={`edit-event-${eventKey}`}
+                                                                        className="h-9"
+                                                                        data-testid={`variables-event-${eventKey}`}
                                                                     >
-                                                                        <Edit2 className="w-3 h-3 mr-1" /> Edit
+                                                                        <Layers className="w-4 h-4" />
                                                                     </Button>
-                                                                </div>
-                                                            )}
+                                                                )}
+                                                            </div>
                                                         </CardContent>
                                                     </Card>
                                                 );
@@ -6069,6 +6109,106 @@ const WhatsAppAutomationPage = () => {
                             </>
                         )}
                     </TabsContent>
+
+                    {/* Automation Configuration Modal */}
+                    <Dialog open={showAutomationConfigModal} onOpenChange={setShowAutomationConfigModal}>
+                        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Configure {eventLabels[configuringEvent] || configuringEvent}</DialogTitle>
+                                <DialogDescription>
+                                    {eventDescriptions[configuringEvent] || "Select a WhatsApp template to send when this event occurs"}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4 py-2">
+                                {/* Template Selection */}
+                                <div>
+                                    <Label className="text-sm font-medium mb-2 block">WhatsApp Template</Label>
+                                    <Select
+                                        value={editingEventValue || ""}
+                                        onValueChange={(val) => setEditingEventValue(val)}
+                                    >
+                                        <SelectTrigger className="h-10 rounded-xl" data-testid="modal-select-template">
+                                            <SelectValue placeholder="Select a template" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">
+                                                <span className="text-gray-500">None (Remove template)</span>
+                                            </SelectItem>
+                                            {authkeyTemplates
+                                                .filter(tpl => {
+                                                    if (configuringEvent === "send_bill") return true;
+                                                    const eventPrefix = (configuringEvent || "").substring(0, 3).toLowerCase();
+                                                    const templatePrefix = (tpl.temp_name || "").substring(0, 3).toLowerCase();
+                                                    return templatePrefix === eventPrefix;
+                                                })
+                                                .map(tpl => (
+                                                    <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
+                                                        {tpl.temp_name}
+                                                    </SelectItem>
+                                                ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {/* Template Preview */}
+                                {editingEventValue && editingEventValue !== "none" && (
+                                    <div className="rounded-lg border border-gray-200 overflow-hidden">
+                                        <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+                                            <span className="text-xs font-medium text-gray-600">Template Preview</span>
+                                        </div>
+                                        <div className="p-3 bg-[#E5DDD5]">
+                                            <div className="bg-white rounded-lg p-3 shadow-sm max-w-[280px]">
+                                                {(() => {
+                                                    const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
+                                                    if (!tpl) return null;
+                                                    const varMappings = templateVariableMappings[tpl.wid] || {};
+                                                    let previewText = tpl.temp_body || "";
+                                                    Object.entries(varMappings).forEach(([key, value]) => {
+                                                        const varInfo = availableVariables.find(v => v.key === value);
+                                                        const displayValue = varInfo ? `[${varInfo.label}]` : `[${value}]`;
+                                                        previewText = previewText.replace(new RegExp(`\\{${key}\\}`, 'g'), displayValue);
+                                                    });
+                                                    return (
+                                                        <p className="text-sm text-gray-800 whitespace-pre-wrap">{previewText}</p>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex justify-end gap-2 pt-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setShowAutomationConfigModal(false);
+                                        setConfiguringEvent(null);
+                                        setEditingEventValue(null);
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    className="bg-[#25D366] hover:bg-[#1da851] text-white"
+                                    disabled={savingMappings || !editingEventValue}
+                                    onClick={() => {
+                                        if (editingEventValue === "none") {
+                                            handleSaveEventMapping(configuringEvent, null, null);
+                                        } else {
+                                            const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
+                                            if (tpl) handleSaveEventMapping(configuringEvent, tpl.wid, tpl.temp_name);
+                                        }
+                                        setShowAutomationConfigModal(false);
+                                        setConfiguringEvent(null);
+                                        setEditingEventValue(null);
+                                    }}
+                                    data-testid="modal-save-template"
+                                >
+                                    {savingMappings ? "Saving..." : "Save Configuration"}
+                                </Button>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
 
                     {/* Settings Tab */}
                     <TabsContent value="settings" className="mt-4">
