@@ -270,6 +270,7 @@ async def save_event_template_map(payload: dict, user: dict = Depends(get_curren
             {"$set": {
                 "template_id": template_id,
                 "template_name": template_name,
+                "is_enabled": m.get("is_enabled", True),
                 "updated_at": now,
             }, "$setOnInsert": {
                 "user_id": user["id"],
@@ -280,6 +281,22 @@ async def save_event_template_map(payload: dict, user: dict = Depends(get_curren
         )
         saved += 1
     return {"message": "Mappings saved", "count": saved}
+
+
+@router.post("/event-template-map/{event_key}/toggle")
+async def toggle_event_mapping(event_key: str, user: dict = Depends(get_current_user)):
+    """Toggle is_enabled for an event mapping."""
+    doc = await db.whatsapp_event_template_map.find_one(
+        {"user_id": user["id"], "event_key": event_key}, {"_id": 0}
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Mapping not found")
+    new_val = not doc.get("is_enabled", True)
+    await db.whatsapp_event_template_map.update_one(
+        {"user_id": user["id"], "event_key": event_key},
+        {"$set": {"is_enabled": new_val, "updated_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    return {"event_key": event_key, "is_enabled": new_val}
 
 
 @router.get("/event-template-map")
