@@ -7391,6 +7391,11 @@ const WhatsAppAutomationPage = ({ defaultTab = "settings" }) => {
     );
 };
 
+// ============ TEMPLATES PAGE (top-level nav) ============
+const TemplatesPage = () => {
+    return <WhatsAppAutomationPage defaultTab="templates" />;
+};
+
 // ============ PUBLIC CUSTOMER REGISTRATION ============
 
 const CustomerRegistrationPage = () => {
