@@ -5758,6 +5758,77 @@ const WhatsAppAutomationPage = () => {
         }
     };
 
+    // Custom template functions
+    const fetchCustomTemplates = async () => {
+        try {
+            const res = await api.get("/whatsapp/custom-templates");
+            setCustomTemplates(res.data.templates || []);
+        } catch (err) {
+            console.error("Failed to fetch custom templates:", err);
+        }
+    };
+
+    const handleSaveCustomTemplate = async () => {
+        if (!newTemplate.template_name.trim() || !newTemplate.body.trim()) {
+            toast.error("Template name and body are required");
+            return;
+        }
+        setSavingTemplate(true);
+        try {
+            if (editingCustomTemplate) {
+                await api.put(`/whatsapp/custom-templates/${editingCustomTemplate.id}`, newTemplate);
+                toast.success("Template updated!");
+            } else {
+                await api.post("/whatsapp/custom-templates", newTemplate);
+                toast.success("Template created!");
+            }
+            setShowAddTemplate(false);
+            setEditingCustomTemplate(null);
+            setNewTemplate({ template_name: "", category: "utility", language: "en", header_type: "none", header_content: "", body: "", footer: "", buttons: [], media_url: "" });
+            fetchCustomTemplates();
+        } catch (err) {
+            toast.error("Failed to save template");
+        } finally {
+            setSavingTemplate(false);
+        }
+    };
+
+    const handleDeleteCustomTemplate = async (templateId) => {
+        try {
+            await api.delete(`/whatsapp/custom-templates/${templateId}`);
+            toast.success("Template deleted");
+            fetchCustomTemplates();
+        } catch (err) {
+            toast.error("Failed to delete template");
+        }
+    };
+
+    const handleSubmitCustomTemplate = async (templateId) => {
+        try {
+            await api.put(`/whatsapp/custom-templates/${templateId}/submit`);
+            toast.success("Template submitted for approval");
+            fetchCustomTemplates();
+        } catch (err) {
+            toast.error("Failed to submit template");
+        }
+    };
+
+    const openEditCustomTemplate = (template) => {
+        setEditingCustomTemplate(template);
+        setNewTemplate({
+            template_name: template.template_name,
+            category: template.category,
+            language: template.language,
+            header_type: template.header_type || "none",
+            header_content: template.header_content || "",
+            body: template.body,
+            footer: template.footer || "",
+            buttons: template.buttons || [],
+            media_url: template.media_url || ""
+        });
+        setShowAddTemplate(true);
+    };
+
     const handleSaveTemplate = async () => {
         try {
             if (editingTemplate) {
