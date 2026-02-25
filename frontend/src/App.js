@@ -930,18 +930,47 @@ const CustomersPage = () => {
         e.stopPropagation(); // Prevent navigation to detail page
         setEditingCustomer(customer);
         setEditData({
+            // Basic Information
             name: customer.name,
             phone: customer.phone,
             country_code: customer.country_code || "+91",
             email: customer.email || "",
+            gender: customer.gender || "",
             dob: customer.dob || "",
             anniversary: customer.anniversary || "",
+            preferred_language: customer.preferred_language || "",
             customer_type: customer.customer_type || "normal",
+            segment_tags: customer.segment_tags || [],
+            // Contact & Marketing Permissions
+            whatsapp_opt_in: customer.whatsapp_opt_in || false,
+            promo_whatsapp_allowed: customer.promo_whatsapp_allowed !== false,
+            promo_sms_allowed: customer.promo_sms_allowed !== false,
+            email_marketing_allowed: customer.email_marketing_allowed !== false,
+            call_allowed: customer.call_allowed !== false,
+            is_blocked: customer.is_blocked || false,
+            // Loyalty Information
+            referral_code: customer.referral_code || "",
+            referred_by: customer.referred_by || "",
+            membership_id: customer.membership_id || "",
+            membership_expiry: customer.membership_expiry || "",
+            // Behavior & Preferences
+            favorite_category: customer.favorite_category || "",
+            preferred_payment_mode: customer.preferred_payment_mode || "",
+            // Corporate Information
             gst_name: customer.gst_name || "",
             gst_number: customer.gst_number || "",
+            // Address
             address: customer.address || "",
             city: customer.city || "",
             pincode: customer.pincode || "",
+            // Preferences
+            allergies: customer.allergies || [],
+            favorites: customer.favorites || [],
+            // Custom Fields
+            custom_field_1: customer.custom_field_1 || "",
+            custom_field_2: customer.custom_field_2 || "",
+            custom_field_3: customer.custom_field_3 || "",
+            // Notes
             notes: customer.notes || ""
         });
         setShowEditModal(true);
