@@ -5399,7 +5399,7 @@ const WhatsAppAutomationPage = ({ defaultTab = "settings" }) => {
     const [automationRules, setAutomationRules] = useState([]);
     const [availableEvents, setAvailableEvents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState("settings");
+    const [activeTab, setActiveTab] = useState(defaultTab);
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [savingApiKey, setSavingApiKey] = useState(false);
     const [authkeyTemplates, setAuthkeyTemplates] = useState([]);
