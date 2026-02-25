@@ -43,7 +43,7 @@ Restaurant loyalty and CRM application cloned from https://github.com/Abhi-mygen
 - POS integration
 
 ## App URL
-https://cmv2-test.preview.emergentagent.com
+https://whatsapp-crm-fix-3.preview.emergentagent.com
 
 ## Updates (Feb 25, 2026 - Session 2)
 
