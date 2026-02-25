@@ -5229,6 +5229,8 @@ const WhatsAppAutomationPage = () => {
                                                                             <SelectValue placeholder="Select template" />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
+                                                                            {/* None option to clear/unmap template */}
+                                                                            <SelectItem value="none">None</SelectItem>
                                                                             {/* Filter templates: send_bill shows all, others match first 3 letters of event KEY */}
                                                                             {authkeyTemplates
                                                                                 .filter(tpl => {
@@ -5260,8 +5262,13 @@ const WhatsAppAutomationPage = () => {
                                                                             className="h-8 rounded-lg text-xs bg-[#25D366] hover:bg-[#1da851] text-white"
                                                                             disabled={savingMappings || !editingEventValue}
                                                                             onClick={() => {
-                                                                                const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
-                                                                                if (tpl) handleSaveEventMapping(eventKey, tpl.wid, tpl.temp_name);
+                                                                                if (editingEventValue === "none") {
+                                                                                    // Clear/unmap the template
+                                                                                    handleSaveEventMapping(eventKey, null, null);
+                                                                                } else {
+                                                                                    const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
+                                                                                    if (tpl) handleSaveEventMapping(eventKey, tpl.wid, tpl.temp_name);
+                                                                                }
                                                                             }}
                                                                             data-testid={`save-event-${eventKey}`}
                                                                         >
