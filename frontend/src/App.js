@@ -5063,7 +5063,7 @@ const WhatsAppAutomationPage = () => {
                             className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
                             data-testid="templates-tab"
                         >
-                            Templates ({templates.length})
+                            Templates ({authkeyTemplates.length || templates.length})
                         </TabsTrigger>
                         <TabsTrigger 
                             value="automation" 
