@@ -4750,6 +4750,13 @@ const WhatsAppAutomationPage = () => {
         delay_minutes: 0
     });
 
+    // Variable mapping state
+    const [showVariableMappingModal, setShowVariableMappingModal] = useState(false);
+    const [mappingTemplate, setMappingTemplate] = useState(null);
+    const [variableMappings, setVariableMappings] = useState({});
+    const [templateVariableMappings, setTemplateVariableMappings] = useState({});
+    const [savingVariableMapping, setSavingVariableMapping] = useState(false);
+
     // Available template variables
     const availableVariables = [
         { key: "customer_name", label: "Customer Name", example: "John" },
