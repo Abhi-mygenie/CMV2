@@ -6281,12 +6281,12 @@ const WhatsAppAutomationPage = () => {
                                             )}
                                             
                                             {/* Authkey Templates divider */}
-                                            {filteredCustom.length > 0 && filteredAuthkey.length > 0 && (
+                                            {displayDrafts.length > 0 && displayTemplates.length > 0 && (
                                                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Authkey Templates</p>
                                             )}
                                             
                                             {/* Template Cards */}
-                                            {filteredCustom.length === 0 && filteredAuthkey.length === 0 ? (
+                                            {displayDrafts.length === 0 && displayTemplates.length === 0 ? (
                                                 <Card className="rounded-xl border-0 shadow-sm">
                                                     <CardContent className="p-8 text-center">
                                                         <p className="text-[#52525B]">No templates match this filter</p>
