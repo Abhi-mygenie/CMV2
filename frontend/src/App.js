@@ -5986,27 +5986,72 @@ const WhatsAppAutomationPage = () => {
                                     </Card>
                                 ) : authkeyTemplates.length > 0 && (
                                     <>
-                                        {/* Header Section */}
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div>
-                                                <p className="text-sm text-[#52525B]">
-                                                    Configure automated WhatsApp messages for customer events
-                                                </p>
-                                                <p className="text-xs text-gray-400 mt-0.5">
-                                                    {authkeyTemplates.length} templates available
-                                                </p>
-                                            </div>
-                                            <Badge className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20">
-                                                {Object.keys(eventMappings).filter(k => eventMappings[k]?.saved).length} Active
-                                            </Badge>
-                                        </div>
-
-                                        {/* Event Cards Grid */}
-                                        <div className="space-y-3" data-testid="automation-events-list">
-                                            {availableEvents.map(eventKey => {
+                                        {/* Filter Tabs for Automation */}
+                                        {(() => {
+                                            const activeCount = Object.keys(eventMappings).filter(k => eventMappings[k]?.saved && eventMappings[k]?.is_enabled !== false).length;
+                                            const notConfiguredCount = availableEvents.length - Object.keys(eventMappings).filter(k => eventMappings[k]?.saved).length;
+                                            
+                                            // Filter events based on filter
+                                            const filteredEvents = availableEvents.filter(eventKey => {
                                                 const mapped = eventMappings[eventKey];
                                                 const isSaved = mapped?.saved;
                                                 const isEnabled = mapped?.is_enabled !== false;
+                                                
+                                                if (automationFilter === "active") return isSaved && isEnabled;
+                                                if (automationFilter === "not_configured") return !isSaved;
+                                                return true; // "all"
+                                            });
+                                            
+                                            return (
+                                                <>
+                                                    <div className="flex gap-2 mb-4 border-b border-gray-200 pb-3">
+                                                        <button
+                                                            onClick={() => setAutomationFilter("all")}
+                                                            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                                automationFilter === "all" 
+                                                                    ? "bg-[#1A1A1A] text-white" 
+                                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                            }`}
+                                                            data-testid="filter-all-events"
+                                                        >
+                                                            All ({availableEvents.length})
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setAutomationFilter("active")}
+                                                            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                                automationFilter === "active" 
+                                                                    ? "bg-[#25D366] text-white" 
+                                                                    : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"
+                                                            }`}
+                                                            data-testid="filter-active-events"
+                                                        >
+                                                            Active ({activeCount})
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setAutomationFilter("not_configured")}
+                                                            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                                                automationFilter === "not_configured" 
+                                                                    ? "bg-gray-500 text-white" 
+                                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                            }`}
+                                                            data-testid="filter-not-configured-events"
+                                                        >
+                                                            Not Configured ({notConfiguredCount})
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Event Cards Grid */}
+                                                    <div className="space-y-3" data-testid="automation-events-list">
+                                                        {filteredEvents.length === 0 ? (
+                                                            <Card className="rounded-xl">
+                                                                <CardContent className="p-8 text-center">
+                                                                    <p className="text-[#52525B]">No events match this filter</p>
+                                                                </CardContent>
+                                                            </Card>
+                                                        ) : filteredEvents.map(eventKey => {
+                                                            const mapped = eventMappings[eventKey];
+                                                            const isSaved = mapped?.saved;
+                                                            const isEnabled = mapped?.is_enabled !== false;
 
                                                 return (
                                                     <Card 
