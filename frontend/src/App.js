@@ -6062,34 +6062,15 @@ const WhatsAppAutomationPage = () => {
                     </CardContent>
                 </Card>
 
-                {/* Tabs */}
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-                    <TabsList className="w-full grid grid-cols-2 h-12 bg-gray-100 rounded-xl p-1">
-                        <TabsTrigger 
-                            value="settings" 
-                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                            data-testid="whatsapp-settings-tab"
-                        >
-                            Settings
-                        </TabsTrigger>
-                        <TabsTrigger 
-                            value="automation" 
-                            className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm"
-                            data-testid="automation-tab"
-                        >
-                            Automation ({automationRules.length})
-                        </TabsTrigger>
-                    </TabsList>
-
-                    {/* Automation Tab - Card-based Layout */}
-                    <TabsContent value="automation" className="mt-4">
+                {/* Automation Content */}
+                <div className="mt-4">
                         {!whatsappApiKey ? (
                             <Card className="rounded-xl border-0 shadow-sm">
                                 <CardContent className="p-8 text-center">
                                     <KeyRound className="w-12 h-12 text-amber-400 mx-auto mb-3" />
                                     <p className="text-[#52525B]">API Key Required</p>
-                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to map templates to events</p>
-                                    <Button onClick={() => setActiveTab("settings")} variant="outline" className="mt-4">
+                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to use automation</p>
+                                    <Button onClick={() => navigate("/settings")} variant="outline" className="mt-4">
                                         Go to Settings
                                     </Button>
                                 </CardContent>
