@@ -206,11 +206,19 @@ class Customer(BaseModel):
     # Corporate Information
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
+    billing_address: Optional[str] = None
+    credit_limit: Optional[float] = None
+    payment_terms: Optional[str] = None
     
     # Address
     address: Optional[str] = None
+    address_line_2: Optional[str] = None
     city: Optional[str] = None
+    state: Optional[str] = None
     pincode: Optional[str] = None
+    country: Optional[str] = None
+    delivery_instructions: Optional[str] = None
+    map_location: Optional[dict] = None
     
     # Preferences
     allergies: Optional[List[str]] = None
