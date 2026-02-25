@@ -658,23 +658,56 @@ const CustomersPage = () => {
         sort_order: "desc"
     });
     const [newCustomer, setNewCustomer] = useState({ 
+        // Basic Information
         name: "", 
         phone: "", 
         country_code: "+91",
         email: "", 
-        notes: "",
+        gender: "",
         dob: "",
         anniversary: "",
+        preferred_language: "",
         customer_type: "normal",
+        segment_tags: [],
+        
+        // Contact & Marketing Permissions
+        whatsapp_opt_in: false,
+        promo_whatsapp_allowed: true,
+        promo_sms_allowed: true,
+        email_marketing_allowed: true,
+        call_allowed: true,
+        is_blocked: false,
+        
+        // Loyalty Information
+        referral_code: "",
+        referred_by: "",
+        membership_id: "",
+        membership_expiry: "",
+        
+        // Behavior & Preferences
+        favorite_category: "",
+        preferred_payment_mode: "",
+        
+        // Corporate Information
         gst_name: "",
         gst_number: "",
+        
+        // Address
         address: "",
         city: "",
         pincode: "",
+        
+        // Preferences
         allergies: [],
+        favorites: [],
+        
+        // Custom Fields
         custom_field_1: "",
         custom_field_2: "",
-        custom_field_3: ""
+        custom_field_3: "",
+        
+        // Notes
+        notes: ""
     });
     const [editData, setEditData] = useState({});
     const [submitting, setSubmitting] = useState(false);
