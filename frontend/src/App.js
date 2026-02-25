@@ -920,8 +920,9 @@ const CustomersPage = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
                     <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="customers-title">
-                        Customers
+                        {customerTab === "customers" ? "Customers" : "Segments"}
                     </h1>
+                    {customerTab === "customers" && (
                     <div className="flex gap-2">
                         {/* Sync button only shows when NOT in demo mode AND no customers exist */}
                         {!isDemoMode && !loading && customers.length === 0 && (
