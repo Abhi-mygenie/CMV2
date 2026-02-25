@@ -1759,55 +1759,35 @@ const CustomersPage = () => {
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-blue-50 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-blue-600">
                                             <Phone className="w-4 h-4" /> Contact Preferences
+                                            <span className="ml-auto text-[10px] bg-blue-100 text-blue-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                         </span>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-1">
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                                <Label className="text-sm">WhatsApp Opt-in</Label>
-                                                <Switch
-                                                    checked={newCustomer.whatsapp_opt_in}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, whatsapp_opt_in: checked})}
-                                                    data-testid="whatsapp-opt-in"
-                                                />
+                                        <div className="relative">
+                                            {/* Coming Soon Overlay */}
+                                            <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center rounded-xl">
+                                                <div className="text-center p-6">
+                                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                        <Rocket className="w-6 h-6 text-blue-500" />
+                                                    </div>
+                                                    <p className="font-semibold text-gray-800">Coming Soon</p>
+                                                    <p className="text-xs text-gray-500 mt-1">This feature is being built.<br/>Check back soon!</p>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                                <Label className="text-sm">Promo WhatsApp Allowed</Label>
-                                                <Switch
-                                                    checked={newCustomer.promo_whatsapp_allowed}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, promo_whatsapp_allowed: checked})}
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                                <Label className="text-sm">Promo SMS Allowed</Label>
-                                                <Switch
-                                                    checked={newCustomer.promo_sms_allowed}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, promo_sms_allowed: checked})}
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                                <Label className="text-sm">Email Marketing Allowed</Label>
-                                                <Switch
-                                                    checked={newCustomer.email_marketing_allowed}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, email_marketing_allowed: checked})}
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                                                <Label className="text-sm">Call Allowed</Label>
-                                                <Switch
-                                                    checked={newCustomer.call_allowed}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, call_allowed: checked})}
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
-                                                <Label className="text-sm text-red-600 flex items-center gap-2">
-                                                    <AlertTriangle className="w-4 h-4" /> Block Customer
-                                                </Label>
-                                                <Switch
-                                                    checked={newCustomer.is_blocked}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, is_blocked: checked})}
-                                                    data-testid="block-customer"
-                                                />
+                                            {/* Actual content (blurred behind) */}
+                                            <div className="space-y-3 opacity-40 pointer-events-none">
+                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                    <Label className="text-sm">WhatsApp Opt-in</Label>
+                                                    <Switch checked={false} disabled />
+                                                </div>
+                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                    <Label className="text-sm">Promo WhatsApp Allowed</Label>
+                                                    <Switch checked={true} disabled />
+                                                </div>
+                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                    <Label className="text-sm">Promo SMS Allowed</Label>
+                                                    <Switch checked={true} disabled />
+                                                </div>
                                             </div>
                                         </div>
                                     </AccordionContent>
