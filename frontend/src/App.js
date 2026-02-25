@@ -3510,55 +3510,6 @@ const SegmentsPage = () => {
             fetchTemplates();
         }
     }, [showSendMessage]);
-        { 
-            id: "welcome", 
-            name: "Welcome Message", 
-            message: "Hi {{name}}! Welcome to our loyalty program. You've earned {{points}} points! Use code {{coupon_code}} for {{discount}}% off on your next visit.",
-            variables: ["coupon_code", "discount"],
-            mediaType: "image",
-            mediaUrl: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"
-        },
-        { 
-            id: "birthday", 
-            name: "Birthday Offer", 
-            message: "Happy Birthday {{name}}! 🎂 Get {{discount}}% off + bonus {{bonus_points}} points! Valid till {{valid_date}}. Use code: {{coupon_code}}",
-            variables: ["discount", "bonus_points", "valid_date", "coupon_code"],
-            mediaType: "image",
-            mediaUrl: "https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=400&h=300&fit=crop"
-        },
-        { 
-            id: "winback", 
-            name: "Win-back Campaign", 
-            message: "We miss you {{name}}! It's been a while since your last visit. Come back and get {{bonus_points}} bonus points + {{discount}}% off! Offer valid for {{valid_days}} days.",
-            variables: ["bonus_points", "discount", "valid_days"],
-            mediaType: "image",
-            mediaUrl: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop"
-        },
-        { 
-            id: "promo", 
-            name: "Promotional Offer", 
-            message: "Special offer for you {{name}}! {{offer_title}} - Get {{discount}}% off this {{offer_period}}! Min order: ₹{{min_order}}. Code: {{coupon_code}}",
-            variables: ["offer_title", "discount", "offer_period", "min_order", "coupon_code"],
-            mediaType: "image",
-            mediaUrl: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&h=300&fit=crop"
-        },
-        { 
-            id: "points_expiry", 
-            name: "Points Expiry Reminder", 
-            message: "Hi {{name}}, your {{expiring_points}} points worth ₹{{points_value}} are expiring on {{expiry_date}}! Visit us soon to redeem them.",
-            variables: ["expiring_points", "points_value", "expiry_date"],
-            mediaType: null,
-            mediaUrl: null
-        },
-        { 
-            id: "new_dish", 
-            name: "New Menu Launch", 
-            message: "Hey {{name}}! 🍽️ We've launched {{dish_name}}! Be among the first to try it. Special launch price: ₹{{price}}. Available from {{launch_date}}.",
-            variables: ["dish_name", "price", "launch_date"],
-            mediaType: "video",
-            mediaUrl: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4"
-        }
-    ];
 
     // Get current selected template
     const currentTemplate = templates.find(t => t.id === messageTemplate);
