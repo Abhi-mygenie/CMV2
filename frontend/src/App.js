@@ -952,6 +952,10 @@ const CustomersPage = () => {
             avg_party_size: "", diet_preference: "", spice_level: "", cuisine_preference: "",
             // Special Occasions
             kids_birthday: [], spouse_name: "", festival_preference: [], special_dates: [],
+            // Feedback & Flags
+            last_rating: "", nps_score: "", complaint_flag: false, vip_flag: false, blacklist_flag: false,
+            // AI/Advanced
+            predicted_next_visit: "", churn_risk_score: "", recommended_offer_type: "", price_sensitivity_score: "",
             // Custom Fields
             custom_field_1: "", custom_field_2: "", custom_field_3: "",
             // Notes
