@@ -302,6 +302,19 @@ async def create_customer(customer_data: CustomerCreate, user: dict = Depends(ge
         "festival_preference": customer_data.festival_preference or [],
         "special_dates": customer_data.special_dates or [],
         
+        # Feedback & Flags
+        "last_rating": customer_data.last_rating,
+        "nps_score": customer_data.nps_score,
+        "complaint_flag": customer_data.complaint_flag,
+        "vip_flag": customer_data.vip_flag,
+        "blacklist_flag": customer_data.blacklist_flag,
+        
+        # AI/Advanced
+        "predicted_next_visit": customer_data.predicted_next_visit,
+        "churn_risk_score": customer_data.churn_risk_score,
+        "recommended_offer_type": customer_data.recommended_offer_type,
+        "price_sensitivity_score": customer_data.price_sensitivity_score,
+        
         # Custom Fields
         "custom_field_1": customer_data.custom_field_1,
         "custom_field_2": customer_data.custom_field_2,
