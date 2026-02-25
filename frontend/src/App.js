@@ -691,11 +691,19 @@ const CustomersPage = () => {
         // Corporate Information
         gst_name: "",
         gst_number: "",
+        billing_address: "",
+        credit_limit: "",
+        payment_terms: "",
         
         // Address
         address: "",
+        address_line_2: "",
         city: "",
+        state: "",
         pincode: "",
+        country: "",
+        delivery_instructions: "",
+        map_location: null,
         
         // Preferences
         allergies: [],
