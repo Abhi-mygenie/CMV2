@@ -4906,7 +4906,7 @@ const SettingsPage = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <Label className="form-label">POS ID</Label>
-                                    <Input value={user?.id?.split("_")?.[1] || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-id" />
+                                    <Input value={user?.pos_id || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-id" />
                                 </div>
                                 <div>
                                     <Label className="form-label">POS Name</Label>
