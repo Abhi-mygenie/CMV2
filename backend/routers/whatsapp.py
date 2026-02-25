@@ -317,6 +317,39 @@ async def delete_event_template_map(event_key: str, user: dict = Depends(get_cur
         raise HTTPException(status_code=404, detail="Event mapping not found")
     return {"message": "Template unmapped successfully", "event_key": event_key}
 
+@router.get("/template-variable-map")
+async def get_template_variable_mappings(user: dict = Depends(get_current_user)):
+    """Get all template variable mappings for the current user."""
+    docs = await db.whatsapp_template_variable_map.find(
+        {"user_id": user["id"]}, {"_id": 0, "user_id": 0}
+    ).to_list(100)
+    return {"mappings": docs}
+
+@router.put("/template-variable-map/{template_id}")
+async def save_template_variable_mapping(
+    template_id: str,
+    data: dict,
+    user: dict = Depends(get_current_user)
+):
+    """Save variable mappings for a template."""
+    now = datetime.now(timezone.utc).isoformat()
+    
+    # Filter out "none" values
+    clean_mappings = {k: v for k, v in (data.get("mappings") or {}).items() if v and v != "none"}
+    
+    await db.whatsapp_template_variable_map.update_one(
+        {"user_id": user["id"], "template_id": template_id},
+        {"$set": {
+            "user_id": user["id"],
+            "template_id": template_id,
+            "template_name": data.get("template_name", ""),
+            "mappings": clean_mappings,
+            "updated_at": now
+        }},
+        upsert=True
+    )
+    return {"message": "Variable mappings saved", "template_id": template_id, "mappings": clean_mappings}
+
 @router.post("/automation/{rule_id}/toggle")
 async def toggle_automation_rule(rule_id: str, user: dict = Depends(get_current_user)):
     rule = await db.automation_rules.find_one({"id": rule_id, "user_id": user["id"]})
