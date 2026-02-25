@@ -4786,7 +4786,7 @@ const WhatsAppAutomationPage = () => {
             ]);
             setTemplates(templatesRes.data);
             setAutomationRules(rulesRes.data);
-            setAvailableEvents(eventsRes.data);
+            setAvailableEvents(eventsRes.data.events || []);
         } catch (err) {
             toast.error("Failed to load WhatsApp settings");
         } finally {
