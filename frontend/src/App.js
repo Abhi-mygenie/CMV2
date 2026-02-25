@@ -3898,23 +3898,6 @@ const SegmentsPage = () => {
                             </DialogHeader>
 
                             <div className="space-y-4">
-                                {/* Campaign Dropdown */}
-                                <div>
-                                    <Label className="text-sm font-medium">Choose Campaign</Label>
-                                    <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-                                        <SelectTrigger className="h-11 rounded-xl mt-1" data-testid="campaign-select">
-                                            <SelectValue placeholder="Select a campaign..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {campaigns.map(campaign => (
-                                                <SelectItem key={campaign.id} value={campaign.id}>
-                                                    {campaign.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
                                 {/* Template Dropdown */}
                                 <div>
                                     <Label className="text-sm font-medium">Choose Template</Label>
