@@ -4720,6 +4720,8 @@ const WhatsAppAutomationPage = () => {
     const [availableEvents, setAvailableEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("templates");
+    const [whatsappApiKey, setWhatsappApiKey] = useState("");
+    const [savingApiKey, setSavingApiKey] = useState(false);
     
     // Template form state
     const [showTemplateModal, setShowTemplateModal] = useState(false);
