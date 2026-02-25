@@ -4891,17 +4891,27 @@ const SettingsPage = () => {
                             </div>
                             <div>
                                 <p className="font-medium text-[#1A1A1A]">Profile</p>
-                                <p className="text-xs text-[#52525B] mt-1">Manage your restaurant details</p>
+                                <p className="text-xs text-[#52525B] mt-1">Manage your business details</p>
                             </div>
                         </div>
                         <div className="space-y-3">
                             <div>
+                                <Label className="form-label">Business Name</Label>
+                                <Input value={user?.restaurant_name || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-name" />
+                            </div>
+                            <div>
                                 <Label className="form-label">Email</Label>
                                 <Input value={user?.email || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-email" />
                             </div>
-                            <div>
-                                <Label className="form-label">Restaurant Name</Label>
-                                <Input value={profile.restaurant_name} onChange={(e) => setProfile(p => ({...p, restaurant_name: e.target.value}))} className="h-12 rounded-xl" data-testid="profile-name" />
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <Label className="form-label">POS ID</Label>
+                                    <Input value={user?.id?.match(/pos_(\w+)_/)?.[1] || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-id" />
+                                </div>
+                                <div>
+                                    <Label className="form-label">POS Name</Label>
+                                    <Input value="MyGenie" disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-name" />
+                                </div>
                             </div>
                             <div>
                                 <Label className="form-label">Phone</Label>
@@ -4909,7 +4919,7 @@ const SettingsPage = () => {
                             </div>
                             <div>
                                 <Label className="form-label">Address</Label>
-                                <Input value={profile.address} onChange={(e) => setProfile(p => ({...p, address: e.target.value}))} placeholder="Enter restaurant address" className="h-12 rounded-xl" data-testid="profile-address" />
+                                <Input value={profile.address} onChange={(e) => setProfile(p => ({...p, address: e.target.value}))} placeholder="Enter business address" className="h-12 rounded-xl" data-testid="profile-address" />
                             </div>
                         </div>
                         <Button onClick={handleSaveProfile} disabled={savingProfile} className="w-full h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A] text-white" data-testid="save-profile-btn">
