@@ -4193,7 +4193,7 @@ const SegmentsPage = () => {
                                         </SelectContent>
                                     </Select>
                                     {templates.length > 0 && (
-                                        <p className="text-xs text-gray-500 mt-1">{templates.length} templates available from WhatsApp API</p>
+                                        <p className="text-xs text-gray-500 mt-1">{templates.filter(t => isSegmentTemplateFullyMapped(t)).length} of {templates.length} templates ready to use</p>
                                     )}
                                 </div>
 
