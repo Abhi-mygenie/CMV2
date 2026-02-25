@@ -6292,7 +6292,7 @@ const WhatsAppAutomationPage = () => {
                                                         <p className="text-[#52525B]">No templates match this filter</p>
                                                     </CardContent>
                                                 </Card>
-                                            ) : filteredAuthkey.map(tpl => {
+                                            ) : displayTemplates.map(tpl => {
                                                 const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
                                                 const hasMappings = templateVariableMappings[tpl.wid] && Object.keys(templateVariableMappings[tpl.wid]).length > 0;
                                                 return (
