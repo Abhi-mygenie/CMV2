@@ -4781,14 +4781,16 @@ const WhatsAppAutomationPage = () => {
 
     const fetchData = async () => {
         try {
-            const [templatesRes, rulesRes, eventsRes] = await Promise.all([
+            const [templatesRes, rulesRes, eventsRes, apiKeyRes] = await Promise.all([
                 api.get("/whatsapp/templates"),
                 api.get("/whatsapp/automation"),
-                api.get("/whatsapp/automation/events")
+                api.get("/whatsapp/automation/events"),
+                api.get("/whatsapp/api-key")
             ]);
             setTemplates(templatesRes.data);
             setAutomationRules(rulesRes.data);
             setAvailableEvents(eventsRes.data.events || []);
+            setWhatsappApiKey(apiKeyRes.data.authkey_api_key || "");
         } catch (err) {
             toast.error("Failed to load WhatsApp settings");
         } finally {
