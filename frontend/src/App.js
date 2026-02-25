@@ -3549,16 +3549,22 @@ const SegmentsPage = () => {
         return preview;
     };
 
-    // Handle template change - reset variables
+    // Handle template change - reset variables and modes
     const handleTemplateChange = (templateId) => {
         setMessageTemplate(templateId);
         const template = templates.find(t => t.id === templateId);
         if (template?.variables) {
             const initialVars = {};
-            template.variables.forEach(v => { initialVars[v] = ""; });
+            const initialModes = {};
+            template.variables.forEach(v => { 
+                initialVars[v] = ""; 
+                initialModes[v] = "map"; // Default to map mode
+            });
             setTemplateVariables(initialVars);
+            setVariableModes(initialModes);
         } else {
             setTemplateVariables({});
+            setVariableModes({});
         }
     };
 
