@@ -682,6 +682,7 @@ const CustomersPage = () => {
     const [segmentName, setSegmentName] = useState("");
     const [savedSegments, setSavedSegments] = useState([]);
     const [selectedSegment, setSelectedSegment] = useState(null);
+    const [customerTab, setCustomerTab] = useState("customers"); // "customers" or "segments"
 
     const buildQueryString = () => {
         const params = new URLSearchParams();
