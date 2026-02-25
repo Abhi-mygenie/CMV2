@@ -3921,6 +3921,277 @@ const SegmentsPage = () => {
                                     </div>
                                 )}
 
+                                {/* Scheduling Options */}
+                                <div className="space-y-4 border-t pt-4">
+                                    <Label className="text-sm font-medium flex items-center gap-2">
+                                        <Clock className="w-4 h-4" />
+                                        When to Send
+                                    </Label>
+                                    
+                                    {/* Send Option Radio Buttons */}
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors" data-testid="send-now-option">
+                                            <input
+                                                type="radio"
+                                                name="sendOption"
+                                                value="now"
+                                                checked={sendOption === "now"}
+                                                onChange={(e) => setSendOption(e.target.value)}
+                                                className="w-4 h-4 text-[#25D366] focus:ring-[#25D366]"
+                                            />
+                                            <div>
+                                                <p className="font-medium text-sm">Send Now</p>
+                                                <p className="text-xs text-gray-500">Send immediately (one-time)</p>
+                                            </div>
+                                        </label>
+                                        
+                                        <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors" data-testid="schedule-option">
+                                            <input
+                                                type="radio"
+                                                name="sendOption"
+                                                value="scheduled"
+                                                checked={sendOption === "scheduled"}
+                                                onChange={(e) => setSendOption(e.target.value)}
+                                                className="w-4 h-4 text-[#25D366] focus:ring-[#25D366]"
+                                            />
+                                            <div>
+                                                <p className="font-medium text-sm">Schedule for Later</p>
+                                                <p className="text-xs text-gray-500">Send on a specific date & time</p>
+                                            </div>
+                                        </label>
+                                        
+                                        <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors" data-testid="recurring-option">
+                                            <input
+                                                type="radio"
+                                                name="sendOption"
+                                                value="recurring"
+                                                checked={sendOption === "recurring"}
+                                                onChange={(e) => setSendOption(e.target.value)}
+                                                className="w-4 h-4 text-[#25D366] focus:ring-[#25D366]"
+                                            />
+                                            <div>
+                                                <p className="font-medium text-sm">Recurring</p>
+                                                <p className="text-xs text-gray-500">Send daily, weekly, or monthly</p>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    {/* Scheduled Date/Time Picker */}
+                                    {sendOption === "scheduled" && (
+                                        <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <Label className="text-xs text-gray-600 flex items-center gap-1">
+                                                        <Calendar className="w-3 h-3" /> Date
+                                                    </Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={scheduledDate}
+                                                        onChange={(e) => setScheduledDate(e.target.value)}
+                                                        min={new Date().toISOString().split('T')[0]}
+                                                        className="h-10 rounded-lg mt-1"
+                                                        data-testid="scheduled-date"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-xs text-gray-600 flex items-center gap-1">
+                                                        <Clock className="w-3 h-3" /> Time
+                                                    </Label>
+                                                    <Input
+                                                        type="time"
+                                                        value={scheduledTime}
+                                                        onChange={(e) => setScheduledTime(e.target.value)}
+                                                        className="h-10 rounded-lg mt-1"
+                                                        data-testid="scheduled-time"
+                                                    />
+                                                </div>
+                                            </div>
+                                            {scheduledDate && scheduledTime && (
+                                                <p className="text-xs text-[#25D366] font-medium">
+                                                    📅 Scheduled for: {new Date(`${scheduledDate}T${scheduledTime}`).toLocaleString()}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Recurring Options */}
+                                    {sendOption === "recurring" && (
+                                        <div className="bg-gray-50 rounded-xl p-4 space-y-4">
+                                            {/* Frequency Selection */}
+                                            <div>
+                                                <Label className="text-xs text-gray-600 mb-2 block">Frequency</Label>
+                                                <div className="flex gap-2">
+                                                    {[
+                                                        { value: "daily", label: "Daily" },
+                                                        { value: "weekly", label: "Weekly" },
+                                                        { value: "monthly", label: "Monthly" }
+                                                    ].map(freq => (
+                                                        <button
+                                                            key={freq.value}
+                                                            type="button"
+                                                            onClick={() => setRecurringFrequency(freq.value)}
+                                                            className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                                                                recurringFrequency === freq.value
+                                                                    ? "bg-[#25D366] text-white"
+                                                                    : "bg-white border hover:bg-gray-100"
+                                                            }`}
+                                                            data-testid={`freq-${freq.value}`}
+                                                        >
+                                                            {freq.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            {/* Weekly Day Selection */}
+                                            {recurringFrequency === "weekly" && (
+                                                <div>
+                                                    <Label className="text-xs text-gray-600 mb-2 block">Select Days</Label>
+                                                    <div className="flex gap-1 flex-wrap">
+                                                        {[
+                                                            { value: "mon", label: "Mon" },
+                                                            { value: "tue", label: "Tue" },
+                                                            { value: "wed", label: "Wed" },
+                                                            { value: "thu", label: "Thu" },
+                                                            { value: "fri", label: "Fri" },
+                                                            { value: "sat", label: "Sat" },
+                                                            { value: "sun", label: "Sun" }
+                                                        ].map(day => (
+                                                            <button
+                                                                key={day.value}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setRecurringDays(prev => 
+                                                                        prev.includes(day.value)
+                                                                            ? prev.filter(d => d !== day.value)
+                                                                            : [...prev, day.value]
+                                                                    );
+                                                                }}
+                                                                className={`w-10 h-10 rounded-full text-xs font-medium transition-colors ${
+                                                                    recurringDays.includes(day.value)
+                                                                        ? "bg-[#25D366] text-white"
+                                                                        : "bg-white border hover:bg-gray-100"
+                                                                }`}
+                                                                data-testid={`day-${day.value}`}
+                                                            >
+                                                                {day.label}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Monthly Day Selection */}
+                                            {recurringFrequency === "monthly" && (
+                                                <div>
+                                                    <Label className="text-xs text-gray-600 mb-1">Day of Month</Label>
+                                                    <Select value={recurringDayOfMonth} onValueChange={setRecurringDayOfMonth}>
+                                                        <SelectTrigger className="h-10 rounded-lg" data-testid="day-of-month">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
+                                                                <SelectItem key={day} value={day.toString()}>
+                                                                    {day === 1 ? "1st" : day === 2 ? "2nd" : day === 3 ? "3rd" : `${day}th`} of each month
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            )}
+
+                                            {/* Time Selection */}
+                                            <div>
+                                                <Label className="text-xs text-gray-600 flex items-center gap-1 mb-1">
+                                                    <Clock className="w-3 h-3" /> Send Time
+                                                </Label>
+                                                <Input
+                                                    type="time"
+                                                    value={scheduledTime}
+                                                    onChange={(e) => setScheduledTime(e.target.value)}
+                                                    className="h-10 rounded-lg"
+                                                    data-testid="recurring-time"
+                                                />
+                                            </div>
+
+                                            {/* End Condition */}
+                                            <div>
+                                                <Label className="text-xs text-gray-600 mb-2 block">Ends</Label>
+                                                <div className="space-y-2">
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="endOption"
+                                                            value="never"
+                                                            checked={recurringEndOption === "never"}
+                                                            onChange={(e) => setRecurringEndOption(e.target.value)}
+                                                            className="w-4 h-4 text-[#25D366]"
+                                                        />
+                                                        <span className="text-sm">Never</span>
+                                                    </label>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="endOption"
+                                                            value="date"
+                                                            checked={recurringEndOption === "date"}
+                                                            onChange={(e) => setRecurringEndOption(e.target.value)}
+                                                            className="w-4 h-4 text-[#25D366]"
+                                                        />
+                                                        <span className="text-sm">On date</span>
+                                                        {recurringEndOption === "date" && (
+                                                            <Input
+                                                                type="date"
+                                                                value={recurringEndDate}
+                                                                onChange={(e) => setRecurringEndDate(e.target.value)}
+                                                                min={new Date().toISOString().split('T')[0]}
+                                                                className="h-8 rounded-lg ml-2 w-40"
+                                                                data-testid="end-date"
+                                                            />
+                                                        )}
+                                                    </label>
+                                                    <label className="flex items-center gap-2 cursor-pointer">
+                                                        <input
+                                                            type="radio"
+                                                            name="endOption"
+                                                            value="occurrences"
+                                                            checked={recurringEndOption === "occurrences"}
+                                                            onChange={(e) => setRecurringEndOption(e.target.value)}
+                                                            className="w-4 h-4 text-[#25D366]"
+                                                        />
+                                                        <span className="text-sm">After</span>
+                                                        {recurringEndOption === "occurrences" && (
+                                                            <>
+                                                                <Input
+                                                                    type="number"
+                                                                    value={recurringOccurrences}
+                                                                    onChange={(e) => setRecurringOccurrences(e.target.value)}
+                                                                    min="1"
+                                                                    max="100"
+                                                                    className="h-8 rounded-lg w-16 text-center"
+                                                                    data-testid="occurrences"
+                                                                />
+                                                                <span className="text-sm">occurrences</span>
+                                                            </>
+                                                        )}
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            {/* Summary */}
+                                            <div className="bg-white rounded-lg p-3 border">
+                                                <p className="text-xs text-[#25D366] font-medium">
+                                                    🔄 {recurringFrequency === "daily" && `Every day at ${scheduledTime}`}
+                                                    {recurringFrequency === "weekly" && `Every ${recurringDays.length > 0 ? recurringDays.join(", ") : "..."} at ${scheduledTime}`}
+                                                    {recurringFrequency === "monthly" && `On the ${recurringDayOfMonth}${recurringDayOfMonth === "1" ? "st" : recurringDayOfMonth === "2" ? "nd" : recurringDayOfMonth === "3" ? "rd" : "th"} of each month at ${scheduledTime}`}
+                                                    {recurringEndOption === "date" && recurringEndDate && ` until ${new Date(recurringEndDate).toLocaleDateString()}`}
+                                                    {recurringEndOption === "occurrences" && ` for ${recurringOccurrences} times`}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Complete Template Preview with Media */}
                                 {messageTemplate && (
                                     <div className="rounded-xl border overflow-hidden bg-[#E5DDD5]">
