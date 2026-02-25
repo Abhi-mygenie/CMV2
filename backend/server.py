@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 from datetime import datetime, timezone
@@ -5,10 +6,21 @@ import os
 import logging
 
 from core.database import db, close_db_connection
+from core.scheduler import start_scheduler, stop_scheduler
 from routers import auth, customers, points, wallet, coupons, feedback, whatsapp, pos
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    start_scheduler()
+    yield
+    # Shutdown
+    stop_scheduler()
+    await close_db_connection()
+
 # Create the main app
-app = FastAPI(title="DinePoints - Loyalty & CRM")
+app = FastAPI(title="DinePoints - Loyalty & CRM", lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
