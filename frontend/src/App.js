@@ -5455,6 +5455,76 @@ const WhatsAppAutomationPage = () => {
                     </TabsContent>
                 </Tabs>
 
+                {/* Variable Mapping Modal */}
+                <Dialog open={showVariableMappingModal} onOpenChange={setShowVariableMappingModal}>
+                    <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Map Template Variables</DialogTitle>
+                            <DialogDescription>
+                                Map each placeholder to a database field for {mappingTemplate?.temp_name}
+                            </DialogDescription>
+                        </DialogHeader>
+                        {mappingTemplate && (
+                            <div className="space-y-4">
+                                <div className="bg-gray-50 p-3 rounded-lg">
+                                    <p className="text-xs text-[#52525B] mb-2 font-medium">Template Preview:</p>
+                                    <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap">{mappingTemplate.temp_body}</p>
+                                </div>
+                                
+                                <div className="space-y-3">
+                                    <p className="text-sm font-medium text-[#1A1A1A]">Variable Mappings:</p>
+                                    {mappingTemplate.variables?.map(variable => (
+                                        <div key={variable} className="flex items-center gap-3">
+                                            <Badge variant="outline" className="min-w-[50px] justify-center">{variable}</Badge>
+                                            <span className="text-gray-400">→</span>
+                                            <Select
+                                                value={variableMappings[variable] || ""}
+                                                onValueChange={(val) => setVariableMappings(prev => ({
+                                                    ...prev,
+                                                    [variable]: val
+                                                }))}
+                                            >
+                                                <SelectTrigger className="flex-1 h-10 rounded-lg" data-testid={`var-map-${variable}`}>
+                                                    <SelectValue placeholder="Select field" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="none">-- None --</SelectItem>
+                                                    {availableVariables.map(field => (
+                                                        <SelectItem key={field.key} value={field.key}>
+                                                            {field.label} (e.g., {field.example})
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <DialogFooter className="gap-2">
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                            setShowVariableMappingModal(false);
+                                            setMappingTemplate(null);
+                                            setVariableMappings({});
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        onClick={handleSaveVariableMapping}
+                                        disabled={savingVariableMapping}
+                                        className="bg-[#25D366] hover:bg-[#1da851] text-white"
+                                        data-testid="save-variable-mapping-btn"
+                                    >
+                                        {savingVariableMapping ? "Saving..." : "Save Mappings"}
+                                    </Button>
+                                </DialogFooter>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
+
                 {/* Template Modal */}
                 <Dialog open={showTemplateModal} onOpenChange={setShowTemplateModal}>
                     <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
