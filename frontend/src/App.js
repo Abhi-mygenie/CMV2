@@ -1889,6 +1889,8 @@ const CustomersPage = () => {
                                             </ComingSoonOverlay>
                                         </AccordionContent>
                                     </AccordionItem>
+                                )}
+
                                 {/* Source & Journey */}
                                 <AccordionItem value="source" className="border-b-0">
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-amber-50 rounded-xl mb-2">
