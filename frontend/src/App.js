@@ -1580,296 +1580,751 @@ const CustomersPage = () => {
 
             {/* Add Customer Modal */}
             <Dialog open={showAddModal} onOpenChange={(open) => { setShowAddModal(open); if (!open) resetForm(); }}>
-                <DialogContent className="max-w-md mx-4 rounded-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                <DialogContent className="max-w-lg mx-4 rounded-2xl max-h-[90vh] overflow-hidden flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="font-['Montserrat']">Add New Customer</DialogTitle>
                         <DialogDescription>Enter customer details to start their loyalty journey.</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleAddCustomer} className="flex-1 overflow-hidden">
                         <ScrollArea className="h-[calc(90vh-200px)] pr-4">
-                            <div className="space-y-4 py-4">
-                                {/* Basic Info */}
-                                <div>
-                                    <Label htmlFor="name" className="form-label">Name *</Label>
-                                    <Input
-                                        id="name"
-                                        value={newCustomer.name}
-                                        onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
-                                        placeholder="Customer name"
-                                        className="h-12 rounded-xl"
-                                        required
-                                        data-testid="new-customer-name"
-                                    />
-                                </div>
+                            <Accordion type="multiple" defaultValue={["basic"]} className="w-full">
                                 
-                                {/* Phone with Country Code */}
-                                <div>
-                                    <Label htmlFor="phone" className="form-label">Phone *</Label>
-                                    <div className="flex gap-2">
-                                        <Select 
-                                            value={newCustomer.country_code} 
-                                            onValueChange={(v) => setNewCustomer({...newCustomer, country_code: v})}
-                                        >
-                                            <SelectTrigger className="w-28 h-12 rounded-xl" data-testid="country-code-select">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {COUNTRY_CODES.map(cc => (
-                                                    <SelectItem key={cc.code} value={cc.code}>
-                                                        {cc.flag} {cc.code}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <Input
-                                            id="phone"
-                                            type="tel"
-                                            value={newCustomer.phone}
-                                            onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value.replace(/\D/g, '')})}
-                                            placeholder="9876543210"
-                                            className="h-12 rounded-xl flex-1"
-                                            required
-                                            maxLength={10}
-                                            data-testid="new-customer-phone"
-                                        />
-                                    </div>
-                                </div>
+                                {/* Basic Information - Always Expanded */}
+                                <AccordionItem value="basic" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-[#329937]/5 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-[#329937]">
+                                            <User className="w-4 h-4" /> Basic Information
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="name" className="form-label">Name *</Label>
+                                                <Input
+                                                    id="name"
+                                                    value={newCustomer.name}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                                                    placeholder="Customer name"
+                                                    className="h-11 rounded-xl"
+                                                    required
+                                                    data-testid="new-customer-name"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <Label htmlFor="phone" className="form-label">Phone *</Label>
+                                                <div className="flex gap-2">
+                                                    <Select 
+                                                        value={newCustomer.country_code} 
+                                                        onValueChange={(v) => setNewCustomer({...newCustomer, country_code: v})}
+                                                    >
+                                                        <SelectTrigger className="w-24 h-11 rounded-xl" data-testid="country-code-select">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {COUNTRY_CODES.map(cc => (
+                                                                <SelectItem key={cc.code} value={cc.code}>
+                                                                    {cc.flag} {cc.code}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <Input
+                                                        id="phone"
+                                                        type="tel"
+                                                        value={newCustomer.phone}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value.replace(/\D/g, '')})}
+                                                        placeholder="9876543210"
+                                                        className="h-11 rounded-xl flex-1"
+                                                        required
+                                                        maxLength={10}
+                                                        data-testid="new-customer-phone"
+                                                    />
+                                                </div>
+                                            </div>
 
-                                <div>
-                                    <Label htmlFor="email" className="form-label">Email</Label>
-                                    <Input
-                                        id="email"
-                                        type="email"
-                                        value={newCustomer.email}
-                                        onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
-                                        placeholder="customer@email.com"
-                                        className="h-12 rounded-xl"
-                                        data-testid="new-customer-email"
-                                    />
-                                </div>
+                                            <div>
+                                                <Label htmlFor="email" className="form-label">Email</Label>
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    value={newCustomer.email}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                                                    placeholder="customer@email.com"
+                                                    className="h-11 rounded-xl"
+                                                    data-testid="new-customer-email"
+                                                />
+                                            </div>
 
-                                {/* Date Fields */}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <Label htmlFor="dob" className="form-label flex items-center gap-1">
-                                            <Calendar className="w-3.5 h-3.5" /> Date of Birth
-                                        </Label>
-                                        <Input
-                                            id="dob"
-                                            type="date"
-                                            value={newCustomer.dob}
-                                            onChange={(e) => setNewCustomer({...newCustomer, dob: e.target.value})}
-                                            className="h-12 rounded-xl"
-                                            data-testid="new-customer-dob"
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="anniversary" className="form-label flex items-center gap-1">
-                                            <Calendar className="w-3.5 h-3.5" /> Anniversary
-                                        </Label>
-                                        <Input
-                                            id="anniversary"
-                                            type="date"
-                                            value={newCustomer.anniversary}
-                                            onChange={(e) => setNewCustomer({...newCustomer, anniversary: e.target.value})}
-                                            className="h-12 rounded-xl"
-                                            data-testid="new-customer-anniversary"
-                                        />
-                                    </div>
-                                </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <Label className="form-label">Gender</Label>
+                                                    <Select 
+                                                        value={newCustomer.gender} 
+                                                        onValueChange={(v) => setNewCustomer({...newCustomer, gender: v})}
+                                                    >
+                                                        <SelectTrigger className="h-11 rounded-xl" data-testid="new-customer-gender">
+                                                            <SelectValue placeholder="Select..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {GENDER_OPTIONS.map(opt => (
+                                                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Language</Label>
+                                                    <Select 
+                                                        value={newCustomer.preferred_language} 
+                                                        onValueChange={(v) => setNewCustomer({...newCustomer, preferred_language: v})}
+                                                    >
+                                                        <SelectTrigger className="h-11 rounded-xl" data-testid="new-customer-language">
+                                                            <SelectValue placeholder="Select..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {LANGUAGE_OPTIONS.map(opt => (
+                                                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
 
-                                {/* Customer Type */}
-                                <div>
-                                    <Label className="form-label">Customer Type</Label>
-                                    <div className="flex gap-2 mt-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setNewCustomer({...newCustomer, customer_type: "normal", gst_name: "", gst_number: ""})}
-                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
-                                                newCustomer.customer_type === "normal"
-                                                    ? "bg-[#329937] text-white border-[#329937]"
-                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-[#329937]"
-                                            }`}
-                                            data-testid="customer-type-normal"
-                                        >
-                                            <User className="w-4 h-4" /> Normal
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setNewCustomer({...newCustomer, customer_type: "corporate"})}
-                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
-                                                newCustomer.customer_type === "corporate"
-                                                    ? "bg-[#F26B33] text-white border-[#F26B33]"
-                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-[#F26B33]"
-                                            }`}
-                                            data-testid="customer-type-corporate"
-                                        >
-                                            <Building2 className="w-4 h-4" /> Corporate
-                                        </button>
-                                    </div>
-                                </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <Label htmlFor="dob" className="form-label flex items-center gap-1">
+                                                        <Calendar className="w-3.5 h-3.5" /> Date of Birth
+                                                    </Label>
+                                                    <Input
+                                                        id="dob"
+                                                        type="date"
+                                                        value={newCustomer.dob}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, dob: e.target.value})}
+                                                        className="h-11 rounded-xl"
+                                                        data-testid="new-customer-dob"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label htmlFor="anniversary" className="form-label flex items-center gap-1">
+                                                        <Calendar className="w-3.5 h-3.5" /> Anniversary
+                                                    </Label>
+                                                    <Input
+                                                        id="anniversary"
+                                                        type="date"
+                                                        value={newCustomer.anniversary}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, anniversary: e.target.value})}
+                                                        className="h-11 rounded-xl"
+                                                        data-testid="new-customer-anniversary"
+                                                    />
+                                                </div>
+                                            </div>
 
-                                {/* GST Fields (for Corporate) */}
+                                            {/* Customer Type */}
+                                            <div>
+                                                <Label className="form-label">Customer Type</Label>
+                                                <div className="flex gap-2 mt-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setNewCustomer({...newCustomer, customer_type: "normal"})}
+                                                        className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
+                                                            newCustomer.customer_type === "normal"
+                                                                ? "bg-[#329937] text-white border-[#329937]"
+                                                                : "bg-white text-[#52525B] border-gray-200 hover:border-[#329937]"
+                                                        }`}
+                                                        data-testid="customer-type-normal"
+                                                    >
+                                                        <User className="w-4 h-4" /> Normal
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setNewCustomer({...newCustomer, customer_type: "corporate"})}
+                                                        className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
+                                                            newCustomer.customer_type === "corporate"
+                                                                ? "bg-[#F26B33] text-white border-[#F26B33]"
+                                                                : "bg-white text-[#52525B] border-gray-200 hover:border-[#F26B33]"
+                                                        }`}
+                                                        data-testid="customer-type-corporate"
+                                                    >
+                                                        <Building2 className="w-4 h-4" /> Corporate
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* Contact Preferences */}
+                                <AccordionItem value="contact" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-blue-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-blue-600">
+                                            <Phone className="w-4 h-4" /> Contact Preferences
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                <Label className="text-sm">WhatsApp Opt-in</Label>
+                                                <Switch
+                                                    checked={newCustomer.whatsapp_opt_in}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, whatsapp_opt_in: checked})}
+                                                    data-testid="whatsapp-opt-in"
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                <Label className="text-sm">Promo WhatsApp Allowed</Label>
+                                                <Switch
+                                                    checked={newCustomer.promo_whatsapp_allowed}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, promo_whatsapp_allowed: checked})}
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                <Label className="text-sm">Promo SMS Allowed</Label>
+                                                <Switch
+                                                    checked={newCustomer.promo_sms_allowed}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, promo_sms_allowed: checked})}
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                <Label className="text-sm">Email Marketing Allowed</Label>
+                                                <Switch
+                                                    checked={newCustomer.email_marketing_allowed}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, email_marketing_allowed: checked})}
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                                                <Label className="text-sm">Call Allowed</Label>
+                                                <Switch
+                                                    checked={newCustomer.call_allowed}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, call_allowed: checked})}
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                                                <Label className="text-sm text-red-600 flex items-center gap-2">
+                                                    <AlertTriangle className="w-4 h-4" /> Block Customer
+                                                </Label>
+                                                <Switch
+                                                    checked={newCustomer.is_blocked}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, is_blocked: checked})}
+                                                    data-testid="block-customer"
+                                                />
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* Membership */}
+                                <AccordionItem value="membership" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-purple-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-purple-600">
+                                            <Tag className="w-4 h-4" /> Membership
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="form-label">Membership ID</Label>
+                                                <Input
+                                                    value={newCustomer.membership_id}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, membership_id: e.target.value})}
+                                                    placeholder="External membership ID"
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Membership Expiry</Label>
+                                                <Input
+                                                    type="date"
+                                                    value={newCustomer.membership_expiry}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, membership_expiry: e.target.value})}
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* Address */}
+                                <AccordionItem value="address" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-cyan-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-cyan-600">
+                                            <MapPin className="w-4 h-4" /> Address
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="form-label">Address Line 1</Label>
+                                                <Textarea
+                                                    value={newCustomer.address}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, address: e.target.value})}
+                                                    placeholder="House/Flat No., Building, Street..."
+                                                    className="rounded-xl resize-none"
+                                                    rows={2}
+                                                    data-testid="new-customer-address"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Address Line 2</Label>
+                                                <Input
+                                                    value={newCustomer.address_line_2}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, address_line_2: e.target.value})}
+                                                    placeholder="Landmark, Area..."
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <Label className="form-label">City</Label>
+                                                    <Input
+                                                        value={newCustomer.city}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, city: e.target.value})}
+                                                        placeholder="City"
+                                                        className="h-11 rounded-xl"
+                                                        data-testid="new-customer-city"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">State</Label>
+                                                    <Input
+                                                        value={newCustomer.state}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, state: e.target.value})}
+                                                        placeholder="State"
+                                                        className="h-11 rounded-xl"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <Label className="form-label">Pincode</Label>
+                                                    <Input
+                                                        value={newCustomer.pincode}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, pincode: e.target.value.replace(/\D/g, '')})}
+                                                        placeholder="400001"
+                                                        className="h-11 rounded-xl"
+                                                        maxLength={6}
+                                                        data-testid="new-customer-pincode"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Country</Label>
+                                                    <Input
+                                                        value={newCustomer.country}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, country: e.target.value})}
+                                                        placeholder="India"
+                                                        className="h-11 rounded-xl"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Delivery Instructions</Label>
+                                                <Textarea
+                                                    value={newCustomer.delivery_instructions}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, delivery_instructions: e.target.value})}
+                                                    placeholder="Special delivery instructions..."
+                                                    className="rounded-xl resize-none"
+                                                    rows={2}
+                                                />
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* Corporate Info - Only shows if customer_type is corporate */}
                                 {newCustomer.customer_type === "corporate" && (
-                                    <div className="space-y-4 p-4 bg-[#F26B33]/5 rounded-xl border border-[#F26B33]/20">
-                                        <p className="text-xs font-semibold text-[#F26B33] uppercase tracking-wider">GST Details</p>
-                                        <div>
-                                            <Label htmlFor="gst_name" className="form-label">GST Name</Label>
-                                            <Input
-                                                id="gst_name"
-                                                value={newCustomer.gst_name}
-                                                onChange={(e) => setNewCustomer({...newCustomer, gst_name: e.target.value})}
-                                                placeholder="Company/Business name"
-                                                className="h-12 rounded-xl"
-                                                data-testid="new-customer-gst-name"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="gst_number" className="form-label">GST Number</Label>
-                                            <Input
-                                                id="gst_number"
-                                                value={newCustomer.gst_number}
-                                                onChange={(e) => setNewCustomer({...newCustomer, gst_number: e.target.value.toUpperCase()})}
-                                                placeholder="22AAAAA0000A1Z5"
-                                                className="h-12 rounded-xl font-mono"
-                                                maxLength={15}
-                                                data-testid="new-customer-gst-number"
-                                            />
-                                        </div>
-                                    </div>
+                                    <AccordionItem value="corporate" className="border-b-0">
+                                        <AccordionTrigger className="hover:no-underline py-3 px-3 bg-[#F26B33]/10 rounded-xl mb-2">
+                                            <span className="flex items-center gap-2 text-sm font-semibold text-[#F26B33]">
+                                                <Building2 className="w-4 h-4" /> Corporate Info
+                                            </span>
+                                        </AccordionTrigger>
+                                        <AccordionContent className="px-1">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label className="form-label">Company/GST Name</Label>
+                                                    <Input
+                                                        value={newCustomer.gst_name}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, gst_name: e.target.value})}
+                                                        placeholder="Company/Business name"
+                                                        className="h-11 rounded-xl"
+                                                        data-testid="new-customer-gst-name"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">GST Number</Label>
+                                                    <Input
+                                                        value={newCustomer.gst_number}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, gst_number: e.target.value.toUpperCase()})}
+                                                        placeholder="22AAAAA0000A1Z5"
+                                                        className="h-11 rounded-xl font-mono"
+                                                        maxLength={15}
+                                                        data-testid="new-customer-gst-number"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Billing Address</Label>
+                                                    <Textarea
+                                                        value={newCustomer.billing_address}
+                                                        onChange={(e) => setNewCustomer({...newCustomer, billing_address: e.target.value})}
+                                                        placeholder="Billing address if different..."
+                                                        className="rounded-xl resize-none"
+                                                        rows={2}
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <Label className="form-label">Credit Limit (₹)</Label>
+                                                        <Input
+                                                            type="number"
+                                                            value={newCustomer.credit_limit}
+                                                            onChange={(e) => setNewCustomer({...newCustomer, credit_limit: e.target.value})}
+                                                            placeholder="0"
+                                                            className="h-11 rounded-xl"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label className="form-label">Payment Terms</Label>
+                                                        <Select 
+                                                            value={newCustomer.payment_terms} 
+                                                            onValueChange={(v) => setNewCustomer({...newCustomer, payment_terms: v})}
+                                                        >
+                                                            <SelectTrigger className="h-11 rounded-xl">
+                                                                <SelectValue placeholder="Select..." />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {PAYMENT_TERMS_OPTIONS.map(opt => (
+                                                                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
                                 )}
 
-                                {/* Allergies */}
-                                <div>
-                                    <Label className="form-label flex items-center gap-1">
-                                        <AlertTriangle className="w-3.5 h-3.5" /> Allergies
-                                    </Label>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                        {COMMON_ALLERGIES.map((allergy) => (
-                                            <button
-                                                key={allergy}
-                                                type="button"
-                                                onClick={() => toggleAllergy(allergy)}
-                                                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                                                    newCustomer.allergies.includes(allergy)
-                                                        ? "bg-red-500 text-white border-red-500"
-                                                        : "bg-white text-[#52525B] border-gray-200 hover:border-red-300"
-                                                }`}
-                                                data-testid={`allergy-${allergy.toLowerCase()}`}
-                                            >
-                                                {allergy}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Delivery Address Section */}
-                                <div className="space-y-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                                    <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider flex items-center gap-1">
-                                        <MapPin className="w-3.5 h-3.5" /> Delivery Address (Optional)
-                                    </p>
-                                    <div>
-                                        <Label htmlFor="address" className="form-label">Address</Label>
-                                        <Textarea
-                                            id="address"
-                                            value={newCustomer.address}
-                                            onChange={(e) => setNewCustomer({...newCustomer, address: e.target.value})}
-                                            placeholder="House/Flat No., Building, Street..."
-                                            className="rounded-xl resize-none"
-                                            rows={2}
-                                            data-testid="new-customer-address"
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <Label htmlFor="city" className="form-label">City</Label>
-                                            <Input
-                                                id="city"
-                                                value={newCustomer.city}
-                                                onChange={(e) => setNewCustomer({...newCustomer, city: e.target.value})}
-                                                placeholder="City"
-                                                className="h-10 rounded-lg"
-                                                data-testid="new-customer-city"
-                                            />
+                                {/* Source & Journey */}
+                                <AccordionItem value="source" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-amber-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-amber-600">
+                                            <TrendingUp className="w-4 h-4" /> Source & Journey
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="form-label">Lead Source</Label>
+                                                <Select 
+                                                    value={newCustomer.lead_source} 
+                                                    onValueChange={(v) => setNewCustomer({...newCustomer, lead_source: v})}
+                                                >
+                                                    <SelectTrigger className="h-11 rounded-xl">
+                                                        <SelectValue placeholder="How did they find you?" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {LEAD_SOURCE_OPTIONS.map(opt => (
+                                                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Campaign Source</Label>
+                                                <Input
+                                                    value={newCustomer.campaign_source}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, campaign_source: e.target.value})}
+                                                    placeholder="UTM or campaign name"
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Assigned Salesperson</Label>
+                                                <Input
+                                                    value={newCustomer.assigned_salesperson}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, assigned_salesperson: e.target.value})}
+                                                    placeholder="Staff name or ID"
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
                                         </div>
-                                        <div>
-                                            <Label htmlFor="pincode" className="form-label">Pincode</Label>
-                                            <Input
-                                                id="pincode"
-                                                value={newCustomer.pincode}
-                                                onChange={(e) => setNewCustomer({...newCustomer, pincode: e.target.value.replace(/\D/g, '')})}
-                                                placeholder="400001"
-                                                className="h-10 rounded-lg"
-                                                maxLength={6}
-                                                data-testid="new-customer-pincode"
-                                            />
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                                {/* Dining Preferences */}
+                                <AccordionItem value="dining" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-rose-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-rose-600">
+                                            <Home className="w-4 h-4" /> Dining Preferences
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="form-label">Preferred Dining Type</Label>
+                                                <div className="flex gap-2 mt-2">
+                                                    {DINING_TYPE_OPTIONS.map(type => (
+                                                        <button
+                                                            key={type}
+                                                            type="button"
+                                                            onClick={() => setNewCustomer({...newCustomer, preferred_dining_type: type})}
+                                                            className={`flex-1 py-2 px-3 rounded-xl text-xs font-medium border-2 transition-all ${
+                                                                newCustomer.preferred_dining_type === type
+                                                                    ? "bg-rose-500 text-white border-rose-500"
+                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-rose-300"
+                                                            }`}
+                                                        >
+                                                            {type}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Preferred Time Slot</Label>
+                                                <Select 
+                                                    value={newCustomer.preferred_time_slot} 
+                                                    onValueChange={(v) => setNewCustomer({...newCustomer, preferred_time_slot: v})}
+                                                >
+                                                    <SelectTrigger className="h-11 rounded-xl">
+                                                        <SelectValue placeholder="Select time slot..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {TIME_SLOT_OPTIONS.map(opt => (
+                                                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Favorite Table/Section</Label>
+                                                <Input
+                                                    value={newCustomer.favorite_table}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, favorite_table: e.target.value})}
+                                                    placeholder="e.g., Table 5, VIP Section, Outdoor"
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Diet Preference</Label>
+                                                <Select 
+                                                    value={newCustomer.diet_preference} 
+                                                    onValueChange={(v) => setNewCustomer({...newCustomer, diet_preference: v})}
+                                                >
+                                                    <SelectTrigger className="h-11 rounded-xl">
+                                                        <SelectValue placeholder="Select diet..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {DIET_OPTIONS.map(opt => (
+                                                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Spice Level</Label>
+                                                <div className="flex gap-2 mt-2">
+                                                    {SPICE_LEVELS.map(level => (
+                                                        <button
+                                                            key={level.value}
+                                                            type="button"
+                                                            onClick={() => setNewCustomer({...newCustomer, spice_level: level.value})}
+                                                            className={`flex-1 py-2 px-2 rounded-xl text-xs font-medium border-2 transition-all flex flex-col items-center gap-1 ${
+                                                                newCustomer.spice_level === level.value
+                                                                    ? "bg-red-500 text-white border-red-500"
+                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-red-300"
+                                                            }`}
+                                                        >
+                                                            <span>{level.icon}</span>
+                                                            <span className="text-[10px]">{level.label}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Cuisine Preference</Label>
+                                                <Input
+                                                    value={newCustomer.cuisine_preference}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, cuisine_preference: e.target.value})}
+                                                    placeholder="e.g., North Indian, Chinese, Italian"
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label flex items-center gap-1">
+                                                    <AlertTriangle className="w-3.5 h-3.5" /> Allergies
+                                                </Label>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {COMMON_ALLERGIES.map((allergy) => (
+                                                        <button
+                                                            key={allergy}
+                                                            type="button"
+                                                            onClick={() => toggleAllergy(allergy)}
+                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                                                                newCustomer.allergies.includes(allergy)
+                                                                    ? "bg-red-500 text-white border-red-500"
+                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-red-300"
+                                                            }`}
+                                                            data-testid={`allergy-${allergy.toLowerCase()}`}
+                                                        >
+                                                            {allergy}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
+                                    </AccordionContent>
+                                </AccordionItem>
 
-                                {/* Custom Fields - Always show 3 fields */}
-                                <div className="space-y-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Additional Information</p>
-                                    
-                                    {/* Custom Field 1 - Dropdown */}
-                                    <div>
-                                        <Label className="form-label">Preference Type</Label>
-                                        <Select 
-                                            value={newCustomer.custom_field_1} 
-                                            onValueChange={(v) => setNewCustomer({...newCustomer, custom_field_1: v})}
-                                        >
-                                            <SelectTrigger className="h-12 rounded-xl" data-testid="new-customer-custom-1">
-                                                <SelectValue placeholder="Select preference" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {CUSTOM_FIELD_1_OPTIONS.map(opt => (
-                                                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                {/* Special Occasions */}
+                                <AccordionItem value="occasions" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-pink-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-pink-600">
+                                            <Gift className="w-4 h-4" /> Special Occasions
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="form-label">Spouse/Partner Name</Label>
+                                                <Input
+                                                    value={newCustomer.spouse_name}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, spouse_name: e.target.value})}
+                                                    placeholder="Partner's name"
+                                                    className="h-11 rounded-xl"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Festival Preferences</Label>
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {FESTIVAL_OPTIONS.map((festival) => (
+                                                        <button
+                                                            key={festival}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const current = newCustomer.festival_preference || [];
+                                                                const updated = current.includes(festival)
+                                                                    ? current.filter(f => f !== festival)
+                                                                    : [...current, festival];
+                                                                setNewCustomer({...newCustomer, festival_preference: updated});
+                                                            }}
+                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                                                                (newCustomer.festival_preference || []).includes(festival)
+                                                                    ? "bg-pink-500 text-white border-pink-500"
+                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-pink-300"
+                                                            }`}
+                                                        >
+                                                            {festival}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
 
-                                    {/* Custom Field 2 - Text */}
-                                    <div>
-                                        <Label htmlFor="custom2" className="form-label">Department / Table</Label>
-                                        <Input
-                                            id="custom2"
-                                            value={newCustomer.custom_field_2}
-                                            onChange={(e) => setNewCustomer({...newCustomer, custom_field_2: e.target.value})}
-                                            placeholder="e.g., HR, Table 5, VIP Section"
-                                            className="h-12 rounded-xl"
-                                            data-testid="new-customer-custom-2"
-                                        />
-                                    </div>
+                                {/* Tags & Flags */}
+                                <AccordionItem value="flags" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-indigo-50 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
+                                            <Star className="w-4 h-4" /> Tags & Flags
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-xl border border-yellow-100">
+                                                <Label className="text-sm text-yellow-700 flex items-center gap-2">
+                                                    <Star className="w-4 h-4" /> VIP Customer
+                                                </Label>
+                                                <Switch
+                                                    checked={newCustomer.vip_flag}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, vip_flag: checked})}
+                                                    data-testid="vip-flag"
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-xl border border-orange-100">
+                                                <Label className="text-sm text-orange-700 flex items-center gap-2">
+                                                    <AlertTriangle className="w-4 h-4" /> Complaint History
+                                                </Label>
+                                                <Switch
+                                                    checked={newCustomer.complaint_flag}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, complaint_flag: checked})}
+                                                />
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                                                <Label className="text-sm text-red-700 flex items-center gap-2">
+                                                    <X className="w-4 h-4" /> Blacklisted
+                                                </Label>
+                                                <Switch
+                                                    checked={newCustomer.blacklist_flag}
+                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, blacklist_flag: checked})}
+                                                    data-testid="blacklist-flag"
+                                                />
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
 
-                                    {/* Custom Field 3 - Text */}
-                                    <div>
-                                        <Label htmlFor="custom3" className="form-label">Special Instructions</Label>
-                                        <Input
-                                            id="custom3"
-                                            value={newCustomer.custom_field_3}
-                                            onChange={(e) => setNewCustomer({...newCustomer, custom_field_3: e.target.value})}
-                                            placeholder="Any special requests..."
-                                            className="h-12 rounded-xl"
-                                            data-testid="new-customer-custom-3"
-                                        />
-                                    </div>
-                                </div>
+                                {/* Custom Fields & Notes */}
+                                <AccordionItem value="custom" className="border-b-0">
+                                    <AccordionTrigger className="hover:no-underline py-3 px-3 bg-gray-100 rounded-xl mb-2">
+                                        <span className="flex items-center gap-2 text-sm font-semibold text-gray-600">
+                                            <Layers className="w-4 h-4" /> Custom Fields & Notes
+                                        </span>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="px-1">
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label className="form-label">Preference Type</Label>
+                                                <Select 
+                                                    value={newCustomer.custom_field_1} 
+                                                    onValueChange={(v) => setNewCustomer({...newCustomer, custom_field_1: v})}
+                                                >
+                                                    <SelectTrigger className="h-11 rounded-xl" data-testid="new-customer-custom-1">
+                                                        <SelectValue placeholder="Select preference" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {CUSTOM_FIELD_1_OPTIONS.map(opt => (
+                                                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Department / Table</Label>
+                                                <Input
+                                                    value={newCustomer.custom_field_2}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, custom_field_2: e.target.value})}
+                                                    placeholder="e.g., HR, Table 5, VIP Section"
+                                                    className="h-11 rounded-xl"
+                                                    data-testid="new-customer-custom-2"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Special Instructions</Label>
+                                                <Input
+                                                    value={newCustomer.custom_field_3}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, custom_field_3: e.target.value})}
+                                                    placeholder="Any special requests..."
+                                                    className="h-11 rounded-xl"
+                                                    data-testid="new-customer-custom-3"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="form-label">Notes</Label>
+                                                <Textarea
+                                                    value={newCustomer.notes}
+                                                    onChange={(e) => setNewCustomer({...newCustomer, notes: e.target.value})}
+                                                    placeholder="Any special notes about this customer..."
+                                                    className="rounded-xl resize-none"
+                                                    rows={3}
+                                                    data-testid="new-customer-notes"
+                                                />
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
 
-                                {/* Notes */}
-                                <div>
-                                    <Label htmlFor="notes" className="form-label">Notes</Label>
-                                    <Textarea
-                                        id="notes"
-                                        value={newCustomer.notes}
-                                        onChange={(e) => setNewCustomer({...newCustomer, notes: e.target.value})}
-                                        placeholder="Any special notes..."
-                                        className="rounded-xl resize-none"
-                                        rows={2}
-                                        data-testid="new-customer-notes"
-                                    />
-                                </div>
-                            </div>
+                            </Accordion>
                         </ScrollArea>
                         <DialogFooter className="gap-2 pt-4 border-t">
                             <Button 
