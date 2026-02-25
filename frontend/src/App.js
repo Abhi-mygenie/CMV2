@@ -4910,7 +4910,7 @@ const SettingsPage = () => {
                                 </div>
                                 <div>
                                     <Label className="form-label">POS Name</Label>
-                                    <Input value="MyGenie" disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-name" />
+                                    <Input value={user?.pos_name || "MyGenie"} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-name" />
                                 </div>
                             </div>
                             <div>
