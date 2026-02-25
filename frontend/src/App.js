@@ -6047,7 +6047,20 @@ const WhatsAppAutomationPage = () => {
                                                 {/* WhatsApp-style message bubble */}
                                                 <div className="bg-[#E5DDD5] p-3 rounded-lg mt-2">
                                                     <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm max-w-[90%] relative">
-                                                        <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-12">{tpl.temp_body}</p>
+                                                        <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-12">
+                                                            {(() => {
+                                                                let previewText = tpl.temp_body;
+                                                                const mappings = templateVariableMappings[tpl.wid] || {};
+                                                                variables.forEach(v => {
+                                                                    const mappedField = mappings[v];
+                                                                    if (mappedField) {
+                                                                        const fieldLabel = availableVariables.find(av => av.key === mappedField)?.label || mappedField;
+                                                                        previewText = previewText.replace(new RegExp(v.replace(/[{}]/g, '\\$&'), 'g'), fieldLabel);
+                                                                    }
+                                                                });
+                                                                return previewText;
+                                                            })()}
+                                                        </p>
                                                         <div className="flex items-center justify-end gap-1 mt-1">
                                                             <span className="text-[10px] text-gray-500">
                                                                 {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
