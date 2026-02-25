@@ -3764,226 +3764,244 @@ const SegmentsPage = () => {
         );
     }
 
+    // Count active WhatsApp configs
+    const activeConfigsCount = Object.values(whatsappConfigs).filter(c => c?.is_active !== false).length;
+
     return (
         <MobileLayout>
             <div className="p-4 max-w-lg mx-auto" data-testid="segments-page">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-4">
+                {/* Header - matching WhatsApp Automation style */}
+                <div className="flex items-center gap-3 mb-4">
+                    <button 
+                        onClick={() => navigate(-1)} 
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                        <ChevronLeft className="w-5 h-5 text-[#1A1A1A]" />
+                    </button>
                     <div>
                         <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="segments-title">
                             Segments
                         </h1>
-                        <p className="text-sm text-[#52525B] mt-1">Manage saved customer segments</p>
+                        <p className="text-sm text-[#52525B]">Customer groups & automation</p>
                     </div>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => navigate('/customers')}
-                        className="text-[#F26B33] border-[#F26B33]"
-                        data-testid="create-segment-btn"
-                    >
-                        <Plus className="w-4 h-4 mr-1" />
-                        New
-                    </Button>
+                </div>
+
+                {/* Info Card - matching WhatsApp Automation style */}
+                <Card className="rounded-xl border-0 shadow-sm bg-[#25D366]/5 mb-4">
+                    <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                            <MessageSquare className="w-5 h-5 text-[#25D366] mt-0.5" />
+                            <div>
+                                <h3 className="font-semibold text-[#1A1A1A]">Customer Segments</h3>
+                                <p className="text-sm text-[#52525B]">
+                                    Create segments and configure WhatsApp automation for targeted messaging.
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Header Section with stats - matching WhatsApp Automation style */}
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <p className="text-sm text-[#52525B]">
+                            Manage saved customer segments
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                            {allSegments.length} segments available
+                        </p>
+                    </div>
+                    <Badge className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20">
+                        {activeConfigsCount} Active
+                    </Badge>
                 </div>
 
                 {/* Segments List */}
                 <div className="space-y-3" data-testid="segments-list">
-                    {allSegments.map(segment => (
-                        <Card 
-                            key={segment.id} 
-                            className={`rounded-xl hover:shadow-md transition-shadow ${segment.isDefault ? 'border-2 border-[#F26B33]/30 bg-[#F26B33]/5' : ''}`}
-                            data-testid={`segment-card-${segment.id}`}
-                        >
-                            <CardContent className="p-4">
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            {segment.isDefault && (
-                                                <Users className="w-4 h-4 text-[#F26B33]" />
+                    {allSegments.map(segment => {
+                        const hasConfig = !!whatsappConfigs[segment.id];
+                        const isConfigActive = hasConfig && whatsappConfigs[segment.id].is_active !== false;
+                        
+                        return (
+                            <Card 
+                                key={segment.id} 
+                                className={`rounded-xl hover:shadow-md transition-shadow ${hasConfig && isConfigActive ? 'border-2 border-[#25D366]/30 bg-[#25D366]/5' : ''}`}
+                                data-testid={`segment-card-${segment.id}`}
+                            >
+                                <CardContent className="p-4">
+                                    {/* Row 1: Segment name, description & badge - matching WhatsApp Automation style */}
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <svg className={`w-4 h-4 ${hasConfig && isConfigActive ? 'text-[#25D366]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                                </svg>
+                                                <h3 className="font-semibold text-[#1A1A1A]" data-testid={`segment-name-${segment.id}`}>
+                                                    {segment.name}
+                                                </h3>
+                                                <Badge className={`${hasConfig ? (isConfigActive ? 'bg-[#25D366]' : 'bg-amber-500') : 'bg-gray-400'} text-white text-xs`}>
+                                                    {hasConfig ? (isConfigActive ? "Active" : "Paused") : "Not Configured"}
+                                                </Badge>
+                                            </div>
+                                            <p className="text-xs text-[#52525B] ml-6">
+                                                {segment.isDefault 
+                                                    ? "Includes all customers in your database" 
+                                                    : `${segment.customer_count} customers in this segment`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Filter Tags - only for non-default segments */}
+                                    {!segment.isDefault && segment.filters && Object.keys(segment.filters).length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 mb-3 ml-6">
+                                            {segment.filters.tier && (
+                                                <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                    Tier: {segment.filters.tier}
+                                                </span>
                                             )}
-                                            <h3 className="font-semibold text-[#1A1A1A]" data-testid={`segment-name-${segment.id}`}>{segment.name}</h3>
-                                            <Badge className={`${segment.isDefault ? 'bg-[#F26B33] text-white' : 'bg-[#F26B33]/10 text-[#F26B33]'} hover:bg-[#F26B33]/20`}>
-                                                {segment.customer_count} customers
-                                            </Badge>
-                                            {segment.isDefault && (
-                                                <Badge variant="outline" className="text-xs">Default</Badge>
+                                            {segment.filters.city && (
+                                                <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                    City: {segment.filters.city}
+                                                </span>
+                                            )}
+                                            {segment.filters.customer_type && (
+                                                <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                    Type: {segment.filters.customer_type}
+                                                </span>
+                                            )}
+                                            {segment.filters.last_visit_days && (
+                                                <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                    Inactive: {segment.filters.last_visit_days}+ days
+                                                </span>
+                                            )}
+                                            {segment.filters.search && (
+                                                <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
+                                                    Search: {segment.filters.search}
+                                                </span>
                                             )}
                                         </div>
-                                        {segment.created_at && (
-                                            <p className="text-xs text-[#52525B]">
-                                                Created {new Date(segment.created_at).toLocaleDateString()}
-                                            </p>
-                                        )}
-                                        {segment.isDefault && (
-                                            <p className="text-xs text-[#52525B]">
-                                                Includes all customers in your database
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
-                                
-                                {/* Filter Tags - only for non-default segments */}
-                                {!segment.isDefault && segment.filters && (
-                                    <div className="flex flex-wrap gap-1.5 mb-3">
-                                        {segment.filters.tier && (
-                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
-                                                Tier: {segment.filters.tier}
-                                            </span>
-                                        )}
-                                        {segment.filters.city && (
-                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
-                                                City: {segment.filters.city}
-                                            </span>
-                                        )}
-                                        {segment.filters.customer_type && (
-                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
-                                                Type: {segment.filters.customer_type}
-                                            </span>
-                                        )}
-                                        {segment.filters.last_visit_days && (
-                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
-                                                Inactive: {segment.filters.last_visit_days}+ days
-                                            </span>
-                                        )}
-                                        {segment.filters.search && (
-                                            <span className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs">
-                                                Search: {segment.filters.search}
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* WhatsApp Automation Status */}
-                                {whatsappConfigs[segment.id] ? (
-                                    <div className={`rounded-lg p-3 mb-3 border ${
-                                        whatsappConfigs[segment.id].is_active !== false 
-                                            ? 'bg-[#25D366]/10 border-[#25D366]/20' 
-                                            : 'bg-gray-100 border-gray-300'
-                                    }`}>
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-1">
-                                                    <svg className={`w-4 h-4 ${whatsappConfigs[segment.id].is_active !== false ? 'text-[#25D366]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                                    </svg>
-                                                    <span className={`text-sm font-medium ${whatsappConfigs[segment.id].is_active !== false ? 'text-[#25D366]' : 'text-gray-500'}`}>
-                                                        WhatsApp Automation
-                                                    </span>
-                                                    {whatsappConfigs[segment.id].is_active === false && (
-                                                        <Badge variant="outline" className="text-xs bg-gray-200 text-gray-600">Paused</Badge>
-                                                    )}
+                                    {/* WhatsApp Configuration Status - matching WhatsApp Automation style */}
+                                    {hasConfig ? (
+                                        <div className={`rounded-lg p-3 mb-3 border ${
+                                            isConfigActive 
+                                                ? 'bg-[#25D366]/10 border-[#25D366]/20' 
+                                                : 'bg-gray-100 border-gray-300'
+                                        }`}>
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <svg className={`w-4 h-4 ${isConfigActive ? 'text-[#25D366]' : 'text-gray-400'}`} viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                                        </svg>
+                                                        <span className={`text-sm font-medium ${isConfigActive ? 'text-[#25D366]' : 'text-gray-500'}`}>
+                                                            WhatsApp Template
+                                                        </span>
+                                                        {!isConfigActive && (
+                                                            <Badge variant="outline" className="text-xs bg-gray-200 text-gray-600">Paused</Badge>
+                                                        )}
+                                                    </div>
+                                                    <p className={`text-xs ml-6 ${isConfigActive ? 'text-gray-700' : 'text-gray-500'}`}>
+                                                        <span className="font-medium">Template:</span> {whatsappConfigs[segment.id].template_name}
+                                                    </p>
+                                                    <p className={`text-xs ml-6 ${isConfigActive ? 'text-gray-600' : 'text-gray-400'}`}>
+                                                        <span className="font-medium">Schedule:</span> {getScheduleDescription(whatsappConfigs[segment.id])}
+                                                    </p>
                                                 </div>
-                                                <p className={`text-xs ml-6 ${whatsappConfigs[segment.id].is_active !== false ? 'text-gray-700' : 'text-gray-500'}`}>
-                                                    <span className="font-medium">Template:</span> {whatsappConfigs[segment.id].template_name}
-                                                </p>
-                                                <p className={`text-xs ml-6 ${whatsappConfigs[segment.id].is_active !== false ? 'text-gray-600' : 'text-gray-400'}`}>
-                                                    <span className="font-medium">Schedule:</span> {getScheduleDescription(whatsappConfigs[segment.id])}
-                                                </p>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                {/* Pause/Resume Button */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        toggleWhatsappConfig(segment.id);
-                                                    }}
-                                                    className={`p-1.5 rounded transition-colors ${
-                                                        whatsappConfigs[segment.id].is_active !== false 
-                                                            ? 'text-gray-500 hover:text-amber-600 hover:bg-amber-50' 
-                                                            : 'text-[#25D366] hover:text-[#20BD5A] hover:bg-[#25D366]/10'
-                                                    }`}
-                                                    title={whatsappConfigs[segment.id].is_active !== false ? "Pause automation" : "Resume automation"}
-                                                    data-testid={`toggle-whatsapp-${segment.id}`}
-                                                >
-                                                    {whatsappConfigs[segment.id].is_active !== false ? (
-                                                        <Pause className="w-4 h-4" />
-                                                    ) : (
-                                                        <Play className="w-4 h-4" />
-                                                    )}
-                                                </button>
-                                                {/* Delete Button */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        removeWhatsappConfig(segment.id);
-                                                    }}
-                                                    className="text-gray-400 hover:text-red-500 p-1.5 rounded transition-colors hover:bg-red-50"
-                                                    title="Delete automation"
-                                                    data-testid={`delete-whatsapp-${segment.id}`}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                <div className="flex items-center gap-1">
+                                                    {/* Pause/Resume Button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            toggleWhatsappConfig(segment.id);
+                                                        }}
+                                                        className={`p-1.5 rounded transition-colors ${
+                                                            isConfigActive 
+                                                                ? 'text-gray-500 hover:text-amber-600 hover:bg-amber-50' 
+                                                                : 'text-[#25D366] hover:text-[#20BD5A] hover:bg-[#25D366]/10'
+                                                        }`}
+                                                        title={isConfigActive ? "Pause automation" : "Resume automation"}
+                                                        data-testid={`toggle-whatsapp-${segment.id}`}
+                                                    >
+                                                        {isConfigActive ? (
+                                                            <Pause className="w-4 h-4" />
+                                                        ) : (
+                                                            <Play className="w-4 h-4" />
+                                                        )}
+                                                    </button>
+                                                    {/* Delete Button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            removeWhatsappConfig(segment.id);
+                                                        }}
+                                                        className="text-gray-400 hover:text-red-500 p-1.5 rounded transition-colors hover:bg-red-50"
+                                                        title="Delete automation"
+                                                        data-testid={`delete-whatsapp-${segment.id}`}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200">
-                                        <div className="flex items-center gap-2 text-gray-500">
-                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <circle cx="12" cy="12" r="10"/>
-                                            </svg>
-                                            <span className="text-xs">No WhatsApp automation configured</span>
+                                    ) : (
+                                        <div className="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200">
+                                            <div className="flex items-center gap-2 text-gray-500">
+                                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <circle cx="12" cy="12" r="10"/>
+                                                </svg>
+                                                <span className="text-xs">No WhatsApp template configured for this segment</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
 
-                                {/* Action Buttons */}
-                                <div className="flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => viewSegmentCustomers(segment)}
-                                        className="flex-1 h-9"
-                                        data-testid={`view-segment-${segment.id}`}
-                                    >
-                                        <Eye className="w-4 h-4 mr-1" />
-                                        View
-                                    </Button>
-                                    {!segment.isDefault && (
+                                    {/* Action Buttons - matching WhatsApp Automation style (centered Configure button) */}
+                                    <div className="flex gap-2">
                                         <Button
                                             variant="outline"
                                             size="sm"
                                             onClick={() => {
-                                                setEditingSegment(segment);
-                                                setSegmentName(segment.name);
-                                                setShowEditDialog(true);
+                                                viewSegmentCustomers(segment);
+                                                setShowSendMessage(true);
                                             }}
-                                            className="h-9"
-                                            data-testid={`edit-segment-${segment.id}`}
+                                            className="flex-1 h-9"
+                                            data-testid={`configure-segment-${segment.id}`}
                                         >
-                                            <Edit2 className="w-4 h-4" />
+                                            <Settings className="w-4 h-4 mr-1" />
+                                            {hasConfig ? "Edit" : "Configure"}
                                         </Button>
-                                    )}
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            viewSegmentCustomers(segment);
-                                            setShowSendMessage(true);
-                                        }}
-                                        className="h-9 bg-[#25D366] text-white hover:bg-[#20BD5A] border-[#25D366]"
-                                        data-testid={`whatsapp-segment-${segment.id}`}
-                                    >
-                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                        </svg>
-                                    </Button>
-                                    {!segment.isDefault && (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => deleteSegment(segment.id)}
-                                            className="h-9 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            data-testid={`delete-segment-${segment.id}`}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                        {hasConfig && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => viewSegmentCustomers(segment)}
+                                                className="h-9"
+                                                data-testid={`view-segment-${segment.id}`}
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                        {!segment.isDefault && (
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setEditingSegment(segment);
+                                                    setSegmentName(segment.name);
+                                                    setShowEditDialog(true);
+                                                }}
+                                                className="h-9"
+                                                data-testid={`edit-segment-${segment.id}`}
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </Button>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        );
+                    })}
                 </div>
 
                 {/* View Customers Modal */}
