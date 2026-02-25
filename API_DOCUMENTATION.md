@@ -1,6 +1,6 @@
 # MyGenie POS Integration API Documentation
 
-**Base URL:** `https://whatsapp-crm-fix-3.preview.emergentagent.com/api`
+**Base URL:** `https://dinepoints-loyalty-1.preview.emergentagent.com/api`
 
 **Authentication:** All endpoints require `X-API-Key` header
 
@@ -61,7 +61,7 @@ POST /api/pos/customers
 ### Example Request
 
 ```bash
-curl -X POST "https://whatsapp-crm-fix-3.preview.emergentagent.com/api/pos/customers" \
+curl -X POST "https://dinepoints-loyalty-1.preview.emergentagent.com/api/pos/customers" \
   -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
@@ -157,7 +157,7 @@ PUT /api/pos/customers/{customer_id}
 ### Example Request
 
 ```bash
-curl -X PUT "https://whatsapp-crm-fix-3.preview.emergentagent.com/api/pos/customers/550e8400-e29b-41d4-a716-446655440000" \
+curl -X PUT "https://dinepoints-loyalty-1.preview.emergentagent.com/api/pos/customers/550e8400-e29b-41d4-a716-446655440000" \
   -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
@@ -222,7 +222,7 @@ POST /api/pos/customer-lookup
 ### Example Request
 
 ```bash
-curl -X POST "https://whatsapp-crm-fix-3.preview.emergentagent.com/api/pos/customer-lookup" \
+curl -X POST "https://dinepoints-loyalty-1.preview.emergentagent.com/api/pos/customer-lookup" \
   -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
@@ -295,7 +295,7 @@ POST /api/pos/max-redeemable
 ### Example Request
 
 ```bash
-curl -X POST "https://whatsapp-crm-fix-3.preview.emergentagent.com/api/pos/max-redeemable" \
+curl -X POST "https://dinepoints-loyalty-1.preview.emergentagent.com/api/pos/max-redeemable" \
   -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
@@ -394,7 +394,7 @@ POST /api/pos/orders
 ### Example Request
 
 ```bash
-curl -X POST "https://whatsapp-crm-fix-3.preview.emergentagent.com/api/pos/orders" \
+curl -X POST "https://dinepoints-loyalty-1.preview.emergentagent.com/api/pos/orders" \
   -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
