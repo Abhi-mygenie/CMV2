@@ -5225,14 +5225,13 @@ const WhatsAppAutomationPage = () => {
                                                                             <SelectValue placeholder="Select template" />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            {/* Filter templates: send_bill shows all, others match first 3 letters */}
+                                                                            {/* Filter templates: send_bill shows all, others match first 3 letters of event KEY */}
                                                                             {authkeyTemplates
                                                                                 .filter(tpl => {
                                                                                     // Send Bill event shows ALL templates
                                                                                     if (eventKey === "send_bill") return true;
-                                                                                    // Other events: match first 3 letters of event label with template name
-                                                                                    const eventLabel = eventLabels[eventKey] || eventKey;
-                                                                                    const eventPrefix = eventLabel.substring(0, 3).toLowerCase();
+                                                                                    // Other events: match first 3 letters of event KEY with template name
+                                                                                    const eventPrefix = eventKey.substring(0, 3).toLowerCase();
                                                                                     const templatePrefix = (tpl.temp_name || "").substring(0, 3).toLowerCase();
                                                                                     return templatePrefix === eventPrefix;
                                                                                 })
