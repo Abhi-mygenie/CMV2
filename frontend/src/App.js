@@ -3610,6 +3610,81 @@ const SegmentsPage = () => {
         }
     };
 
+    // Save WhatsApp config for a segment
+    const saveWhatsappConfig = async (segmentId) => {
+        const currentTpl = templates.find(t => t.id === messageTemplate);
+        if (!currentTpl) return;
+        
+        const configData = {
+            template_id: messageTemplate,
+            template_name: currentTpl.name,
+            variable_mappings: templateVariables,
+            variable_modes: variableModes,
+            schedule_type: sendOption,
+            scheduled_date: scheduledDate || null,
+            scheduled_time: scheduledTime,
+            recurring_frequency: sendOption === "recurring" ? recurringFrequency : null,
+            recurring_days: recurringDays,
+            recurring_day_of_month: recurringDayOfMonth,
+            recurring_end_option: recurringEndOption,
+            recurring_end_date: recurringEndDate || null,
+            recurring_occurrences: recurringOccurrences
+        };
+        
+        try {
+            await api.post(`/segments/${segmentId}/whatsapp-config`, configData);
+            // Update local state
+            setWhatsappConfigs(prev => ({
+                ...prev,
+                [segmentId]: { ...configData, segment_id: segmentId, is_active: true }
+            }));
+            return true;
+        } catch (err) {
+            console.error("Failed to save WhatsApp config:", err);
+            return false;
+        }
+    };
+
+    // Remove WhatsApp config from a segment
+    const removeWhatsappConfig = async (segmentId) => {
+        if (!window.confirm("Remove WhatsApp automation for this segment?")) return;
+        
+        try {
+            await api.delete(`/segments/${segmentId}/whatsapp-config`);
+            toast.success("WhatsApp automation removed");
+            setWhatsappConfigs(prev => {
+                const newConfigs = { ...prev };
+                delete newConfigs[segmentId];
+                return newConfigs;
+            });
+        } catch (err) {
+            toast.error("Failed to remove automation");
+        }
+    };
+
+    // Get schedule description for display
+    const getScheduleDescription = (config) => {
+        if (!config) return "";
+        
+        if (config.schedule_type === "now") {
+            return "Send immediately";
+        } else if (config.schedule_type === "scheduled") {
+            const date = config.scheduled_date ? new Date(config.scheduled_date).toLocaleDateString() : "";
+            return `Scheduled: ${date} at ${config.scheduled_time}`;
+        } else if (config.schedule_type === "recurring") {
+            const freq = config.recurring_frequency;
+            if (freq === "daily") {
+                return `Daily at ${config.scheduled_time}`;
+            } else if (freq === "weekly") {
+                const days = (config.recurring_days || []).join(", ");
+                return `Weekly (${days}) at ${config.scheduled_time}`;
+            } else if (freq === "monthly") {
+                return `Monthly (${config.recurring_day_of_month}th) at ${config.scheduled_time}`;
+            }
+        }
+        return "";
+    };
+
     const updateSegment = async () => {
         if (!segmentName.trim()) {
             toast.error("Please enter a segment name");
