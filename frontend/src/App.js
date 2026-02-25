@@ -3466,6 +3466,9 @@ const SegmentsPage = () => {
     const [recurringEndOption, setRecurringEndOption] = useState("never"); // "never", "date", "occurrences"
     const [recurringEndDate, setRecurringEndDate] = useState("");
     const [recurringOccurrences, setRecurringOccurrences] = useState("10");
+    // Templates from API
+    const [templates, setTemplates] = useState([]);
+    const [templatesLoading, setTemplatesLoading] = useState(false);
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
@@ -3476,8 +3479,37 @@ const SegmentsPage = () => {
         { id: "birthday_club", name: "Birthday Club" }
     ];
 
-    // Enhanced templates with media and variables
-    const templates = [
+    // Fetch templates from API
+    const fetchTemplates = async () => {
+        setTemplatesLoading(true);
+        try {
+            const res = await api.get("/whatsapp/authkey-templates");
+            const authkeyTemplates = res.data.templates || [];
+            // Transform authkey templates to match expected format
+            const formattedTemplates = authkeyTemplates.map(tpl => ({
+                id: tpl.wid?.toString() || tpl.id,
+                name: tpl.temp_name || tpl.name,
+                message: tpl.temp_body || tpl.message || "",
+                variables: (tpl.temp_body?.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i),
+                mediaType: tpl.media_type || null,
+                mediaUrl: tpl.media_url || null
+            }));
+            setTemplates(formattedTemplates);
+        } catch (err) {
+            console.error("Failed to fetch templates:", err);
+            // Fallback to empty array if API fails
+            setTemplates([]);
+        } finally {
+            setTemplatesLoading(false);
+        }
+    };
+
+    // Fetch templates when modal opens
+    useEffect(() => {
+        if (showSendMessage) {
+            fetchTemplates();
+        }
+    }, [showSendMessage]);
         { 
             id: "welcome", 
             name: "Welcome Message", 
