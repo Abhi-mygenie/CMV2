@@ -6026,16 +6026,14 @@ const WhatsAppAutomationPage = () => {
                                                     <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm max-w-[90%] relative">
                                                         <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-12">
                                                             {(() => {
-                                                                let previewText = tpl.temp_body;
                                                                 const mappings = templateVariableMappings[tpl.wid] || {};
-                                                                variables.forEach(v => {
-                                                                    const mappedField = mappings[v];
-                                                                    if (mappedField) {
-                                                                        const fieldLabel = availableVariables.find(av => av.key === mappedField)?.label || mappedField;
-                                                                        previewText = previewText.replace(new RegExp(v.replace(/[{}]/g, '\\$&'), 'g'), fieldLabel);
-                                                                    }
+                                                                const modes = templateVariableModes[tpl.wid] || {};
+                                                                const parts = resolvePreviewWithSampleData(tpl.temp_body, mappings, modes);
+                                                                return parts.map((part, idx) => {
+                                                                    if (part.type === "na") return <span key={idx} className="text-red-500 font-medium">NA</span>;
+                                                                    if (part.type === "var") return <span key={idx}>{part.value}</span>;
+                                                                    return <span key={idx}>{part.value}</span>;
                                                                 });
-                                                                return previewText;
                                                             })()}
                                                         </p>
                                                         <div className="flex items-center justify-end gap-1 mt-1">
