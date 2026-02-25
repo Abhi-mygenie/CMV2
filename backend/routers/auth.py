@@ -347,6 +347,8 @@ async def mygenie_login(credentials: UserLogin):
                     email=email,
                     restaurant_name=restaurant_name,
                     phone=phone,
+                    pos_id=pos_id,
+                    pos_name=pos_name,
                     created_at=now
                 ),
                 is_demo=False
