@@ -55,3 +55,13 @@ https://cmv2-test.preview.emergentagent.com
   - E.g., "Points Earned" → shows templates starting with "poi" (if any exist)
 
 **File Changed**: `/app/frontend/src/App.js` (lines 5210-5235)
+
+### Templates Tab Filtering (Feb 25, 2026)
+**Feature**: Filter templates list to only show templates matching any event key
+- Templates tab now shows only templates whose first 3 letters match ANY event key's first 3 letters
+- Count updated from 19 to 3 (filtered)
+- Matching templates: `send_creds_first_time`, `wallet_credit`, `send_bill_to_customer`
+
+### Automation Tab Dropdown Fix
+- Changed from matching event LABEL to event KEY
+- E.g., `wallet_credit` event now matches `wallet_credit` template (both start with "wal")
