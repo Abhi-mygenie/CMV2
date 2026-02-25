@@ -186,6 +186,8 @@ async def mygenie_login(credentials: UserLogin):
                 email=local_user["email"],
                 restaurant_name=local_user.get("restaurant_name", "Unknown"),
                 phone=local_user.get("phone", ""),
+                pos_id=local_user.get("pos_id", ""),
+                pos_name=local_user.get("pos_name", ""),
                 created_at=local_user["created_at"]
             ),
             is_demo=False
