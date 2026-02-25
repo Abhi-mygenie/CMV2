@@ -7389,11 +7389,15 @@ const TemplatesPage = () => {
                                             <Card key={tpl.wid} className="rounded-xl border-0 shadow-sm overflow-hidden">
                                                 <CardContent className="p-4">
                                                     <div className="flex items-start justify-between mb-2">
-                                                        <div>
-                                                            <h4 className="font-semibold text-[#1A1A1A]">{tpl.temp_name}</h4>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-semibold text-[#1A1A1A] truncate">{tpl.temp_name}</h4>
                                                             <span className="text-xs text-gray-500 capitalize">{tpl.meta_data?.category || "utility"}</span>
                                                         </div>
-                                                        <Badge className={`text-xs ${isMapped ? "bg-[#25D366] text-white" : "bg-amber-500 text-white"}`}>{isMapped ? "Mapped" : "Not Mapped"}</Badge>
+                                                        <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                                                            <button onClick={() => openVariableMappingModal(tpl)} className="text-xs text-gray-500 hover:text-[#25D366] flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-50 transition-colors" data-testid={`map-vars-${tpl.wid}`}><Tag className="w-3 h-3" /> Map</button>
+                                                            <button onClick={() => setExpandedPreviews(prev => ({...prev, [tpl.wid]: !prev[tpl.wid]}))} className="text-xs text-gray-500 hover:text-[#25D366] flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-50 transition-colors" data-testid={`preview-${tpl.wid}`}>{expandedPreviews[tpl.wid] ? <><EyeOff className="w-3 h-3" /> Hide</> : <><Eye className="w-3 h-3" /> Preview</>}</button>
+                                                            <Badge className={`text-xs ${isMapped ? "bg-[#25D366] text-white" : "bg-amber-500 text-white"}`}>{isMapped ? "Mapped" : "Not Mapped"}</Badge>
+                                                        </div>
                                                     </div>
                                                     {variables.length > 0 && (
                                                         <div className="flex flex-wrap gap-1.5 mb-2">
@@ -7427,10 +7431,6 @@ const TemplatesPage = () => {
                                                         </div>
                                                     </div>
                                                     )}
-                                                    <div className="flex gap-2 mt-3">
-                                                        <Button size="sm" variant="outline" onClick={() => openVariableMappingModal(tpl)} data-testid={`map-vars-${tpl.wid}`}><Tag className="w-3 h-3 mr-1" /> Map Variables</Button>
-                                                        <Button size="sm" variant="ghost" onClick={() => setExpandedPreviews(prev => ({...prev, [tpl.wid]: !prev[tpl.wid]}))} data-testid={`preview-${tpl.wid}`}>{expandedPreviews[tpl.wid] ? <><EyeOff className="w-3 h-3 mr-1" /> Hide</> : <><Eye className="w-3 h-3 mr-1" /> Preview</>}</Button>
-                                                    </div>
                                                 </CardContent>
                                             </Card>
                                         );
