@@ -43,5 +43,5 @@ Pull and set up the CMV2 repository from https://github.com/Abhi-mygenie/CMV2.gi
 - `/api/whatsapp/*` - WhatsApp automation
 
 ## URLs
-- **Frontend**: https://dine-auth-api.preview.emergentagent.com
-- **Backend API**: https://dine-auth-api.preview.emergentagent.com/api
+- **Frontend**: https://dine-rewards-7.preview.emergentagent.com
+- **Backend API**: https://dine-rewards-7.preview.emergentagent.com/api
