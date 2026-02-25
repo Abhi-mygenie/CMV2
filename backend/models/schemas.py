@@ -335,6 +335,19 @@ class Customer(BaseModel):
     festival_preference: Optional[List[str]] = None
     special_dates: Optional[List[dict]] = None
     
+    # Feedback & Flags
+    last_rating: Optional[int] = None
+    nps_score: Optional[int] = None
+    complaint_flag: bool = False
+    vip_flag: bool = False
+    blacklist_flag: bool = False
+    
+    # AI/Advanced (MyGenie CRM Differentiator)
+    predicted_next_visit: Optional[str] = None
+    churn_risk_score: Optional[int] = None
+    recommended_offer_type: Optional[str] = None
+    price_sensitivity_score: Optional[str] = None
+    
     # Custom Fields
     custom_field_1: Optional[str] = None
     custom_field_2: Optional[str] = None
