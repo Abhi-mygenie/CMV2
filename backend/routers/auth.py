@@ -246,8 +246,9 @@ async def mygenie_login(credentials: UserLogin):
                 phone = restaurant.get("phone", "")
                 restaurant_id = str(restaurant.get("id", ""))
             
-            # pos_id hardcoded for now, will be dynamic later
+            # pos_id and pos_name hardcoded for now, will be dynamic later
             pos_id = "0001"
+            pos_name = "MyGenie"
             user_id = f"pos_{pos_id}_restaurant_{restaurant_id}"
             
             # Check if user already exists (e.g. created before password_hash was added)
