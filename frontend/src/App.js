@@ -4722,6 +4722,10 @@ const WhatsAppAutomationPage = () => {
     const [activeTab, setActiveTab] = useState("settings");
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [savingApiKey, setSavingApiKey] = useState(false);
+    const [authkeyTemplates, setAuthkeyTemplates] = useState([]);
+    const [eventMappings, setEventMappings] = useState({});
+    const [loadingAuthkeyTemplates, setLoadingAuthkeyTemplates] = useState(false);
+    const [savingMappings, setSavingMappings] = useState(false);
     
     // Template form state
     const [showTemplateModal, setShowTemplateModal] = useState(false);
