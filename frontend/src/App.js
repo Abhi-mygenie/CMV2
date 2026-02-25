@@ -5954,11 +5954,33 @@ const WhatsAppAutomationPage = () => {
                                                                                 })
                                                                                 .map(tpl => (
                                                                                 <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
-                                                                                    {tpl.temp_name}
+                                                                                    <div className="flex items-center justify-between w-full">
+                                                                                        <span>{tpl.temp_name}</span>
+                                                                                    </div>
                                                                                 </SelectItem>
                                                                             ))}
                                                                         </SelectContent>
                                                                     </Select>
+                                                                    
+                                                                    {/* Preview button for selected template */}
+                                                                    {editingEventValue && editingEventValue !== "none" && (
+                                                                        <Button
+                                                                            variant="outline"
+                                                                            size="sm"
+                                                                            className="mt-2 h-8 w-full rounded-lg text-xs"
+                                                                            onClick={() => {
+                                                                                const tpl = authkeyTemplates.find(t => t.wid.toString() === editingEventValue);
+                                                                                if (tpl) {
+                                                                                    setPreviewTemplate(tpl);
+                                                                                    setShowTemplatePreview(true);
+                                                                                }
+                                                                            }}
+                                                                            data-testid={`preview-template-${eventKey}`}
+                                                                        >
+                                                                            <Eye className="w-3 h-3 mr-1" /> Preview Template
+                                                                        </Button>
+                                                                    )}
+                                                                    
                                                                     <div className="flex justify-end gap-2 mt-2">
                                                                         <Button
                                                                             variant="outline"
