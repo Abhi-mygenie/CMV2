@@ -71,6 +71,11 @@ class POSCustomerCreate(BaseModel):
     favorite_category: Optional[str] = None
     preferred_payment_mode: Optional[str] = None
     
+    # Customer Source & Journey
+    lead_source: Optional[str] = None
+    campaign_source: Optional[str] = None
+    assigned_salesperson: Optional[str] = None
+    
     # GST Details
     gst_name: Optional[str] = None
     gst_number: Optional[str] = None
