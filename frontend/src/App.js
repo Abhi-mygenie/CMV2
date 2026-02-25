@@ -5217,7 +5217,18 @@ const WhatsAppAutomationPage = () => {
                                                                             <SelectValue placeholder="Select template" />
                                                                         </SelectTrigger>
                                                                         <SelectContent>
-                                                                            {authkeyTemplates.map(tpl => (
+                                                                            {/* Filter templates: send_bill shows all, others match first 3 letters */}
+                                                                            {authkeyTemplates
+                                                                                .filter(tpl => {
+                                                                                    // Send Bill event shows ALL templates
+                                                                                    if (eventKey === "send_bill") return true;
+                                                                                    // Other events: match first 3 letters of event label with template name
+                                                                                    const eventLabel = eventLabels[eventKey] || eventKey;
+                                                                                    const eventPrefix = eventLabel.substring(0, 3).toLowerCase();
+                                                                                    const templatePrefix = (tpl.temp_name || "").substring(0, 3).toLowerCase();
+                                                                                    return templatePrefix === eventPrefix;
+                                                                                })
+                                                                                .map(tpl => (
                                                                                 <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
                                                                                     {tpl.temp_name}
                                                                                 </SelectItem>
