@@ -7510,27 +7510,6 @@ const TemplatesPage = () => {
                     </DialogContent>
                 </Dialog>
 
-                {/* Template Preview Dialog */}
-                <Dialog open={showTemplatePreview} onOpenChange={setShowTemplatePreview}>
-                    <DialogContent className="max-w-md">
-                        <DialogHeader><DialogTitle>{previewTemplate?.temp_name || "Template Preview"}</DialogTitle></DialogHeader>
-                        {previewTemplate && (
-                            <div className="space-y-3">
-                                <div className="bg-[#E5DDD5] rounded-xl p-3"><div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm">
-                                    <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                        {(() => {
-                                            const m = templateVariableMappings[previewTemplate.wid] || {};
-                                            const mo = templateVariableModes[previewTemplate.wid] || {};
-                                            const parts = resolvePreviewWithSampleData(previewTemplate.temp_body, m, mo);
-                                            return parts.map((part, idx) => { if (part.type === "na") return <span key={idx} className="text-red-500 font-medium">NA</span>; return <span key={idx}>{part.value}</span>; });
-                                        })()}
-                                    </p>
-                                    <div className="flex items-center justify-end gap-1 mt-1"><span className="text-[10px] text-gray-500">{new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span><svg className="w-4 h-4 text-[#53BDEB]" viewBox="0 0 16 15" fill="currentColor"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.51zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.89 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/></svg></div>
-                                </div></div>
-                            </div>
-                        )}
-                    </DialogContent>
-                </Dialog>
             </div>
         </MobileLayout>
     );
