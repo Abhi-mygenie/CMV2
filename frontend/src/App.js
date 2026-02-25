@@ -5463,10 +5463,11 @@ const WhatsAppAutomationPage = () => {
             const apiKey = apiKeyRes.data.authkey_api_key || "";
             if (apiKey) {
                 try {
-                    const [tplRes, mapRes, varMapRes] = await Promise.all([
+                    const [tplRes, mapRes, varMapRes, sampleRes] = await Promise.all([
                         api.get("/whatsapp/authkey-templates"),
                         api.get("/whatsapp/event-template-map"),
-                        api.get("/whatsapp/template-variable-map")
+                        api.get("/whatsapp/template-variable-map"),
+                        api.get("/customers/sample-data")
                     ]);
                     setAuthkeyTemplates(tplRes.data.templates || []);
                     const mapObj = {};
@@ -5483,6 +5484,10 @@ const WhatsAppAutomationPage = () => {
                     });
                     setTemplateVariableMappings(varMapObj);
                     setTemplateVariableModes(varModesObj);
+                    // Load sample customer data
+                    const sample = sampleRes.data.sample || {};
+                    sample.restaurant_name = sampleRes.data.restaurant_name || "";
+                    setSampleCustomerData(sample);
                 } catch (_) {}
             }
         } catch (err) {
