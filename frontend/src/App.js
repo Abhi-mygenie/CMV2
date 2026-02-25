@@ -6085,66 +6085,97 @@ const WhatsAppAutomationPage = () => {
                                         return true; // "all"
                                     });
                                     
-                                    // Count statuses across custom templates
-                                    const draftCount = customTemplates.filter(ct => ct.status === "draft").length;
-                                    const pendingCount = customTemplates.filter(ct => ct.status === "pending").length;
-                                    const approvedCount = customTemplates.filter(ct => ct.status === "approved").length;
+                                    // Count statuses — currently all Authkey are "approved", drafts are local
+                                    const draftCount = customTemplates.length;
+                                    // Currently Authkey doesn't send status, so all are approved
+                                    // Later when Authkey provides status, filter here
+                                    const approvedAuthkey = authkeyTemplates; // all approved for now
+                                    const pendingAuthkey = []; // will come from Authkey later
                                     
-                                    // Filter custom templates
-                                    const filteredCustom = customTemplates.filter(ct => {
-                                        // Status filter
-                                        if (templateFilter === "mapped" || templateFilter === "not_mapped") return false; // mapped/not_mapped only applies to authkey
-                                        if (templateFilter === "draft" && ct.status !== "draft") return false;
-                                        if (templateFilter === "pending" && ct.status !== "pending") return false;
-                                        if (templateFilter === "approved" && ct.status !== "approved") return false;
-                                        // Category filter
-                                        if (categoryFilter !== "all" && ct.category !== categoryFilter) return false;
-                                        return true;
-                                    });
+                                    // Apply filters
+                                    let displayTemplates = []; // authkey templates to show
+                                    let displayDrafts = []; // local drafts to show
                                     
-                                    // Filter authkey templates (they don't have status — treat as "approved")
-                                    const filteredAuthkey = filteredTemplates.filter(tpl => {
-                                        if (templateFilter === "draft" || templateFilter === "pending") return false;
-                                        // Category filter — authkey templates don't have category, show them under "all"
-                                        if (categoryFilter !== "all") return false;
-                                        return true;
-                                    });
+                                    if (templateFilter === "all") {
+                                        displayTemplates = authkeyTemplates;
+                                        displayDrafts = customTemplates;
+                                    } else if (templateFilter === "approved") {
+                                        displayTemplates = approvedAuthkey;
+                                        // Apply mapped/not_mapped toggle
+                                        if (mappingToggle === "mapped") {
+                                            displayTemplates = displayTemplates.filter(tpl => {
+                                                const vars = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                                return vars.length === 0 || isTemplateFullyMapped(tpl);
+                                            });
+                                        } else {
+                                            displayTemplates = displayTemplates.filter(tpl => {
+                                                const vars = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                                return vars.length > 0 && !isTemplateFullyMapped(tpl);
+                                            });
+                                        }
+                                    } else if (templateFilter === "pending") {
+                                        displayTemplates = pendingAuthkey;
+                                    } else if (templateFilter === "draft") {
+                                        displayDrafts = customTemplates;
+                                    }
                                     
-                                    const totalCount = authkeyTemplates.length + customTemplates.length;
+                                    // Apply category filter
+                                    if (categoryFilter !== "all") {
+                                        displayDrafts = displayDrafts.filter(ct => ct.category === categoryFilter);
+                                        // Authkey templates don't have category yet, hide them when category is filtered
+                                        displayTemplates = [];
+                                    }
                                     
                                     return (
                                         <>
-                                            {/* Status filter pills */}
+                                            {/* Filter bar */}
                                             <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                                                <div className="flex gap-2 flex-wrap">
-                                                    <button onClick={() => setTemplateFilter("all")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "all" ? "bg-[#1A1A1A] text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`} data-testid="filter-all-templates">
-                                                        All ({totalCount})
-                                                    </button>
-                                                    {draftCount > 0 && (
-                                                        <button onClick={() => setTemplateFilter("draft")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "draft" ? "bg-gray-500 text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`} data-testid="filter-draft-templates">
-                                                            Draft ({draftCount})
-                                                        </button>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    {/* Status dropdown */}
+                                                    <Select value={templateFilter} onValueChange={(val) => { setTemplateFilter(val); if (val === "approved") setMappingToggle("mapped"); }}>
+                                                        <SelectTrigger className="h-9 w-[140px] rounded-full text-sm" data-testid="status-filter">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="approved">Approved</SelectItem>
+                                                            <SelectItem value="pending">Pending</SelectItem>
+                                                            <SelectItem value="draft">Draft</SelectItem>
+                                                            <SelectItem value="all">All</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    
+                                                    {/* Mapped / Not Mapped toggle — only when Approved */}
+                                                    {templateFilter === "approved" && (
+                                                        <div className="flex rounded-full border bg-white overflow-hidden">
+                                                            <button
+                                                                onClick={() => setMappingToggle("mapped")}
+                                                                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                                                                    mappingToggle === "mapped"
+                                                                        ? "bg-[#25D366] text-white"
+                                                                        : "text-gray-600 hover:bg-gray-100"
+                                                                }`}
+                                                                data-testid="toggle-mapped"
+                                                            >
+                                                                Mapped ({mappedCount})
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setMappingToggle("not_mapped")}
+                                                                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
+                                                                    mappingToggle === "not_mapped"
+                                                                        ? "bg-amber-500 text-white"
+                                                                        : "text-gray-600 hover:bg-gray-100"
+                                                                }`}
+                                                                data-testid="toggle-not-mapped"
+                                                            >
+                                                                Not Mapped ({notMappedCount})
+                                                            </button>
+                                                        </div>
                                                     )}
-                                                    {pendingCount > 0 && (
-                                                        <button onClick={() => setTemplateFilter("pending")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "pending" ? "bg-amber-500 text-white" : "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"}`} data-testid="filter-pending-templates">
-                                                            Pending ({pendingCount})
-                                                        </button>
-                                                    )}
-                                                    {approvedCount > 0 && (
-                                                        <button onClick={() => setTemplateFilter("approved")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "approved" ? "bg-[#25D366] text-white" : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"}`} data-testid="filter-approved-templates">
-                                                            Approved ({approvedCount + authkeyTemplates.length})
-                                                        </button>
-                                                    )}
-                                                    <button onClick={() => setTemplateFilter("mapped")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "mapped" ? "bg-[#25D366] text-white" : "bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20"}`} data-testid="filter-mapped-templates">
-                                                        Mapped ({mappedCount})
-                                                    </button>
-                                                    <button onClick={() => setTemplateFilter("not_mapped")} className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${templateFilter === "not_mapped" ? "bg-amber-500 text-white" : "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"}`} data-testid="filter-not-mapped-templates">
-                                                        Not Mapped ({notMappedCount})
-                                                    </button>
                                                 </div>
                                                 <div className="flex items-center gap-2">
+                                                    {/* Category dropdown */}
                                                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                                        <SelectTrigger className="h-9 w-[140px] rounded-full text-sm" data-testid="category-filter">
+                                                        <SelectTrigger className="h-9 w-[150px] rounded-full text-sm" data-testid="category-filter">
                                                             <Filter className="w-3.5 h-3.5 mr-1 text-gray-500" />
                                                             <SelectValue placeholder="Category" />
                                                         </SelectTrigger>
@@ -6170,14 +6201,14 @@ const WhatsAppAutomationPage = () => {
                                             </div>
                                             <div className="border-b border-gray-200 mb-4"></div>
                                             
-                                            {/* Custom Templates */}
-                                            {filteredCustom.length > 0 && (
+                                            {/* Draft Templates */}
+                                            {displayDrafts.length > 0 && (
                                                 <div className="mb-4">
-                                                    {(templateFilter === "all" || templateFilter === "draft" || templateFilter === "pending" || templateFilter === "approved") && filteredAuthkey.length > 0 && (
-                                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Custom Templates</p>
+                                                    {displayTemplates.length > 0 && (
+                                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Draft Templates</p>
                                                     )}
                                                     <div className="space-y-3">
-                                                        {filteredCustom.map(ct => (
+                                                        {displayDrafts.map(ct => (
                                                             <Card key={ct.id} className="rounded-xl border-0 shadow-sm overflow-hidden">
                                                                 <CardContent className="p-4">
                                                                     <div className="flex items-start justify-between mb-2">
