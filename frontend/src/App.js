@@ -4366,60 +4366,6 @@ const SegmentsPage = () => {
                                     )}
                                 </div>
 
-                                {/* Complete Template Preview with Media */}
-                                {messageTemplate && (
-                                    <div className="rounded-xl border overflow-hidden bg-[#E5DDD5]">
-                                        <div className="p-2">
-                                            <p className="text-xs font-medium text-[#52525B] mb-2 bg-white/80 rounded px-2 py-1 inline-block">
-                                                📱 Message Preview
-                                            </p>
-                                            
-                                            {/* WhatsApp Style Message Bubble */}
-                                            <div className="bg-[#DCF8C6] rounded-lg p-3 max-w-[85%] ml-auto shadow-sm">
-                                                {/* Media Preview */}
-                                                {currentTemplate?.mediaType === "image" && currentTemplate.mediaUrl && (
-                                                    <div className="mb-2 rounded-lg overflow-hidden">
-                                                        <img 
-                                                            src={currentTemplate.mediaUrl} 
-                                                            alt="Template media" 
-                                                            className="w-full h-40 object-cover"
-                                                        />
-                                                    </div>
-                                                )}
-                                                {currentTemplate?.mediaType === "video" && currentTemplate.mediaUrl && (
-                                                    <div className="mb-2 rounded-lg overflow-hidden bg-black relative">
-                                                        <div className="w-full h-32 flex items-center justify-center bg-gray-900">
-                                                            <div className="text-center text-white">
-                                                                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-2">
-                                                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                                                        <path d="M8 5v14l11-7z"/>
-                                                                    </svg>
-                                                                </div>
-                                                                <p className="text-xs">Video Attachment</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                
-                                                {/* Message Text */}
-                                                <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                                                    {getPreviewMessage()}
-                                                </p>
-                                                
-                                                {/* Timestamp */}
-                                                <div className="flex items-center justify-end gap-1 mt-1">
-                                                    <span className="text-[10px] text-gray-500">
-                                                        {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                                    </span>
-                                                    <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
                                     <p className="text-xs text-amber-800">
                                         <strong>⚠️ Coming Soon:</strong> WhatsApp Business API integration is in development.
