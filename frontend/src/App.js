@@ -3482,6 +3482,8 @@ const SegmentsPage = () => {
     const [segmentTemplateVariableMappings, setSegmentTemplateVariableMappings] = useState({});
     // Sample customer data for previews
     const [segmentSampleData, setSegmentSampleData] = useState({});
+    // Template variable modes for segments
+    const [segmentTemplateVariableModes, setSegmentTemplateVariableModes] = useState({});
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
