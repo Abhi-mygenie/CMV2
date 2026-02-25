@@ -7170,6 +7170,7 @@ const TemplatesPage = () => {
                 const res = await api.get("/whatsapp/api-key");
                 setWhatsappApiKey(res.data.authkey_api_key || "");
             } catch (_) {}
+            setInitialLoading(false);
         };
         fetchData();
     }, []);
