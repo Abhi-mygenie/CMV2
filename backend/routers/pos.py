@@ -608,6 +608,21 @@ async def _find_or_create_customer(
         "allergies": [],
         "favorites": [],
         
+        # Dining Preferences
+        "preferred_dining_type": None,
+        "preferred_time_slot": None,
+        "favorite_table": None,
+        "avg_party_size": None,
+        "diet_preference": None,
+        "spice_level": None,
+        "cuisine_preference": None,
+        
+        # Special Occasions
+        "kids_birthday": [],
+        "spouse_name": None,
+        "festival_preference": [],
+        "special_dates": [],
+        
         # Custom Fields
         "custom_field_1": None,
         "custom_field_2": None,
