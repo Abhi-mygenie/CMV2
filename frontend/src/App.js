@@ -6421,43 +6421,118 @@ const WhatsAppAutomationPage = () => {
                 <Dialog open={showVariableMappingModal} onOpenChange={setShowVariableMappingModal}>
                     <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <DialogTitle>Map Template Variables</DialogTitle>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Tag className="w-5 h-5" />
+                                Map Template Variables
+                            </DialogTitle>
                             <DialogDescription>
-                                Map each placeholder to a database field for {mappingTemplate?.temp_name}
+                                Choose to map each variable to a customer field or enter custom text
                             </DialogDescription>
                         </DialogHeader>
                         {mappingTemplate && (
                             <div className="space-y-4">
-                                <div className="bg-gray-50 p-3 rounded-lg">
-                                    <p className="text-xs text-[#52525B] mb-2 font-medium">Template Preview:</p>
-                                    <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap">{mappingTemplate.temp_body}</p>
+                                {/* WhatsApp-style Preview */}
+                                <div className="rounded-lg overflow-hidden bg-[#E5DDD5]">
+                                    <div className="p-3">
+                                        <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm">
+                                            {(() => {
+                                                let previewText = mappingTemplate.temp_body || "";
+                                                Object.entries(variableMappings).forEach(([key, value]) => {
+                                                    if (value && value !== "none") {
+                                                        const mode = variableMappingModes[key] || "map";
+                                                        const displayValue = mode === "text" 
+                                                            ? value 
+                                                            : (availableVariables.find(v => v.key === value)?.label || value);
+                                                        previewText = previewText.replace(new RegExp(key.replace(/[{}]/g, '\\$&'), 'g'), displayValue);
+                                                    }
+                                                });
+                                                return (
+                                                    <>
+                                                        <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-10">{previewText}</p>
+                                                        <div className="flex items-center justify-end gap-1 mt-1">
+                                                            <span className="text-[10px] text-gray-500">
+                                                                {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                                                            </span>
+                                                            <svg className="w-4 h-4 text-[#53BDEB]" viewBox="0 0 16 15" fill="currentColor">
+                                                                <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.51zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.89 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z"/>
+                                                            </svg>
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
                                 </div>
-                                
+
+                                {/* Variable Mapping Controls */}
                                 <div className="space-y-3">
-                                    <p className="text-sm font-medium text-[#1A1A1A]">Variable Mappings:</p>
                                     {mappingTemplate.variables?.map(variable => (
-                                        <div key={variable} className="flex items-center gap-3">
-                                            <Badge variant="outline" className="min-w-[50px] justify-center">{variable}</Badge>
-                                            <span className="text-gray-400">→</span>
-                                            <Select
-                                                value={variableMappings[variable] || ""}
-                                                onValueChange={(val) => setVariableMappings(prev => ({
-                                                    ...prev,
-                                                    [variable]: val
-                                                }))}
-                                            >
-                                                <SelectTrigger className="flex-1 h-10 rounded-lg" data-testid={`var-map-${variable}`}>
-                                                    <SelectValue placeholder="Select field" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="none">-- None --</SelectItem>
-                                                    {availableVariables.map(field => (
-                                                        <SelectItem key={field.key} value={field.key}>
-                                                            {field.label} (e.g., {field.example})
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                        <div key={variable} className="bg-gray-50 rounded-xl p-3 space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <Badge variant="outline" className="bg-white font-mono text-sm">
+                                                    {variable}
+                                                </Badge>
+                                                <div className="flex rounded-lg border bg-white overflow-hidden">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setVariableMappingModes(prev => ({...prev, [variable]: "map"}))}
+                                                        className={`px-3 py-1 text-xs font-medium transition-colors ${
+                                                            (variableMappingModes[variable] || "map") === "map"
+                                                                ? "bg-[#F26B33] text-white"
+                                                                : "bg-white text-gray-600 hover:bg-gray-100"
+                                                        }`}
+                                                        data-testid={`var-mode-map-${variable}`}
+                                                    >
+                                                        Map to Field
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setVariableMappingModes(prev => ({...prev, [variable]: "text"}))}
+                                                        className={`px-3 py-1 text-xs font-medium transition-colors ${
+                                                            variableMappingModes[variable] === "text"
+                                                                ? "bg-[#F26B33] text-white"
+                                                                : "bg-white text-gray-600 hover:bg-gray-100"
+                                                        }`}
+                                                        data-testid={`var-mode-text-${variable}`}
+                                                    >
+                                                        Custom Text
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            {variableMappingModes[variable] === "text" ? (
+                                                <Input
+                                                    type="text"
+                                                    value={variableMappings[variable] || ""}
+                                                    onChange={(e) => setVariableMappings(prev => ({
+                                                        ...prev,
+                                                        [variable]: e.target.value
+                                                    }))}
+                                                    placeholder="Enter custom text..."
+                                                    className="h-10 rounded-lg"
+                                                    data-testid={`var-text-${variable}`}
+                                                />
+                                            ) : (
+                                                <Select
+                                                    value={variableMappings[variable] || ""}
+                                                    onValueChange={(val) => setVariableMappings(prev => ({
+                                                        ...prev,
+                                                        [variable]: val
+                                                    }))}
+                                                >
+                                                    <SelectTrigger className="h-10 rounded-lg bg-white" data-testid={`var-map-${variable}`}>
+                                                        <SelectValue placeholder="Select a field..." />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="none">-- None --</SelectItem>
+                                                        {availableVariables.map(field => (
+                                                            <SelectItem key={field.key} value={field.key}>
+                                                                {field.label} (e.g., {field.example})
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -6469,6 +6544,7 @@ const WhatsAppAutomationPage = () => {
                                             setShowVariableMappingModal(false);
                                             setMappingTemplate(null);
                                             setVariableMappings({});
+                                            setVariableMappingModes({});
                                         }}
                                     >
                                         Cancel
