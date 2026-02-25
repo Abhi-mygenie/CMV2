@@ -3770,9 +3770,6 @@ const SegmentsPage = () => {
     const activeConfigsCount = Object.values(whatsappConfigs).filter(c => c?.is_active !== false).length;
     const notConfiguredCount = allSegments.length - Object.keys(whatsappConfigs).length;
     
-    // Filter state for segments
-    const [segmentFilter, setSegmentFilter] = useState("all"); // "all", "active", "not_configured"
-    
     // Filtered segments based on filter
     const filteredSegments = allSegments.filter(segment => {
         const hasConfig = !!whatsappConfigs[segment.id];
