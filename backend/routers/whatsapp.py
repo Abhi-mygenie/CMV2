@@ -230,6 +230,65 @@ async def save_whatsapp_api_key(payload: dict, user: dict = Depends(get_current_
     )
     return {"message": "WhatsApp API key saved", "authkey_api_key": api_key}
 
+
+@router.get("/authkey-templates")
+async def get_authkey_templates(user: dict = Depends(get_current_user)):
+    """Fetch WhatsApp templates from AuthKey.io using the user's saved API key."""
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "authkey_api_key": 1})
+    api_key = user_doc.get("authkey_api_key", "") if user_doc else ""
+    if not api_key:
+        raise HTTPException(status_code=400, detail="WhatsApp API key not configured. Please add it in Settings.")
+    async with httpx.AsyncClient(timeout=15) as client:
+        resp = await client.post(
+            "https://console.authkey.io/restapi/getAllTemplate.php",
+            headers={"Authorization": f"Basic {api_key}", "Content-Type": "application/json"},
+            json={"channel": "whatsapp"},
+        )
+    data = resp.json()
+    if not data.get("status"):
+        raise HTTPException(status_code=400, detail="Invalid API key or AuthKey.io request failed.")
+    return {"templates": data.get("data", [])}
+
+
+@router.put("/event-template-map")
+async def save_event_template_map(payload: dict, user: dict = Depends(get_current_user)):
+    """Save event→template mappings. Upserts per (user_id, event_key)."""
+    mappings = payload.get("mappings", [])
+    if not mappings:
+        raise HTTPException(status_code=400, detail="No mappings provided.")
+    now = datetime.now(timezone.utc).isoformat()
+    saved = 0
+    for m in mappings:
+        event_key = m.get("event_key")
+        template_id = m.get("template_id")
+        template_name = m.get("template_name", "")
+        if not event_key or template_id is None:
+            continue
+        await db.whatsapp_event_template_map.update_one(
+            {"user_id": user["id"], "event_key": event_key},
+            {"$set": {
+                "template_id": template_id,
+                "template_name": template_name,
+                "updated_at": now,
+            }, "$setOnInsert": {
+                "user_id": user["id"],
+                "event_key": event_key,
+                "created_at": now,
+            }},
+            upsert=True,
+        )
+        saved += 1
+    return {"message": "Mappings saved", "count": saved}
+
+
+@router.get("/event-template-map")
+async def get_event_template_map(user: dict = Depends(get_current_user)):
+    """Get saved event→template mappings for the current user."""
+    docs = await db.whatsapp_event_template_map.find(
+        {"user_id": user["id"]}, {"_id": 0, "user_id": 0}
+    ).to_list(100)
+    return {"mappings": docs}
+
 @router.post("/automation/{rule_id}/toggle")
 async def toggle_automation_rule(rule_id: str, user: dict = Depends(get_current_user)):
     rule = await db.automation_rules.find_one({"id": rule_id, "user_id": user["id"]})
