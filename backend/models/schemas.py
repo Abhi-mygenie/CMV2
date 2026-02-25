@@ -435,5 +435,6 @@ AUTOMATION_EVENTS = [
     "coupon_earned",
     "points_expiring",
     "feedback_received",
-    "inactive_reminder"
+    "inactive_reminder",
+    "send_bill"
 ]

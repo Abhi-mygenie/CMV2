@@ -173,7 +173,8 @@ async def get_automation_events():
         "coupon_earned": "When customer receives a coupon",
         "points_expiring": "When points are about to expire",
         "feedback_received": "When customer submits feedback",
-        "inactive_reminder": "When customer hasn't visited in X days"
+        "inactive_reminder": "When customer hasn't visited in X days",
+        "send_bill": "When a new order is received, send the bill to the customer"
     }
     return {"events": AUTOMATION_EVENTS, "descriptions": event_descriptions}
 

@@ -4778,7 +4778,8 @@ const WhatsAppAutomationPage = () => {
         "coupon_earned": "Coupon Received",
         "points_expiring": "Points Expiring Reminder",
         "feedback_received": "Feedback Thank You",
-        "inactive_reminder": "Win-back Message"
+        "inactive_reminder": "Win-back Message",
+        "send_bill": "Send Bill (New Order)"
     };
 
     useEffect(() => {
