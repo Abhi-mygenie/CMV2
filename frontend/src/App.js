@@ -6362,6 +6362,95 @@ const WhatsAppAutomationPage = () => {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                {/* Template Preview Modal */}
+                <Dialog open={showTemplatePreview} onOpenChange={setShowTemplatePreview}>
+                    <DialogContent className="sm:max-w-md rounded-xl">
+                        <DialogHeader>
+                            <DialogTitle className="text-lg flex items-center gap-2">
+                                <Eye className="w-5 h-5 text-[#25D366]" />
+                                {previewTemplate?.temp_name || "Template Preview"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        
+                        {previewTemplate && (
+                            <div className="space-y-4">
+                                {/* Message Preview - WhatsApp Style */}
+                                <div className="bg-[#E5DDD5] rounded-xl p-3">
+                                    <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm">
+                                        <p className="text-sm text-gray-800 whitespace-pre-wrap">
+                                            {previewTemplate.temp_body}
+                                        </p>
+                                        <div className="flex items-center justify-end gap-1 mt-2">
+                                            <span className="text-[10px] text-gray-500">
+                                                {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                            </span>
+                                            <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Variable Mappings */}
+                                {(() => {
+                                    const variables = (previewTemplate.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
+                                    if (variables.length === 0) return null;
+                                    
+                                    const mappings = templateVariableMappings[previewTemplate.wid] || {};
+                                    
+                                    return (
+                                        <div className="space-y-2">
+                                            <p className="text-sm font-medium text-gray-700">Variable Mappings:</p>
+                                            <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                                                {variables.map(v => {
+                                                    const mappedField = mappings[v];
+                                                    const fieldLabel = mappedField 
+                                                        ? availableVariables.find(av => av.key === mappedField)?.label || mappedField 
+                                                        : null;
+                                                    
+                                                    return (
+                                                        <div key={v} className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <Badge variant="outline" className="font-mono text-xs">
+                                                                    {v}
+                                                                </Badge>
+                                                                <span className="text-gray-400">→</span>
+                                                                <span className={`text-sm ${fieldLabel ? 'text-[#25D366] font-medium' : 'text-gray-400 italic'}`}>
+                                                                    {fieldLabel || "Not mapped"}
+                                                                </span>
+                                                            </div>
+                                                            {fieldLabel ? (
+                                                                <Check className="w-4 h-4 text-[#25D366]" />
+                                                            ) : (
+                                                                <div className="w-4 h-4 rounded-full border-2 border-gray-300" />
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
+
+                                {/* Select This Template Button */}
+                                <Button
+                                    className="w-full bg-[#25D366] hover:bg-[#20BD5A] rounded-xl"
+                                    onClick={() => {
+                                        if (previewTemplate) {
+                                            setEditingEventValue(previewTemplate.wid.toString());
+                                        }
+                                        setShowTemplatePreview(false);
+                                    }}
+                                    data-testid="select-preview-template"
+                                >
+                                    <Check className="w-4 h-4 mr-2" />
+                                    Select This Template
+                                </Button>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </MobileLayout>
     );
