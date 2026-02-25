@@ -3456,6 +3456,16 @@ const SegmentsPage = () => {
     const [editingSegment, setEditingSegment] = useState(null);
     const [segmentName, setSegmentName] = useState("");
     const [templateVariables, setTemplateVariables] = useState({});
+    // Scheduling state
+    const [sendOption, setSendOption] = useState("now"); // "now", "scheduled", "recurring"
+    const [scheduledDate, setScheduledDate] = useState("");
+    const [scheduledTime, setScheduledTime] = useState("10:00");
+    const [recurringFrequency, setRecurringFrequency] = useState("daily"); // "daily", "weekly", "monthly"
+    const [recurringDays, setRecurringDays] = useState([]); // For weekly: ["mon", "wed", "fri"]
+    const [recurringDayOfMonth, setRecurringDayOfMonth] = useState("1"); // For monthly
+    const [recurringEndOption, setRecurringEndOption] = useState("never"); // "never", "date", "occurrences"
+    const [recurringEndDate, setRecurringEndDate] = useState("");
+    const [recurringOccurrences, setRecurringOccurrences] = useState("10");
 
     // Sample campaigns - in real app, fetch from API
     const campaigns = [
