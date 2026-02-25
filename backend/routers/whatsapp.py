@@ -307,6 +307,16 @@ async def get_event_template_map(user: dict = Depends(get_current_user)):
     ).to_list(100)
     return {"mappings": docs}
 
+@router.delete("/event-template-map/{event_key}")
+async def delete_event_template_map(event_key: str, user: dict = Depends(get_current_user)):
+    """Delete/unmap a template from an event."""
+    result = await db.whatsapp_event_template_map.delete_one(
+        {"user_id": user["id"], "event_key": event_key}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Event mapping not found")
+    return {"message": "Template unmapped successfully", "event_key": event_key}
+
 @router.post("/automation/{rule_id}/toggle")
 async def toggle_automation_rule(rule_id: str, user: dict = Depends(get_current_user)):
     rule = await db.automation_rules.find_one({"id": rule_id, "user_id": user["id"]})
