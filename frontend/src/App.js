@@ -6047,16 +6047,14 @@ const WhatsAppAutomationPage = () => {
                     </TabsList>
 
                     {/* Automation Tab - Card-based Layout */}
-                        ) : (
-                            <div className="space-y-3">
-                                {/* Filter Tabs for Templates */}
-                                {(() => {
-                                    const mappedCount = authkeyTemplates.filter(tpl => {
-                                        const variables = (tpl.temp_body.match(/\{\{\d+\}\}/g) || []).filter((v, i, a) => a.indexOf(v) === i);
-                                        if (variables.length === 0) return true;
-                                        return isTemplateFullyMapped(tpl);
-                                    }).length;
-                                    const notMappedCount = authkeyTemplates.length - mappedCount;
+                    <TabsContent value="automation" className="mt-4">
+                        {!whatsappApiKey ? (
+                            <Card className="rounded-xl border-0 shadow-sm">
+                                <CardContent className="p-8 text-center">
+                                    <KeyRound className="w-12 h-12 text-amber-400 mx-auto mb-3" />
+                                    <p className="text-[#52525B]">API Key Required</p>
+                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to map templates to events</p>
+                                    <Button onClick={() => setActiveTab("settings")} variant="outline" className="mt-4">
                                     
                                     // Filter templates based on filter
                                     const filteredTemplates = authkeyTemplates.filter(tpl => {
