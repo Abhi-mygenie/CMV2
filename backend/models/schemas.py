@@ -97,6 +97,21 @@ class CustomerBase(BaseModel):
     allergies: Optional[List[str]] = None
     favorites: Optional[List[str]] = None
     
+    # Dining Preferences
+    preferred_dining_type: Optional[str] = None  # Dine-In, Takeaway, Delivery
+    preferred_time_slot: Optional[str] = None
+    favorite_table: Optional[str] = None
+    avg_party_size: Optional[int] = None
+    diet_preference: Optional[str] = None  # Veg, Non-Veg, Vegan, Jain, Eggetarian
+    spice_level: Optional[str] = None  # Mild, Medium, Spicy, Extra Spicy
+    cuisine_preference: Optional[str] = None
+    
+    # Special Occasions
+    kids_birthday: Optional[List[str]] = None  # Array of dates
+    spouse_name: Optional[str] = None
+    festival_preference: Optional[List[str]] = None  # Diwali, Eid, Christmas, etc.
+    special_dates: Optional[List[dict]] = None  # [{date, label}]
+    
     # Custom Fields
     custom_field_1: Optional[str] = None
     custom_field_2: Optional[str] = None
