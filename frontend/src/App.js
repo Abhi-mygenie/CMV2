@@ -5170,44 +5170,91 @@ const WhatsAppAutomationPage = () => {
                                         <div className="space-y-3">
                                             {availableEvents.map(eventKey => {
                                                 const mapped = eventMappings[eventKey];
+                                                const isSaved = mapped?.saved;
+                                                const isEditing = editingEvent === eventKey;
+
                                                 return (
                                                     <Card key={eventKey} className="rounded-xl border-0 shadow-sm" data-testid={`event-map-${eventKey}`}>
                                                         <CardContent className="p-4">
-                                                            <p className="font-semibold text-[#1A1A1A] text-sm">{eventLabels[eventKey] || eventKey}</p>
-                                                            <Select
-                                                                value={mapped?.template_id?.toString() || ""}
-                                                                onValueChange={(val) => {
-                                                                    const tpl = authkeyTemplates.find(t => t.wid.toString() === val);
-                                                                    setEventMappings(prev => ({
-                                                                        ...prev,
-                                                                        [eventKey]: tpl ? { template_id: tpl.wid, template_name: tpl.temp_name } : null,
-                                                                    }));
-                                                                }}
-                                                            >
-                                                                <SelectTrigger className="h-10 rounded-xl mt-2" data-testid={`select-template-${eventKey}`}>
-                                                                    <SelectValue placeholder="Select template" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {authkeyTemplates.map(tpl => (
-                                                                        <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
-                                                                            {tpl.temp_name}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <p className="font-semibold text-[#1A1A1A] text-sm">{eventLabels[eventKey] || eventKey}</p>
+                                                                {isSaved && !isEditing && (
+                                                                    <Badge className="bg-[#25D366] text-white text-xs">Mapped</Badge>
+                                                                )}
+                                                            </div>
+
+                                                            {isSaved && !isEditing ? (
+                                                                <div className="flex items-center justify-between mt-2">
+                                                                    <p className="text-sm text-[#52525B]">Template: <span className="font-medium">{mapped.template_name}</span></p>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="h-8 rounded-lg text-xs"
+                                                                        onClick={() => {
+                                                                            setEditingEvent(eventKey);
+                                                                            setEditingEventValue(mapped.template_id?.toString() || "");
+                                                                        }}
+                                                                        data-testid={`edit-event-${eventKey}`}
+                                                                    >
+                                                                        <Edit2 className="w-3 h-3 mr-1" /> Edit
+                                                                    </Button>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <Select
+                                                                        value={isEditing ? (editingEventValue || "") : ""}
+                                                                        onValueChange={(val) => {
+                                                                            if (isEditing) {
+                                                                                setEditingEventValue(val);
+                                                                            } else {
+                                                                                setEditingEvent(eventKey);
+                                                                                setEditingEventValue(val);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <SelectTrigger className="h-10 rounded-xl mt-2" data-testid={`select-template-${eventKey}`}>
+                                                                            <SelectValue placeholder="Select template" />
+                                                                        </SelectTrigger>
+                                                                        <SelectContent>
+                                                                            {authkeyTemplates.map(tpl => (
+                                                                                <SelectItem key={tpl.wid} value={tpl.wid.toString()}>
+                                                                                    {tpl.temp_name}
+                                                                                </SelectItem>
+                                                                            ))}
+                                                                        </SelectContent>
+                                                                    </Select>
+                                                                    <div className="flex justify-end gap-2 mt-2">
+                                                                        {isEditing && (
+                                                                            <Button
+                                                                                variant="outline"
+                                                                                size="sm"
+                                                                                className="h-8 rounded-lg text-xs"
+                                                                                onClick={() => { setEditingEvent(null); setEditingEventValue(null); }}
+                                                                            >
+                                                                                Cancel
+                                                                            </Button>
+                                                                        )}
+                                                                        <Button
+                                                                            size="sm"
+                                                                            className="h-8 rounded-lg text-xs bg-[#25D366] hover:bg-[#1da851] text-white"
+                                                                            disabled={savingMappings || !(isEditing ? editingEventValue : false)}
+                                                                            onClick={() => {
+                                                                                const val = editingEventValue;
+                                                                                const tpl = authkeyTemplates.find(t => t.wid.toString() === val);
+                                                                                if (tpl) handleSaveEventMapping(eventKey, tpl.wid, tpl.temp_name);
+                                                                            }}
+                                                                            data-testid={`save-event-${eventKey}`}
+                                                                        >
+                                                                            {savingMappings ? "Saving..." : "Save"}
+                                                                        </Button>
+                                                                    </div>
+                                                                </>
+                                                            )}
                                                         </CardContent>
                                                     </Card>
                                                 );
                                             })}
                                         </div>
-                                        <Button
-                                            onClick={handleSaveMappings}
-                                            disabled={savingMappings}
-                                            className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white mt-4"
-                                            data-testid="save-mappings-btn"
-                                        >
-                                            {savingMappings ? "Saving..." : "Save Mappings"}
-                                        </Button>
                                     </>
                                 )}
                             </>
