@@ -948,8 +948,37 @@ const CustomersPage = () => {
                             <Plus className="w-4 h-4 mr-1" /> Add
                         </Button>
                     </div>
+                    )}
                 </div>
 
+                {/* Tab switcher */}
+                <div className="flex gap-2 mb-4">
+                    <button
+                        onClick={() => setCustomerTab("customers")}
+                        className={`flex-1 py-2 text-sm font-medium rounded-full transition-colors ${
+                            customerTab === "customers"
+                                ? "bg-[#1A1A1A] text-white"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                        data-testid="tab-customers"
+                    >
+                        Customers
+                    </button>
+                    <button
+                        onClick={() => setCustomerTab("segments")}
+                        className={`flex-1 py-2 text-sm font-medium rounded-full transition-colors ${
+                            customerTab === "segments"
+                                ? "bg-[#1A1A1A] text-white"
+                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                        }`}
+                        data-testid="tab-segments"
+                    >
+                        Segments
+                    </button>
+                </div>
+
+                {customerTab === "customers" ? (
+                <>
                 {/* Search & Filter Row */}
                 <div className="flex gap-2 mb-4">
                     <div className="relative flex-1">
