@@ -6483,19 +6483,15 @@ const WhatsAppAutomationPage = () => {
                                     <div className="p-3">
                                         <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm">
                                             {(() => {
-                                                let previewText = mappingTemplate.temp_body || "";
-                                                Object.entries(variableMappings).forEach(([key, value]) => {
-                                                    if (value && value !== "none") {
-                                                        const mode = variableMappingModes[key] || "map";
-                                                        const displayValue = mode === "text" 
-                                                            ? value 
-                                                            : (availableVariables.find(v => v.key === value)?.label || value);
-                                                        previewText = previewText.replace(new RegExp(key.replace(/[{}]/g, '\\$&'), 'g'), displayValue);
-                                                    }
-                                                });
+                                                const parts = resolvePreviewWithSampleData(mappingTemplate.temp_body, variableMappings, variableMappingModes);
                                                 return (
                                                     <>
-                                                        <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-10">{previewText}</p>
+                                                        <p className="text-sm text-[#1A1A1A] whitespace-pre-wrap pr-10">
+                                                            {parts.map((part, idx) => {
+                                                                if (part.type === "na") return <span key={idx} className="text-red-500 font-medium">NA</span>;
+                                                                return <span key={idx}>{part.value}</span>;
+                                                            })}
+                                                        </p>
                                                         <div className="flex items-center justify-end gap-1 mt-1">
                                                             <span className="text-[10px] text-gray-500">
                                                                 {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
