@@ -211,31 +211,69 @@ async def create_customer(customer_data: CustomerCreate, user: dict = Depends(ge
     customer_doc = {
         "id": customer_id,
         "user_id": user["id"],
+        "created_at": now,
+        "updated_at": now,
+        
+        # Basic Information
         "name": customer_data.name,
         "phone": customer_data.phone,
         "country_code": customer_data.country_code,
         "email": customer_data.email,
-        "notes": customer_data.notes,
+        "gender": customer_data.gender,
         "dob": customer_data.dob,
         "anniversary": customer_data.anniversary,
+        "preferred_language": customer_data.preferred_language,
         "customer_type": customer_data.customer_type,
+        "segment_tags": customer_data.segment_tags or [],
+        
+        # Contact & Marketing Permissions
+        "whatsapp_opt_in": customer_data.whatsapp_opt_in,
+        "whatsapp_opt_in_date": customer_data.whatsapp_opt_in_date,
+        "promo_whatsapp_allowed": customer_data.promo_whatsapp_allowed,
+        "promo_sms_allowed": customer_data.promo_sms_allowed,
+        "email_marketing_allowed": customer_data.email_marketing_allowed,
+        "call_allowed": customer_data.call_allowed,
+        "is_blocked": customer_data.is_blocked,
+        
+        # Loyalty Information
+        "total_points": first_visit_bonus,
+        "wallet_balance": 0.0,
+        "tier": "Bronze",
+        "referral_code": customer_data.referral_code,
+        "referred_by": customer_data.referred_by,
+        "membership_id": customer_data.membership_id,
+        "membership_expiry": customer_data.membership_expiry,
+        
+        # Spending & Visit Behavior
+        "total_visits": 0,
+        "total_spent": 0.0,
+        "avg_order_value": 0.0,
+        "last_visit": None,
+        "favorite_category": customer_data.favorite_category,
+        "preferred_payment_mode": customer_data.preferred_payment_mode,
+        
+        # Corporate Information
         "gst_name": customer_data.gst_name,
         "gst_number": customer_data.gst_number,
+        
+        # Address
         "address": customer_data.address,
         "city": customer_data.city,
         "pincode": customer_data.pincode,
+        
+        # Preferences
         "allergies": customer_data.allergies or [],
+        "favorites": customer_data.favorites or [],
+        
+        # Custom Fields
         "custom_field_1": customer_data.custom_field_1,
         "custom_field_2": customer_data.custom_field_2,
         "custom_field_3": customer_data.custom_field_3,
-        "favorites": customer_data.favorites or [],
-        "total_points": first_visit_bonus,
-        "wallet_balance": 0.0,
-        "total_visits": 0,
-        "total_spent": 0.0,
-        "tier": "Bronze",
-        "created_at": now,
-        "last_visit": None,
+        
+        # Notes
+        "notes": customer_data.notes,
+        
+        # MyGenie Sync
         "mygenie_customer_id": mygenie_customer_id,
         "mygenie_synced": mygenie_customer_id is not None,
         "first_visit_bonus_awarded": first_visit_bonus > 0
