@@ -1161,7 +1161,14 @@ const CustomersPage = () => {
         e.preventDefault();
         setSubmitting(true);
         try {
-            await api.put(`/customers/${editingCustomer.id}`, editData);
+            // Only send fields that have actual values to avoid overwriting with empty strings
+            const cleanData = {};
+            for (const [key, value] of Object.entries(editData)) {
+                if (value !== "" && value !== null && value !== undefined) {
+                    cleanData[key] = value;
+                }
+            }
+            await api.put(`/customers/${editingCustomer.id}`, cleanData);
             toast.success("Customer updated successfully!");
             setShowEditModal(false);
             setEditingCustomer(null);
