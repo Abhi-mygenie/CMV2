@@ -1,0 +1,912 @@
+from fastapi import APIRouter, HTTPException, Depends, Header
+from pydantic import BaseModel
+from typing import Optional, List
+from datetime import datetime, timezone
+import uuid
+
+from core.database import db
+from core.auth import get_current_user, generate_api_key
+from core.helpers import calculate_tier, get_earn_percent_for_tier
+from models.schemas import (
+    POSPaymentWebhook, POSCustomerLookup, POSResponse,
+    MessageRequest
+)
+
+router = APIRouter(prefix="/pos", tags=["POS Gateway"])
+messaging_router = APIRouter(prefix="/messaging", tags=["Messaging"])
+
+# API Key Authentication Dependency
+async def verify_pos_api_key(x_api_key: str = Header(None, alias="X-API-Key")):
+    print(f"DEBUG: Received API key: {x_api_key}")
+    if not x_api_key:
+        raise HTTPException(status_code=401, detail="API key required in X-API-Key header")
+    
+    user = await db.users.find_one({"api_key": x_api_key}, {"_id": 0})
+    print(f"DEBUG: User found: {user is not None}")
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    return user
+
+
+# ============================================
+# POS Customer Management APIs (for MyGenie/other POS to call)
+# ============================================
+
+class POSCustomerCreate(BaseModel):
+    """Schema for POS to create a customer - includes all customer fields"""
+    # POS Identification (Required)
+    pos_id: str  # POS system identifier (mygenie, petpooja, ezzo)
+    restaurant_id: str  # Restaurant ID in that POS system
+    
+    # Basic Info
+    name: str
+    phone: str
+    country_code: str = "+91"
+    email: Optional[str] = None
+    
+    # Personal Details
+    dob: Optional[str] = None  # Date of birth (YYYY-MM-DD)
+    anniversary: Optional[str] = None  # Anniversary date (YYYY-MM-DD)
+    
+    # Customer Type
+    customer_type: str = "normal"  # "normal" or "corporate"
+    
+    # GST Details
+    gst_name: Optional[str] = None
+    gst_number: Optional[str] = None
+    
+    # Address
+    address: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+    
+    # Preferences
+    allergies: Optional[List[str]] = None  # List of allergies
+    favorites: Optional[List[str]] = None  # List of favorite items
+    
+    # Custom Fields
+    custom_field_1: Optional[str] = None
+    custom_field_2: Optional[str] = None
+    custom_field_3: Optional[str] = None
+    
+    # Notes
+    notes: Optional[str] = None
+
+
+class POSCustomerUpdate(BaseModel):
+    """Schema for POS to update a customer - phone is required as unique key"""
+    # POS Identification (Required)
+    pos_id: str  # POS system identifier (mygenie, petpooja, ezzo)
+    restaurant_id: str  # Restaurant ID in that POS system
+    
+    # Basic Info (phone is required - unique key)
+    phone: str  # Required - unique identifier
+    name: Optional[str] = None
+    country_code: Optional[str] = None
+    email: Optional[str] = None
+    
+    # Personal Details
+    dob: Optional[str] = None  # Date of birth (YYYY-MM-DD)
+    anniversary: Optional[str] = None  # Anniversary date (YYYY-MM-DD)
+    
+    # Customer Type
+    customer_type: Optional[str] = None  # "normal" or "corporate"
+    
+    # GST Details
+    gst_name: Optional[str] = None
+    gst_number: Optional[str] = None
+    
+    # Address
+    address: Optional[str] = None
+    city: Optional[str] = None
+    pincode: Optional[str] = None
+    
+    # Preferences
+    allergies: Optional[List[str]] = None  # List of allergies
+    favorites: Optional[List[str]] = None  # List of favorite items
+    
+    # Custom Fields
+    custom_field_1: Optional[str] = None
+    custom_field_2: Optional[str] = None
+    custom_field_3: Optional[str] = None
+    
+    # Notes
+    notes: Optional[str] = None
+
+
+@router.post("/customers", response_model=POSResponse)
+async def pos_create_customer(
+    customer_data: POSCustomerCreate,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    API for POS (MyGenie/others) to create a customer in our database.
+    Requires X-API-Key header for authentication.
+    """
+    # Check if phone exists for this user
+    existing = await db.customers.find_one({"user_id": user["id"], "phone": customer_data.phone})
+    if existing:
+        return POSResponse(
+            success=False,
+            message="Customer with this phone already exists",
+            data={"customer_id": existing["id"], "existing": True}
+        )
+    
+    customer_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    
+    customer_doc = {
+        "id": customer_id,
+        "user_id": user["id"],
+        # POS Identification
+        "pos_id": customer_data.pos_id,
+        "pos_restaurant_id": customer_data.restaurant_id,
+        # Basic Info
+        "name": customer_data.name,
+        "phone": customer_data.phone,
+        "country_code": customer_data.country_code,
+        "email": customer_data.email,
+        # Personal Details
+        "dob": customer_data.dob,
+        "anniversary": customer_data.anniversary,
+        # Customer Type
+        "customer_type": customer_data.customer_type,
+        # GST Details
+        "gst_name": customer_data.gst_name,
+        "gst_number": customer_data.gst_number,
+        # Address
+        "address": customer_data.address,
+        "city": customer_data.city,
+        "pincode": customer_data.pincode,
+        # Preferences
+        "allergies": customer_data.allergies or [],
+        "favorites": customer_data.favorites or [],
+        # Custom Fields
+        "custom_field_1": customer_data.custom_field_1,
+        "custom_field_2": customer_data.custom_field_2,
+        "custom_field_3": customer_data.custom_field_3,
+        # Notes
+        "notes": customer_data.notes,
+        # System Fields (default values)
+        "total_points": 0,
+        "wallet_balance": 0.0,
+        "total_visits": 0,
+        "total_spent": 0.0,
+        "tier": "Bronze",
+        "created_at": now,
+        "last_visit": None,
+        "pos_synced": True,
+        "pos_synced_at": now
+    }
+    
+    await db.customers.insert_one(customer_doc)
+    
+    return POSResponse(
+        success=True,
+        message="Customer created successfully",
+        data={
+            "customer_id": customer_id,
+            "name": customer_data.name,
+            "phone": customer_data.phone,
+            "created_at": now
+        }
+    )
+
+
+@router.put("/customers/{customer_id}", response_model=POSResponse)
+async def pos_update_customer(
+    customer_id: str,
+    update_data: POSCustomerUpdate,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    API for POS (MyGenie/others) to update a customer in our database.
+    Requires X-API-Key header for authentication.
+    """
+    customer = await db.customers.find_one({"id": customer_id, "user_id": user["id"]})
+    if not customer:
+        return POSResponse(
+            success=False,
+            message="Customer not found",
+            data=None
+        )
+    
+    update_dict = {k: v for k, v in update_data.model_dump().items() if v is not None}
+    
+    # Map restaurant_id to pos_restaurant_id for storage
+    if "restaurant_id" in update_dict:
+        update_dict["pos_restaurant_id"] = update_dict.pop("restaurant_id")
+    
+    # Check phone uniqueness if phone is being updated
+    if "phone" in update_dict and update_dict["phone"] != customer.get("phone"):
+        existing = await db.customers.find_one({
+            "user_id": user["id"],
+            "phone": update_dict["phone"],
+            "id": {"$ne": customer_id}
+        })
+        if existing:
+            return POSResponse(
+                success=False,
+                message="Another customer with this phone already exists",
+                data=None
+            )
+    
+    if update_dict:
+        update_dict["pos_synced"] = True
+        update_dict["pos_synced_at"] = datetime.now(timezone.utc).isoformat()
+        await db.customers.update_one({"id": customer_id}, {"$set": update_dict})
+    
+    updated = await db.customers.find_one({"id": customer_id}, {"_id": 0})
+    
+    return POSResponse(
+        success=True,
+        message="Customer updated successfully",
+        data={
+            "customer_id": customer_id,
+            "name": updated.get("name"),
+            "phone": updated.get("phone"),
+            "updated_at": update_dict.get("pos_synced_at")
+        }
+    )
+
+# ============================================
+# Loyalty Points - Max Redeemable Check
+# ============================================
+
+class POSMaxRedeemableRequest(BaseModel):
+    """Request to check max redeemable loyalty points"""
+    pos_id: str
+    restaurant_id: str
+    cust_mobile: str
+    bill_amount: float
+
+
+@router.post("/max-redeemable", response_model=POSResponse)
+async def pos_max_redeemable(
+    request: POSMaxRedeemableRequest,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    Check maximum loyalty points redeemable for a given bill.
+    Returns max points and their monetary value.
+    """
+    # Find customer by phone
+    customer = await db.customers.find_one({
+        "user_id": user["id"],
+        "phone": request.cust_mobile
+    })
+    
+    if not customer:
+        return POSResponse(
+            success=False,
+            message="Customer not found",
+            data={"registered": False}
+        )
+    
+    # Get loyalty settings
+    settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
+    if not settings:
+        settings = {
+            "redemption_value": 0.25,
+            "min_redemption_points": 100,
+            "max_redemption_percent": 50.0,
+            "max_redemption_amount": 500.0
+        }
+    
+    available_points = customer.get("total_points", 0)
+    redemption_value = settings.get("redemption_value", 0.25)
+    min_redemption = settings.get("min_redemption_points", 100)
+    max_percent = settings.get("max_redemption_percent", 50.0)
+    max_amount = settings.get("max_redemption_amount", 500.0)
+    
+    # Check if customer has minimum points
+    if available_points < min_redemption:
+        return POSResponse(
+            success=True,
+            message="Customer does not have minimum points required for redemption",
+            data={
+                "max_points_redeemable": 0,
+                "max_discount_value": 0.0,
+                "available_points": available_points,
+                "min_points_required": min_redemption
+            }
+        )
+    
+    # Calculate max discount by bill percentage
+    max_by_percent = (request.bill_amount * max_percent) / 100
+    
+    # Calculate max discount by absolute cap
+    max_by_cap = max_amount
+    
+    # Calculate max discount by available points
+    max_by_points = available_points * redemption_value
+    
+    # Take the minimum of all limits
+    max_discount = min(max_by_percent, max_by_cap, max_by_points)
+    
+    # Convert back to points
+    max_points = int(max_discount / redemption_value)
+    
+    # Ensure we don't exceed available points
+    max_points = min(max_points, available_points)
+    
+    # Recalculate exact discount value
+    max_discount_value = round(max_points * redemption_value, 2)
+    
+    return POSResponse(
+        success=True,
+        message="Max redeemable calculated",
+        data={
+            "max_points_redeemable": max_points,
+            "max_discount_value": max_discount_value
+        }
+    )
+
+
+# ============================================
+# Order Webhook (for MyGenie to call on every order)
+# ============================================
+
+class POSOrderWebhook(BaseModel):
+    """Schema for order data from MyGenie/POS systems"""
+    # POS Identification (Required)
+    pos_id: str  # "mygenie", "petpooja", "ezzo"
+    restaurant_id: str
+    
+    # Order Identification (Required)
+    order_id: str
+    
+    # Customer (Required)
+    cust_mobile: str
+    cust_name: Optional[str] = None  # Only needed for new customer
+    
+    # Amount (Required)
+    order_amount: float
+    
+    # Wallet (Optional)
+    wallet_used: Optional[float] = 0.0
+    
+    # Coupon (Optional)
+    coupon_code: Optional[str] = None
+    coupon_discount: Optional[float] = 0.0
+    
+    # Payment Info
+    payment_method: Optional[str] = None
+    payment_status: str = "success"
+    
+    # Order Meta
+    order_type: Optional[str] = "pos"  # pos, dine_in, takeaway, delivery
+
+
+@router.post("/orders", response_model=POSResponse)
+async def pos_order_webhook(
+    order_data: POSOrderWebhook,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    Webhook for MyGenie/POS to send order data.
+    - Creates customer if not exists
+    - Records order
+    - Calculates and awards loyalty points
+    """
+    try:
+        # Only process successful payments
+        if order_data.payment_status != "success":
+            return POSResponse(
+                success=False,
+                message=f"Order not processed - payment status: {order_data.payment_status}",
+                data=None
+            )
+        
+        # Check for duplicate order
+        existing_order = await db.orders.find_one({
+            "pos_id": order_data.pos_id,
+            "pos_order_id": order_data.order_id
+        })
+        if existing_order:
+            return POSResponse(
+                success=False,
+                message="Duplicate order - already processed",
+                data={"order_id": existing_order["id"], "duplicate": True}
+            )
+        
+        # Find or create customer by phone
+        customer = await db.customers.find_one({
+            "user_id": user["id"],
+            "phone": order_data.cust_mobile
+        })
+        
+        now = datetime.now(timezone.utc).isoformat()
+        
+        if not customer:
+            # Auto-create customer
+            customer_id = str(uuid.uuid4())
+            customer_name = order_data.cust_name or f"Customer {order_data.cust_mobile[-4:]}"
+            
+            customer = {
+                "id": customer_id,
+                "user_id": user["id"],
+                "name": customer_name,
+                "phone": order_data.cust_mobile,
+                "country_code": "+91",
+                "email": None,
+                "customer_type": "normal",
+                "pos_id": order_data.pos_id,
+                "pos_restaurant_id": order_data.restaurant_id,
+                "total_points": 0,
+                "wallet_balance": 0.0,
+                "total_visits": 0,
+                "total_spent": 0.0,
+                "tier": "Bronze",
+                "allergies": [],
+                "favorites": [],
+                "notes": "Auto-created via POS order",
+                "created_at": now,
+                "last_visit": None
+            }
+            await db.customers.insert_one(customer)
+            is_new_customer = True
+        else:
+            customer_id = customer["id"]
+            is_new_customer = False
+        
+        # Get loyalty settings
+        settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
+        if not settings:
+            settings = {
+                "min_order_value": 100.0,
+                "bronze_earn_percent": 5.0,
+                "silver_earn_percent": 7.0,
+                "gold_earn_percent": 10.0,
+                "platinum_earn_percent": 15.0,
+                "redemption_value": 0.25,
+                "tier_silver_min": 500,
+                "tier_gold_min": 1500,
+                "tier_platinum_min": 5000
+            }
+        
+        # Calculate points earned
+        points_earned = 0
+        min_order = settings.get("min_order_value", 100.0)
+        
+        if order_data.order_amount >= min_order:
+            customer_tier = customer.get("tier", "Bronze")
+            earn_percent = get_earn_percent_for_tier(customer_tier, settings)
+            points_earned = int(order_data.order_amount * earn_percent / 100)
+        
+        # Update customer stats
+        current_points = customer.get("total_points", 0)
+        new_points = current_points + points_earned
+        new_tier = calculate_tier(new_points, settings)
+        
+        # Handle wallet deduction
+        wallet_used = order_data.wallet_used or 0.0
+        current_wallet = customer.get("wallet_balance", 0.0)
+        
+        # Validate wallet usage
+        if wallet_used > current_wallet:
+            return POSResponse(
+                success=False,
+                message=f"Insufficient wallet balance. Available: {current_wallet}, Requested: {wallet_used}",
+                data={"available_balance": current_wallet}
+            )
+        
+        new_wallet_balance = current_wallet - wallet_used
+        
+        await db.customers.update_one(
+            {"id": customer["id"]},
+            {"$set": {
+                "total_points": new_points,
+                "tier": new_tier,
+                "wallet_balance": new_wallet_balance,
+                "total_visits": customer.get("total_visits", 0) + 1,
+                "total_spent": customer.get("total_spent", 0) + order_data.order_amount,
+                "last_visit": now
+            }}
+        )
+        
+        # Record order
+        order_doc = {
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "customer_id": customer["id"],
+            "pos_id": order_data.pos_id,
+            "pos_restaurant_id": order_data.restaurant_id,
+            "pos_order_id": order_data.order_id,
+            "order_amount": order_data.order_amount,
+            "wallet_used": order_data.wallet_used or 0.0,
+            "coupon_code": order_data.coupon_code,
+            "coupon_discount": order_data.coupon_discount or 0.0,
+            "points_earned": points_earned,
+            "payment_method": order_data.payment_method,
+            "payment_status": order_data.payment_status,
+            "order_type": order_data.order_type,
+            "created_at": now
+        }
+        await db.orders.insert_one(order_doc)
+        
+        # Record points transaction if points earned
+        if points_earned > 0:
+            tx_doc = {
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "customer_id": customer["id"],
+                "points": points_earned,
+                "transaction_type": "earn",
+                "description": f"Earned on order {order_data.order_id} (Rs.{order_data.order_amount})",
+                "order_id": order_doc["id"],
+                "balance_after": new_points,
+                "created_at": now
+            }
+            await db.points_transactions.insert_one(tx_doc)
+        
+        # Record wallet transaction if wallet was used
+        if wallet_used > 0:
+            wallet_tx_doc = {
+                "id": str(uuid.uuid4()),
+                "user_id": user["id"],
+                "customer_id": customer["id"],
+                "amount": wallet_used,
+                "transaction_type": "debit",
+                "description": f"Used on order {order_data.order_id}",
+                "order_id": order_doc["id"],
+                "balance_after": new_wallet_balance,
+                "created_at": now
+            }
+            await db.wallet_transactions.insert_one(wallet_tx_doc)
+        
+        return POSResponse(
+            success=True,
+            message="Order processed successfully",
+            data={
+                "order_id": order_doc["id"],
+                "pos_order_id": order_data.order_id,
+                "customer_id": customer["id"],
+                "customer_name": customer.get("name"),
+                "is_new_customer": is_new_customer,
+                "order_amount": order_data.order_amount,
+                "points_earned": points_earned,
+                "total_points": new_points,
+                "tier": new_tier,
+                "wallet_used": wallet_used,
+                "wallet_balance_after": new_wallet_balance,
+                "coupon_applied": order_data.coupon_code,
+                "coupon_discount": order_data.coupon_discount or 0.0
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Order processing failed: {str(e)}")
+
+
+@router.post("/webhook/payment-received", response_model=POSResponse)
+async def pos_payment_received(
+    webhook_data: POSPaymentWebhook,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    Main POS webhook endpoint - processes payments and manages loyalty points
+    """
+    try:
+        # Find customer by phone
+        customer = await db.customers.find_one({
+            "user_id": user["id"],
+            "phone": webhook_data.customer_phone
+        })
+        
+        if not customer:
+            # Auto-create customer if not exists
+            customer_id = str(uuid.uuid4())
+            now = datetime.now(timezone.utc).isoformat()
+            
+            customer = {
+                "id": customer_id,
+                "user_id": user["id"],
+                "name": f"Customer {webhook_data.customer_phone[-4:]}",
+                "phone": webhook_data.customer_phone,
+                "country_code": "+91",
+                "email": None,
+                "notes": "Auto-created via POS",
+                "dob": None,
+                "anniversary": None,
+                "customer_type": "normal",
+                "gst_name": None,
+                "gst_number": None,
+                "address": None,
+                "city": None,
+                "pincode": None,
+                "allergies": [],
+                "custom_field_1": None,
+                "custom_field_2": None,
+                "custom_field_3": None,
+                "favorites": [],
+                "total_points": 0,
+                "wallet_balance": 0.0,
+                "total_visits": 0,
+                "total_spent": 0.0,
+                "tier": "Bronze",
+                "created_at": now,
+                "last_visit": None
+            }
+            await db.customers.insert_one(customer)
+        
+        # Get loyalty settings
+        settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
+        if not settings:
+            settings = {
+                "min_order_value": 100.0,
+                "bronze_earn_percent": 5.0,
+                "silver_earn_percent": 7.0,
+                "gold_earn_percent": 10.0,
+                "platinum_earn_percent": 15.0,
+                "redemption_value": 0.25,
+                "min_redemption_points": 100,
+                "max_redemption_percent": 50.0,
+                "max_redemption_amount": 500.0,
+                "tier_silver_min": 500,
+                "tier_gold_min": 1500,
+                "tier_platinum_min": 5000
+            }
+        
+        response_data = {
+            "customer_id": customer["id"],
+            "customer_name": customer["name"],
+            "current_points": customer.get("total_points", 0),
+            "current_tier": customer.get("tier", "Bronze"),
+            "wallet_balance": customer.get("wallet_balance", 0.0),
+            "transactions": []
+        }
+        
+        final_bill_amount = webhook_data.bill_amount
+        
+        # Process coupon if provided
+        if webhook_data.coupon_code:
+            coupon = await db.coupons.find_one({
+                "user_id": user["id"],
+                "code": webhook_data.coupon_code.upper(),
+                "is_active": True
+            })
+            
+            if coupon:
+                now = datetime.now(timezone.utc).isoformat()
+                if coupon["start_date"] <= now <= coupon["end_date"]:
+                    if coupon["discount_type"] == "percentage":
+                        discount = (final_bill_amount * coupon["discount_value"]) / 100
+                        if coupon.get("max_discount"):
+                            discount = min(discount, coupon["max_discount"])
+                    else:
+                        discount = min(coupon["discount_value"], final_bill_amount)
+                    
+                    final_bill_amount -= discount
+                    response_data["coupon_applied"] = {
+                        "code": webhook_data.coupon_code,
+                        "discount": round(discount, 2)
+                    }
+                    response_data["transactions"].append({
+                        "type": "coupon",
+                        "amount": round(discount, 2),
+                        "description": f"Coupon {webhook_data.coupon_code} applied"
+                    })
+        
+        # Process points redemption if requested
+        points_redeemed = 0
+        if webhook_data.redeem_points and webhook_data.redeem_points > 0:
+            current_points = customer.get("total_points", 0)
+            min_redemption = settings.get("min_redemption_points", 100)
+            max_redemption_percent = settings.get("max_redemption_percent", 50.0)
+            max_redemption_amount = settings.get("max_redemption_amount", 500.0)
+            redemption_value = settings.get("redemption_value", 0.25)
+            
+            max_redemption_by_percent = (final_bill_amount * max_redemption_percent) / 100
+            max_redemption = min(max_redemption_by_percent, max_redemption_amount)
+            
+            if current_points >= min_redemption:
+                points_to_redeem = min(webhook_data.redeem_points, current_points)
+                redemption_amount = points_to_redeem * redemption_value
+                
+                if redemption_amount > max_redemption:
+                    redemption_amount = max_redemption
+                    points_to_redeem = int(redemption_amount / redemption_value)
+                
+                if redemption_amount > final_bill_amount:
+                    redemption_amount = final_bill_amount
+                    points_to_redeem = int(redemption_amount / redemption_value)
+                
+                if points_to_redeem > 0:
+                    new_points = current_points - points_to_redeem
+                    await db.customers.update_one(
+                        {"id": customer["id"]},
+                        {"$set": {"total_points": new_points}}
+                    )
+                    
+                    tx_doc = {
+                        "id": str(uuid.uuid4()),
+                        "user_id": user["id"],
+                        "customer_id": customer["id"],
+                        "points": points_to_redeem,
+                        "transaction_type": "redeem",
+                        "description": f"Redeemed at POS (Bill: Rs.{webhook_data.bill_amount})",
+                        "bill_amount": webhook_data.bill_amount,
+                        "balance_after": new_points,
+                        "created_at": datetime.now(timezone.utc).isoformat()
+                    }
+                    await db.points_transactions.insert_one(tx_doc)
+                    
+                    final_bill_amount -= redemption_amount
+                    points_redeemed = points_to_redeem
+                    response_data["points_redeemed"] = {
+                        "points": points_to_redeem,
+                        "value": round(redemption_amount, 2)
+                    }
+                    response_data["transactions"].append({
+                        "type": "redeem",
+                        "points": points_to_redeem,
+                        "value": round(redemption_amount, 2),
+                        "description": "Points redeemed"
+                    })
+        
+        # Calculate points earned
+        min_order = settings.get("min_order_value", 100.0)
+        points_earned = 0
+        
+        if webhook_data.bill_amount >= min_order:
+            customer_tier = customer.get("tier", "Bronze")
+            earn_percent = get_earn_percent_for_tier(customer_tier, settings)
+            points_earned = int(webhook_data.bill_amount * earn_percent / 100)
+            
+            if points_earned > 0:
+                current_points = customer.get("total_points", 0)
+                if points_redeemed > 0:
+                    current_points = current_points - points_redeemed
+                new_points = current_points + points_earned
+                new_tier = calculate_tier(new_points, settings)
+                
+                await db.customers.update_one(
+                    {"id": customer["id"]},
+                    {"$set": {
+                        "total_points": new_points,
+                        "tier": new_tier,
+                        "total_visits": customer.get("total_visits", 0) + 1,
+                        "total_spent": customer.get("total_spent", 0) + webhook_data.bill_amount,
+                        "last_visit": datetime.now(timezone.utc).isoformat()
+                    }}
+                )
+                
+                tx_doc = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": user["id"],
+                    "customer_id": customer["id"],
+                    "points": points_earned,
+                    "transaction_type": "earn",
+                    "description": f"Earned {earn_percent}% on bill of Rs.{webhook_data.bill_amount}",
+                    "bill_amount": webhook_data.bill_amount,
+                    "balance_after": new_points,
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.points_transactions.insert_one(tx_doc)
+                
+                response_data["points_earned"] = {
+                    "points": points_earned,
+                    "percentage": earn_percent
+                }
+                response_data["new_points"] = new_points
+                response_data["new_tier"] = new_tier
+                response_data["transactions"].append({
+                    "type": "earn",
+                    "points": points_earned,
+                    "description": f"Earned {earn_percent}% on purchase"
+                })
+        else:
+            await db.customers.update_one(
+                {"id": customer["id"]},
+                {"$set": {
+                    "total_visits": customer.get("total_visits", 0) + 1,
+                    "total_spent": customer.get("total_spent", 0) + webhook_data.bill_amount,
+                    "last_visit": datetime.now(timezone.utc).isoformat()
+                }}
+            )
+        
+        response_data["final_bill_amount"] = round(final_bill_amount, 2)
+        response_data["original_bill_amount"] = webhook_data.bill_amount
+        
+        return POSResponse(
+            success=True,
+            message="Payment processed successfully",
+            data=response_data
+        )
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/customer-lookup", response_model=POSResponse)
+async def pos_customer_lookup(
+    lookup_data: POSCustomerLookup,
+    user: dict = Depends(verify_pos_api_key)
+):
+    """
+    Look up customer by phone number for POS display
+    """
+    customer = await db.customers.find_one({
+        "user_id": user["id"],
+        "phone": lookup_data.phone
+    }, {"_id": 0})
+    
+    if not customer:
+        return POSResponse(
+            success=False,
+            message="Customer not found",
+            data={"registered": False}
+        )
+    
+    settings = await db.loyalty_settings.find_one({"user_id": user["id"]}, {"_id": 0})
+    redemption_value = settings.get("redemption_value", 0.25) if settings else 0.25
+    
+    return POSResponse(
+        success=True,
+        message="Customer found",
+        data={
+            "registered": True,
+            "customer_id": customer["id"],
+            "name": customer["name"],
+            "phone": customer["phone"],
+            "tier": customer.get("tier", "Bronze"),
+            "total_points": customer.get("total_points", 0),
+            "points_value": round(customer.get("total_points", 0) * redemption_value, 2),
+            "wallet_balance": customer.get("wallet_balance", 0.0),
+            "total_visits": customer.get("total_visits", 0),
+            "total_spent": customer.get("total_spent", 0.0),
+            "allergies": customer.get("allergies", []),
+            "favorites": customer.get("favorites", []),
+            "last_visit": customer.get("last_visit")
+        }
+    )
+
+@router.get("/api-key")
+async def get_api_key(user: dict = Depends(get_current_user)):
+    """Get the current API key for POS integration"""
+    user_doc = await db.users.find_one({"id": user["id"]}, {"_id": 0, "api_key": 1})
+    if not user_doc or not user_doc.get("api_key"):
+        new_key = generate_api_key()
+        await db.users.update_one({"id": user["id"]}, {"$set": {"api_key": new_key}})
+        return {"api_key": new_key}
+    
+    return {"api_key": user_doc["api_key"]}
+
+@router.post("/api-key/regenerate")
+async def regenerate_api_key(user: dict = Depends(get_current_user)):
+    """Regenerate API key for POS integration"""
+    new_key = generate_api_key()
+    await db.users.update_one({"id": user["id"]}, {"$set": {"api_key": new_key}})
+    return {
+        "message": "API key regenerated successfully",
+        "api_key": new_key,
+        "warning": "Make sure to update your POS system with the new key"
+    }
+
+
+# Messaging routes
+@messaging_router.post("/send")
+async def send_message(msg_data: MessageRequest, user: dict = Depends(get_current_user)):
+    """Mock messaging endpoint - ready for real provider integration"""
+    customer = await db.customers.find_one({"id": msg_data.customer_id, "user_id": user["id"]})
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    message_log = {
+        "id": str(uuid.uuid4()),
+        "user_id": user["id"],
+        "customer_id": msg_data.customer_id,
+        "customer_phone": customer["phone"],
+        "message": msg_data.message,
+        "channel": msg_data.channel,
+        "status": "sent",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.message_logs.insert_one(message_log)
+    
+    return {
+        "message": "Message sent successfully (MOCK)",
+        "log_id": message_log["id"],
+        "note": "Real messaging provider integration pending"
+    }

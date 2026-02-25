@@ -1,0 +1,30 @@
+[
+  {
+    "_id": {
+      "$oid": "699da17af23094a85009c8e2"
+    },
+    "id": "a294e899-e232-4cc5-959a-1bba63928188",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "amount": 200.0,
+    "transaction_type": "debit",
+    "description": "Used on order TEST-WALLET-001",
+    "order_id": "9ccb9ae7-2dd0-417d-82ee-de67123d7e88",
+    "balance_after": 300.0,
+    "created_at": "2026-02-24T13:02:50.911416+00:00"
+  },
+  {
+    "_id": {
+      "$oid": "699da190f23094a85009c8e5"
+    },
+    "id": "6b668d1a-4b93-409c-8170-50b7790e680a",
+    "user_id": "3582",
+    "customer_id": "8fb94635-2373-42e9-bc9e-9c244cedcfb5",
+    "amount": 300.0,
+    "transaction_type": "debit",
+    "description": "Used on order TEST-WALLET-003",
+    "order_id": "eb3e8377-b5e1-4fcc-ac4e-6c057d5ec795",
+    "balance_after": 0.0,
+    "created_at": "2026-02-24T13:03:12.434592+00:00"
+  }
+]
