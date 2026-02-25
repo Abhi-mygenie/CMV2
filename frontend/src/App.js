@@ -4718,8 +4718,14 @@ const SegmentsPageContent = () => {
                     </Dialog>
                 )}
             </div>
-        </MobileLayout>
     );
+};
+
+// ============ SEGMENTS PAGE (legacy route - redirects) ============
+const SegmentsPage = () => {
+    const navigate = useNavigate();
+    React.useEffect(() => { navigate("/customers", { replace: true }); }, [navigate]);
+    return null;
 };
 
 // ============ SETTINGS PAGE ============
