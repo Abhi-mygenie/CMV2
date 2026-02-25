@@ -5392,7 +5392,7 @@ const SettingsPage = () => {
 
 // ============ WHATSAPP AUTOMATION PAGE ============
 
-const WhatsAppAutomationPage = () => {
+const WhatsAppAutomationPage = ({ defaultTab = "settings" }) => {
     const { api } = useAuth();
     const navigate = useNavigate();
     const [templates, setTemplates] = useState([]);
