@@ -1064,14 +1064,6 @@ const CustomersPage = () => {
         filters.city ? 1 : 0
     ].reduce((a, b) => a + b, 0);
 
-    const toggleAllergy = (allergy) => {
-        if (newCustomer.allergies.includes(allergy)) {
-            setNewCustomer({...newCustomer, allergies: newCustomer.allergies.filter(a => a !== allergy)});
-        } else {
-            setNewCustomer({...newCustomer, allergies: [...newCustomer.allergies, allergy]});
-        }
-    };
-
     const openEditModal = (customer, e) => {
         e.stopPropagation(); // Prevent navigation to detail page
         setEditingCustomer(customer);
