@@ -5183,24 +5183,23 @@ const WhatsAppAutomationPage = () => {
                                             Map a WhatsApp template to each event. {authkeyTemplates.length} templates available.
                                         </p>
                                         <div className="space-y-3">
-                                            {availableEvents.map(event => {
-                                                const mapped = eventMappings[event.event];
+                                            {availableEvents.map(eventKey => {
+                                                const mapped = eventMappings[eventKey];
                                                 return (
-                                                    <Card key={event.event} className="rounded-xl border-0 shadow-sm" data-testid={`event-map-${event.event}`}>
+                                                    <Card key={eventKey} className="rounded-xl border-0 shadow-sm" data-testid={`event-map-${eventKey}`}>
                                                         <CardContent className="p-4">
-                                                            <p className="font-semibold text-[#1A1A1A] text-sm">{eventLabels[event.event] || event.event}</p>
-                                                            <p className="text-xs text-[#52525B] mb-2">{event.description}</p>
+                                                            <p className="font-semibold text-[#1A1A1A] text-sm">{eventLabels[eventKey] || eventKey}</p>
                                                             <Select
                                                                 value={mapped?.template_id?.toString() || ""}
                                                                 onValueChange={(val) => {
                                                                     const tpl = authkeyTemplates.find(t => t.wid.toString() === val);
                                                                     setEventMappings(prev => ({
                                                                         ...prev,
-                                                                        [event.event]: tpl ? { template_id: tpl.wid, template_name: tpl.temp_name } : null,
+                                                                        [eventKey]: tpl ? { template_id: tpl.wid, template_name: tpl.temp_name } : null,
                                                                     }));
                                                                 }}
                                                             >
-                                                                <SelectTrigger className="h-10 rounded-xl" data-testid={`select-template-${event.event}`}>
+                                                                <SelectTrigger className="h-10 rounded-xl mt-2" data-testid={`select-template-${eventKey}`}>
                                                                     <SelectValue placeholder="Select template" />
                                                                 </SelectTrigger>
                                                                 <SelectContent>
