@@ -425,7 +425,7 @@ async def get_customer_segments(user: dict = Depends(get_current_user)):
     })
     
     cities_pipeline = [
-        {"$match": {"user_id": user_id, "city": {"$exists": True, "$ne": None, "$ne": ""}}},
+        {"$match": {"user_id": user_id, "city": {"$exists": True, "$nin": [None, ""]}}},
         {"$group": {"_id": "$city", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
         {"$limit": 10}
