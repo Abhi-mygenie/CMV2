@@ -3647,18 +3647,35 @@ const SegmentsPage = () => {
 
     // Remove WhatsApp config from a segment
     const removeWhatsappConfig = async (segmentId) => {
-        if (!window.confirm("Remove WhatsApp automation for this segment?")) return;
+        if (!window.confirm("Permanently delete WhatsApp automation for this segment?")) return;
         
         try {
             await api.delete(`/segments/${segmentId}/whatsapp-config`);
-            toast.success("WhatsApp automation removed");
+            toast.success("WhatsApp automation deleted");
             setWhatsappConfigs(prev => {
                 const newConfigs = { ...prev };
                 delete newConfigs[segmentId];
                 return newConfigs;
             });
         } catch (err) {
-            toast.error("Failed to remove automation");
+            toast.error("Failed to delete automation");
+        }
+    };
+
+    // Toggle (pause/resume) WhatsApp config for a segment
+    const toggleWhatsappConfig = async (segmentId) => {
+        const currentConfig = whatsappConfigs[segmentId];
+        const isCurrentlyActive = currentConfig?.is_active !== false;
+        
+        try {
+            const res = await api.patch(`/segments/${segmentId}/whatsapp-config/toggle`);
+            toast.success(res.data.message);
+            setWhatsappConfigs(prev => ({
+                ...prev,
+                [segmentId]: { ...prev[segmentId], is_active: res.data.is_active }
+            }));
+        } catch (err) {
+            toast.error("Failed to toggle automation");
         }
     };
 
