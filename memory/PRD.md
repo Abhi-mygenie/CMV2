@@ -94,3 +94,38 @@ https://whatsapp-crm-fix-3.preview.emergentagent.com
 **Files Changed**:
 - `/app/frontend/src/App.js` - Added modal, state, and functions
 - `/app/backend/routers/whatsapp.py` - Added endpoints
+
+### WhatsApp Message Scheduling UI (Feb 25, 2026)
+**Feature**: Added scheduling options to the "Send WhatsApp Message" modal in Segments page
+
+**UI Components Added**:
+- **Send Now**: Immediate one-time send (default)
+- **Schedule for Later**: Date picker + time picker for one-time scheduled send
+- **Recurring**: Repeating message schedule with:
+  - Frequency: Daily, Weekly, Monthly
+  - Weekly: Day selector (Mon-Sun circular buttons)
+  - Monthly: Day of month dropdown (1st-31st)
+  - Send Time picker
+  - End condition: Never, On date, After X occurrences
+
+**Button Text Changes**:
+- "Send Now" → for immediate send
+- "Schedule Message" → for scheduled
+- "Set Recurring" → for recurring
+
+**Validation**:
+- Requires date for scheduled option
+- Requires at least one day selected for weekly recurring
+
+**State Variables Added**:
+- sendOption, scheduledDate, scheduledTime
+- recurringFrequency, recurringDays, recurringDayOfMonth
+- recurringEndOption, recurringEndDate, recurringOccurrences
+
+**Files Changed**:
+- `/app/frontend/src/App.js` (Segments page - Send Message Modal)
+
+## Upcoming Tasks
+- Backend API for saving and processing scheduled messages
+- Cron job for triggering scheduled/recurring messages
+- Message history and status tracking
