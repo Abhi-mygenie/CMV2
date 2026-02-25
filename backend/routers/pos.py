@@ -606,6 +606,7 @@ async def pos_order_webhook(
                 "customer_id": customer["id"],
                 "customer_name": customer.get("name"),
                 "is_new_customer": is_new_customer,
+                "first_visit_bonus_awarded": first_visit_bonus if is_new_customer else 0,
                 "order_amount": order_data.order_amount,
                 "points_earned": points_earned,
                 "total_points": new_points,
