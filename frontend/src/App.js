@@ -1966,66 +1966,27 @@ const CustomersPage = () => {
                                         </ComingSoonOverlay>
                                     </AccordionContent>
                                 </AccordionItem>
-                                                                const current = newCustomer.festival_preference || [];
-                                                                const updated = current.includes(festival)
-                                                                    ? current.filter(f => f !== festival)
-                                                                    : [...current, festival];
-                                                                setNewCustomer({...newCustomer, festival_preference: updated});
-                                                            }}
-                                                            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                                                                (newCustomer.festival_preference || []).includes(festival)
-                                                                    ? "bg-pink-500 text-white border-pink-500"
-                                                                    : "bg-white text-[#52525B] border-gray-200 hover:border-pink-300"
-                                                            }`}
-                                                        >
-                                                            {festival}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-
-                                {/* Tags & Flags */}
+                                                {/* Tags & Flags */}
                                 <AccordionItem value="flags" className="border-b-0">
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-indigo-50 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-indigo-600">
                                             <Star className="w-4 h-4" /> Tags & Flags
+                                            <span className="ml-auto text-[10px] bg-indigo-100 text-indigo-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                         </span>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-1">
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-xl border border-yellow-100">
-                                                <Label className="text-sm text-yellow-700 flex items-center gap-2">
-                                                    <Star className="w-4 h-4" /> VIP Customer
-                                                </Label>
-                                                <Switch
-                                                    checked={newCustomer.vip_flag}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, vip_flag: checked})}
-                                                    data-testid="vip-flag"
-                                                />
+                                        <ComingSoonOverlay color="indigo">
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-xl">
+                                                    <Label className="text-sm text-yellow-700">⭐ VIP Customer</Label>
+                                                    <Switch checked={false} disabled />
+                                                </div>
+                                                <div className="flex items-center justify-between p-3 bg-red-50 rounded-xl">
+                                                    <Label className="text-sm text-red-700">🚫 Blacklisted</Label>
+                                                    <Switch checked={false} disabled />
+                                                </div>
                                             </div>
-                                            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-xl border border-orange-100">
-                                                <Label className="text-sm text-orange-700 flex items-center gap-2">
-                                                    <AlertTriangle className="w-4 h-4" /> Complaint History
-                                                </Label>
-                                                <Switch
-                                                    checked={newCustomer.complaint_flag}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, complaint_flag: checked})}
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
-                                                <Label className="text-sm text-red-700 flex items-center gap-2">
-                                                    <X className="w-4 h-4" /> Blacklisted
-                                                </Label>
-                                                <Switch
-                                                    checked={newCustomer.blacklist_flag}
-                                                    onCheckedChange={(checked) => setNewCustomer({...newCustomer, blacklist_flag: checked})}
-                                                    data-testid="blacklist-flag"
-                                                />
-                                            </div>
-                                        </div>
+                                        </ComingSoonOverlay>
                                     </AccordionContent>
                                 </AccordionItem>
 
@@ -2034,30 +1995,27 @@ const CustomersPage = () => {
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-gray-100 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-gray-600">
                                             <Layers className="w-4 h-4" /> Custom Fields & Notes
+                                            <span className="ml-auto text-[10px] bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                         </span>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-1">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="form-label">Preference Type</Label>
-                                                <Select 
-                                                    value={newCustomer.custom_field_1} 
-                                                    onValueChange={(v) => setNewCustomer({...newCustomer, custom_field_1: v})}
-                                                >
-                                                    <SelectTrigger className="h-11 rounded-xl" data-testid="new-customer-custom-1">
-                                                        <SelectValue placeholder="Select preference" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {CUSTOM_FIELD_1_OPTIONS.map(opt => (
-                                                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                        <ComingSoonOverlay color="gray">
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label className="form-label">Preference Type</Label>
+                                                    <Input placeholder="Select preference" className="h-11 rounded-xl" disabled />
+                                                </div>
+                                                <div>
+                                                    <Label className="form-label">Notes</Label>
+                                                    <Textarea placeholder="Any special notes..." className="rounded-xl resize-none" rows={2} disabled />
+                                                </div>
                                             </div>
-                                            <div>
-                                                <Label className="form-label">Department / Table</Label>
-                                                <Input
-                                                    value={newCustomer.custom_field_2}
+                                        </ComingSoonOverlay>
+                                    </AccordionContent>
+                                </AccordionItem>
+
+                            </Accordion>
+                        </ScrollArea>
                                                     onChange={(e) => setNewCustomer({...newCustomer, custom_field_2: e.target.value})}
                                                     placeholder="e.g., HR, Table 5, VIP Section"
                                                     className="h-11 rounded-xl"
