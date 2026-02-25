@@ -275,6 +275,7 @@ async def get_sample_customer_data(user: dict = Depends(get_current_user)):
     return {
         "sample": {
             "customer_name": customer.get("name", ""),
+            "phone": customer.get("phone", ""),
             "points_balance": str(customer.get("total_points", 0)),
             "points_earned": str(customer.get("total_points_earned", 0)),
             "points_redeemed": str(customer.get("total_points_redeemed", 0)),
@@ -282,7 +283,9 @@ async def get_sample_customer_data(user: dict = Depends(get_current_user)):
             "amount": f"₹{customer.get('total_spent', 0)}",
             "tier": customer.get("tier", ""),
             "coupon_code": "",
-            "expiry_date": ""
+            "expiry_date": "",
+            "order_id": "",
+            "visit_count": str(customer.get("total_visits", 0))
         },
         "restaurant_name": restaurant_name
     }
