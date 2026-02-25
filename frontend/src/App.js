@@ -688,6 +688,18 @@ const CustomersPage = () => {
         favorite_category: "",
         preferred_payment_mode: "",
         
+        // Customer Source & Journey
+        lead_source: "",
+        campaign_source: "",
+        assigned_salesperson: "",
+        
+        // WhatsApp CRM Tracking
+        last_whatsapp_sent: "",
+        last_whatsapp_response: "",
+        last_campaign_clicked: "",
+        last_coupon_used: "",
+        automation_status_tag: "",
+        
         // Corporate Information
         gst_name: "",
         gst_number: "",
