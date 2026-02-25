@@ -984,6 +984,17 @@ const CustomersPage = () => {
             // Behavior & Preferences
             favorite_category: customer.favorite_category || "",
             preferred_payment_mode: customer.preferred_payment_mode || "",
+            // Customer Source & Journey
+            lead_source: customer.lead_source || "",
+            campaign_source: customer.campaign_source || "",
+            last_interaction_date: customer.last_interaction_date || "",
+            assigned_salesperson: customer.assigned_salesperson || "",
+            // WhatsApp CRM Tracking
+            last_whatsapp_sent: customer.last_whatsapp_sent || "",
+            last_whatsapp_response: customer.last_whatsapp_response || "",
+            last_campaign_clicked: customer.last_campaign_clicked || "",
+            last_coupon_used: customer.last_coupon_used || "",
+            automation_status_tag: customer.automation_status_tag || "",
             // Corporate Information
             gst_name: customer.gst_name || "",
             gst_number: customer.gst_number || "",
