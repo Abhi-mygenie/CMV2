@@ -3858,23 +3858,36 @@ const SegmentsPage = () => {
                                 {/* Template Dropdown */}
                                 <div>
                                     <Label className="text-sm font-medium">Choose Template</Label>
-                                    <Select value={messageTemplate} onValueChange={handleTemplateChange}>
+                                    <Select value={messageTemplate} onValueChange={handleTemplateChange} disabled={templatesLoading}>
                                         <SelectTrigger className="h-11 rounded-xl mt-1" data-testid="template-select">
-                                            <SelectValue placeholder="Select a template..." />
+                                            <SelectValue placeholder={templatesLoading ? "Loading templates..." : "Select a template..."} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {templates.map(template => (
-                                                <SelectItem key={template.id} value={template.id}>
-                                                    <div className="flex items-center gap-2">
-                                                        {template.mediaType === "image" && <span>🖼️</span>}
-                                                        {template.mediaType === "video" && <span>🎬</span>}
-                                                        {!template.mediaType && <span>📝</span>}
-                                                        {template.name}
-                                                    </div>
-                                                </SelectItem>
-                                            ))}
+                                            {templatesLoading ? (
+                                                <div className="p-4 text-center text-sm text-gray-500">
+                                                    Loading templates...
+                                                </div>
+                                            ) : templates.length === 0 ? (
+                                                <div className="p-4 text-center text-sm text-gray-500">
+                                                    No templates available. Please configure WhatsApp API key in Settings.
+                                                </div>
+                                            ) : (
+                                                templates.map(template => (
+                                                    <SelectItem key={template.id} value={template.id}>
+                                                        <div className="flex items-center gap-2">
+                                                            {template.mediaType === "image" && <span>🖼️</span>}
+                                                            {template.mediaType === "video" && <span>🎬</span>}
+                                                            {!template.mediaType && <span>📝</span>}
+                                                            {template.name}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))
+                                            )}
                                         </SelectContent>
                                     </Select>
+                                    {templates.length > 0 && (
+                                        <p className="text-xs text-gray-500 mt-1">{templates.length} templates available from WhatsApp API</p>
+                                    )}
                                 </div>
 
                                 {/* Template Variables */}
