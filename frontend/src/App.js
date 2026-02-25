@@ -3576,14 +3576,21 @@ const SegmentsPage = () => {
 
     const fetchSegments = async () => {
         try {
-            const [segmentsRes, statsRes] = await Promise.all([
+            const [segmentsRes, statsRes, configsRes] = await Promise.all([
                 api.get('/segments'),
-                api.get('/customers/segments/stats')
+                api.get('/customers/segments/stats'),
+                api.get('/segments/whatsapp-configs/all')
             ]);
             setSegments(segmentsRes.data);
             // Get total customers count from stats endpoint
             const totalCount = statsRes.data.total || 0;
             setTotalCustomersCount(totalCount);
+            // Build a map of segment_id -> config
+            const configsMap = {};
+            (configsRes.data.configs || []).forEach(cfg => {
+                configsMap[cfg.segment_id] = cfg;
+            });
+            setWhatsappConfigs(configsMap);
         } catch (err) {
             toast.error("Failed to load segments");
         } finally {
