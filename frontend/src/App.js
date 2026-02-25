@@ -7057,6 +7057,7 @@ const TemplatesPage = () => {
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [authkeyTemplates, setAuthkeyTemplates] = useState([]);
     const [loadingAuthkeyTemplates, setLoadingAuthkeyTemplates] = useState(false);
+    const [initialLoading, setInitialLoading] = useState(true);
     
     // Template filter state
     const [templateFilter, setTemplateFilter] = useState("approved");
