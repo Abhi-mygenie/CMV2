@@ -4815,6 +4815,49 @@ const WhatsAppAutomationPage = () => {
         }
     };
 
+    const fetchAuthkeyTemplatesAndMappings = async () => {
+        setLoadingAuthkeyTemplates(true);
+        try {
+            const [tplRes, mapRes] = await Promise.all([
+                api.get("/whatsapp/authkey-templates"),
+                api.get("/whatsapp/event-template-map")
+            ]);
+            setAuthkeyTemplates(tplRes.data.templates || []);
+            const mapObj = {};
+            (mapRes.data.mappings || []).forEach(m => {
+                mapObj[m.event_key] = { template_id: m.template_id, template_name: m.template_name };
+            });
+            setEventMappings(mapObj);
+        } catch (err) {
+            if (err.response?.status === 400) {
+                toast.error(err.response.data?.detail || "Add your API key in Settings first");
+            } else {
+                toast.error("Failed to load AuthKey templates");
+            }
+        } finally {
+            setLoadingAuthkeyTemplates(false);
+        }
+    };
+
+    const handleSaveMappings = async () => {
+        setSavingMappings(true);
+        try {
+            const mappings = Object.entries(eventMappings)
+                .filter(([, v]) => v.template_id)
+                .map(([event_key, v]) => ({
+                    event_key,
+                    template_id: v.template_id,
+                    template_name: v.template_name,
+                }));
+            await api.put("/whatsapp/event-template-map", { mappings });
+            toast.success("Template mappings saved!");
+        } catch (err) {
+            toast.error("Failed to save mappings");
+        } finally {
+            setSavingMappings(false);
+        }
+    };
+
     const handleSaveTemplate = async () => {
         try {
             if (editingTemplate) {
