@@ -4739,8 +4739,12 @@ const SettingsPage = () => {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const res = await api.get("/loyalty/settings");
+                const [res, apiKeyRes] = await Promise.all([
+                    api.get("/loyalty/settings"),
+                    api.get("/whatsapp/api-key").catch(() => ({ data: {} }))
+                ]);
                 setSettings(res.data);
+                setWhatsappApiKey(apiKeyRes.data.authkey_api_key || "");
             } catch (err) {
                 toast.error("Failed to load settings");
             } finally {
