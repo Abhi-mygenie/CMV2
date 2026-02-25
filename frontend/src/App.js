@@ -4381,6 +4381,7 @@ const SegmentsPage = () => {
                                             setSelectedCampaign("");
                                             setMessageTemplate("");
                                             setTemplateVariables({});
+                                            setVariableModes({});
                                             setSendOption("now");
                                             setScheduledDate("");
                                             setScheduledTime("10:00");
@@ -4408,6 +4409,7 @@ const SegmentsPage = () => {
                                             setSelectedCampaign("");
                                             setMessageTemplate("");
                                             setTemplateVariables({});
+                                            setVariableModes({});
                                             setSendOption("now");
                                             setScheduledDate("");
                                             setScheduledTime("10:00");
