@@ -1840,84 +1840,28 @@ const CustomersPage = () => {
                                     <AccordionTrigger className="hover:no-underline py-3 px-3 bg-cyan-50 rounded-xl mb-2">
                                         <span className="flex items-center gap-2 text-sm font-semibold text-cyan-600">
                                             <MapPin className="w-4 h-4" /> Address
+                                            <span className="ml-auto text-[10px] bg-cyan-100 text-cyan-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                         </span>
                                     </AccordionTrigger>
                                     <AccordionContent className="px-1">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label className="form-label">Address Line 1</Label>
-                                                <Textarea
-                                                    value={newCustomer.address}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, address: e.target.value})}
-                                                    placeholder="House/Flat No., Building, Street..."
-                                                    className="rounded-xl resize-none"
-                                                    rows={2}
-                                                    data-testid="new-customer-address"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Address Line 2</Label>
-                                                <Input
-                                                    value={newCustomer.address_line_2}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, address_line_2: e.target.value})}
-                                                    placeholder="Landmark, Area..."
-                                                    className="h-11 rounded-xl"
-                                                />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-3">
+                                        <ComingSoonOverlay color="cyan">
+                                            <div className="space-y-4">
                                                 <div>
-                                                    <Label className="form-label">City</Label>
-                                                    <Input
-                                                        value={newCustomer.city}
-                                                        onChange={(e) => setNewCustomer({...newCustomer, city: e.target.value})}
-                                                        placeholder="City"
-                                                        className="h-11 rounded-xl"
-                                                        data-testid="new-customer-city"
-                                                    />
+                                                    <Label className="form-label">Address Line 1</Label>
+                                                    <Textarea placeholder="House/Flat No., Building..." className="rounded-xl resize-none" rows={2} disabled />
                                                 </div>
-                                                <div>
-                                                    <Label className="form-label">State</Label>
-                                                    <Input
-                                                        value={newCustomer.state}
-                                                        onChange={(e) => setNewCustomer({...newCustomer, state: e.target.value})}
-                                                        placeholder="State"
-                                                        className="h-11 rounded-xl"
-                                                    />
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <Label className="form-label">City</Label>
+                                                        <Input placeholder="City" className="h-11 rounded-xl" disabled />
+                                                    </div>
+                                                    <div>
+                                                        <Label className="form-label">Pincode</Label>
+                                                        <Input placeholder="400001" className="h-11 rounded-xl" disabled />
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div>
-                                                    <Label className="form-label">Pincode</Label>
-                                                    <Input
-                                                        value={newCustomer.pincode}
-                                                        onChange={(e) => setNewCustomer({...newCustomer, pincode: e.target.value.replace(/\D/g, '')})}
-                                                        placeholder="400001"
-                                                        className="h-11 rounded-xl"
-                                                        maxLength={6}
-                                                        data-testid="new-customer-pincode"
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Label className="form-label">Country</Label>
-                                                    <Input
-                                                        value={newCustomer.country}
-                                                        onChange={(e) => setNewCustomer({...newCustomer, country: e.target.value})}
-                                                        placeholder="India"
-                                                        className="h-11 rounded-xl"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <Label className="form-label">Delivery Instructions</Label>
-                                                <Textarea
-                                                    value={newCustomer.delivery_instructions}
-                                                    onChange={(e) => setNewCustomer({...newCustomer, delivery_instructions: e.target.value})}
-                                                    placeholder="Special delivery instructions..."
-                                                    className="rounded-xl resize-none"
-                                                    rows={2}
-                                                />
-                                            </div>
-                                        </div>
+                                        </ComingSoonOverlay>
                                     </AccordionContent>
                                 </AccordionItem>
 
@@ -1927,8 +1871,25 @@ const CustomersPage = () => {
                                         <AccordionTrigger className="hover:no-underline py-3 px-3 bg-[#F26B33]/10 rounded-xl mb-2">
                                             <span className="flex items-center gap-2 text-sm font-semibold text-[#F26B33]">
                                                 <Building2 className="w-4 h-4" /> Corporate Info
+                                                <span className="ml-auto text-[10px] bg-orange-100 text-orange-500 px-2 py-0.5 rounded-full">Coming Soon</span>
                                             </span>
                                         </AccordionTrigger>
+                                        <AccordionContent className="px-1">
+                                            <ComingSoonOverlay color="orange">
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <Label className="form-label">Company/GST Name</Label>
+                                                        <Input placeholder="Company name" className="h-11 rounded-xl" disabled />
+                                                    </div>
+                                                    <div>
+                                                        <Label className="form-label">GST Number</Label>
+                                                        <Input placeholder="22AAAAA0000A1Z5" className="h-11 rounded-xl" disabled />
+                                                    </div>
+                                                </div>
+                                            </ComingSoonOverlay>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                )}
                                         <AccordionContent className="px-1">
                                             <div className="space-y-4">
                                                 <div>
