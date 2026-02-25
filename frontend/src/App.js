@@ -907,6 +907,13 @@ const CustomersPage = () => {
             referral_code: "", referred_by: "", membership_id: "", membership_expiry: "",
             // Behavior & Preferences
             favorite_category: "", preferred_payment_mode: "",
+            // Behavior & Preferences
+            favorite_category: "", preferred_payment_mode: "",
+            // Customer Source & Journey
+            lead_source: "", campaign_source: "", assigned_salesperson: "",
+            // WhatsApp CRM Tracking
+            last_whatsapp_sent: "", last_whatsapp_response: "", last_campaign_clicked: "",
+            last_coupon_used: "", automation_status_tag: "",
             // Corporate Information
             gst_name: "", gst_number: "", billing_address: "", credit_limit: "", payment_terms: "",
             // Address
