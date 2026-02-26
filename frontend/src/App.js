@@ -5580,7 +5580,7 @@ const SettingsPage = () => {
     const navigate = useNavigate();
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [savingApiKey, setSavingApiKey] = useState(false);
-    const [activeSection, setActiveSection] = useState(null);
+    const [activeSection, setActiveSection] = useState("profile"); // Default to profile
     const [profile, setProfile] = useState({ restaurant_name: "", phone: "", address: "" });
     const [savingProfile, setSavingProfile] = useState(false);
 
@@ -5629,157 +5629,206 @@ const SettingsPage = () => {
         toast.success("Logged out successfully");
     };
 
-    const toggleSection = (section) => {
-        setActiveSection(prev => prev === section ? null : section);
-    };
-
-    const sectionColors = {
-        coupons: { bg: "bg-[#F26B33]/10", border: "border-[#F26B33]", text: "text-[#F26B33]" },
-        whatsapp: { bg: "bg-[#25D366]/10", border: "border-[#25D366]", text: "text-[#25D366]" },
-        loyalty: { bg: "bg-[#329937]/10", border: "border-[#329937]", text: "text-[#329937]" }
-    };
+    const tabs = [
+        { key: "profile", icon: User, label: "Profile", color: "#F26B33" },
+        { key: "coupons", icon: Tag, label: "Coupons", color: "#F26B33" },
+        { key: "whatsapp", icon: MessageSquare, label: "WhatsApp", color: "#25D366" },
+        { key: "loyalty", icon: Gift, label: "Loyalty", color: "#329937" }
+    ];
 
     return (
         <MobileLayout>
             <div className="p-4 max-w-lg mx-auto">
                 <h1 className="text-2xl font-bold text-[#1A1A1A] mb-6 font-['Montserrat']" data-testid="settings-title">Settings</h1>
 
-                {/* Tab Cards */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                    {[
-                        { key: "coupons", icon: Tag, label: "Coupons", sub: "Manage discounts", color: "#F26B33" },
-                        { key: "whatsapp", icon: MessageSquare, label: "WhatsApp", sub: "Automation", color: "#25D366" },
-                        { key: "loyalty", icon: Gift, label: "Loyalty", sub: "Points & tiers", color: "#329937" }
-                    ].map(({ key, icon: Icon, label, sub, color }) => (
+                {/* 4 Tab Cards */}
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                    {tabs.map(({ key, icon: Icon, label, color }) => (
                         <button
                             key={key}
-                            onClick={() => toggleSection(key)}
-                            className={`flex items-center gap-3 p-4 rounded-xl shadow-sm transition-all ${activeSection === key ? `bg-white border-l-4 ${sectionColors[key].border} shadow-md` : "bg-white border-l-4 border-transparent hover:shadow-md"}`}
+                            onClick={() => setActiveSection(key)}
+                            className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                                activeSection === key 
+                                    ? "bg-white shadow-md border-2" 
+                                    : "bg-gray-50 hover:bg-white hover:shadow-sm border-2 border-transparent"
+                            }`}
+                            style={{ borderColor: activeSection === key ? color : "transparent" }}
                             data-testid={`tab-${key}`}
                         >
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center`} style={{ backgroundColor: `${color}15` }}>
+                            <div 
+                                className="w-10 h-10 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: `${color}15` }}
+                            >
                                 <Icon className="w-5 h-5" style={{ color }} />
                             </div>
-                            <div className="text-left">
-                                <p className={`font-medium ${activeSection === key ? sectionColors[key].text : "text-[#1A1A1A]"}`}>{label}</p>
-                                <p className="text-xs text-[#52525B]">{sub}</p>
-                            </div>
+                            <p className={`text-xs font-medium ${activeSection === key ? "" : "text-[#52525B]"}`} style={{ color: activeSection === key ? color : undefined }}>
+                                {label}
+                            </p>
                         </button>
                     ))}
                 </div>
 
-                {/* Inline Section Content */}
+                {/* Profile Tab Content */}
+                {activeSection === "profile" && (
+                    <div className="space-y-4">
+                        {/* WhatsApp API Key Section */}
+                        <Card className="rounded-xl border-0 shadow-sm" data-testid="whatsapp-api-key-card">
+                            <CardContent className="p-4 space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0">
+                                        <KeyRound className="w-5 h-5 text-[#25D366]" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-[#1A1A1A]">WhatsApp API Key</p>
+                                        <p className="text-xs text-[#52525B] mt-1">Enter your AuthKey.io API key to authenticate and send WhatsApp messages.</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <Label className="form-label">API Key</Label>
+                                    <Input 
+                                        type="password" 
+                                        value={whatsappApiKey} 
+                                        onChange={(e) => setWhatsappApiKey(e.target.value)} 
+                                        placeholder="Enter your AuthKey.io API key" 
+                                        className="h-12 rounded-xl font-mono" 
+                                        data-testid="whatsapp-api-key-input" 
+                                    />
+                                </div>
+                                <Button 
+                                    onClick={handleSaveApiKey} 
+                                    disabled={savingApiKey} 
+                                    className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white" 
+                                    data-testid="save-whatsapp-api-key-btn"
+                                >
+                                    {savingApiKey ? "Saving..." : "Save API Key"}
+                                </Button>
+                            </CardContent>
+                        </Card>
+
+                        {/* Profile Section */}
+                        <Card className="rounded-xl border-0 shadow-sm" data-testid="profile-card">
+                            <CardContent className="p-4 space-y-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-[#F26B33]/10 flex items-center justify-center flex-shrink-0">
+                                        <User className="w-5 h-5 text-[#F26B33]" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-[#1A1A1A]">Business Profile</p>
+                                        <p className="text-xs text-[#52525B] mt-1">Manage your business details</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    <div>
+                                        <Label className="form-label">Business Name</Label>
+                                        <Input value={user?.restaurant_name || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-name" />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label">Email</Label>
+                                        <Input value={user?.email || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-email" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <Label className="form-label">POS ID</Label>
+                                            <Input value={user?.pos_id || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-id" />
+                                        </div>
+                                        <div>
+                                            <Label className="form-label">POS Name</Label>
+                                            <Input value={user?.pos_name || "MyGenie"} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-name" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label className="form-label">Phone</Label>
+                                        <Input value={profile.phone} onChange={(e) => setProfile(p => ({...p, phone: e.target.value}))} className="h-12 rounded-xl" data-testid="profile-phone" />
+                                    </div>
+                                    <div>
+                                        <Label className="form-label">Address</Label>
+                                        <Input value={profile.address} onChange={(e) => setProfile(p => ({...p, address: e.target.value}))} placeholder="Enter business address" className="h-12 rounded-xl" data-testid="profile-address" />
+                                    </div>
+                                </div>
+                                <Button 
+                                    onClick={handleSaveProfile} 
+                                    disabled={savingProfile} 
+                                    className="w-full h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A] text-white" 
+                                    data-testid="save-profile-btn"
+                                >
+                                    {savingProfile ? "Saving..." : "Save Profile"}
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+
+                {/* Coupons Tab Content */}
                 {activeSection === "coupons" && (
-                    <Card className="rounded-xl border-0 shadow-sm mb-4 border-l-4 border-[#F26B33]">
-                        <CardContent className="p-4 text-center">
-                            <Tag className="w-10 h-10 text-[#F26B33] mx-auto mb-2" />
-                            <p className="font-medium text-[#1A1A1A] mb-1">Coupon Management</p>
-                            <p className="text-xs text-[#52525B] mb-3">Create and manage discount coupons for your customers</p>
-                            <Button onClick={() => navigate("/coupons")} className="bg-[#F26B33] hover:bg-[#D85A2A] text-white rounded-full" data-testid="open-coupons-btn">
+                    <Card className="rounded-xl border-0 shadow-sm border-l-4 border-[#F26B33]">
+                        <CardContent className="p-6 text-center">
+                            <div className="w-16 h-16 rounded-full bg-[#F26B33]/10 flex items-center justify-center mx-auto mb-3">
+                                <Tag className="w-8 h-8 text-[#F26B33]" />
+                            </div>
+                            <p className="font-semibold text-[#1A1A1A] text-lg mb-1">Coupon Management</p>
+                            <p className="text-sm text-[#52525B] mb-4">Create and manage discount coupons for your customers</p>
+                            <Button 
+                                onClick={() => navigate("/coupons")} 
+                                className="bg-[#F26B33] hover:bg-[#D85A2A] text-white rounded-full px-8 h-11" 
+                                data-testid="open-coupons-btn"
+                            >
                                 Open Coupons
                             </Button>
                         </CardContent>
                     </Card>
                 )}
 
+                {/* WhatsApp Tab Content */}
                 {activeSection === "whatsapp" && (
-                    <Card className="rounded-xl border-0 shadow-sm mb-4 border-l-4 border-[#25D366]">
-                        <CardContent className="p-4 text-center">
-                            <MessageSquare className="w-10 h-10 text-[#25D366] mx-auto mb-2" />
-                            <p className="font-medium text-[#1A1A1A] mb-1">WhatsApp Automation</p>
-                            <p className="text-xs text-[#52525B] mb-3">Configure event-based WhatsApp messages to customers</p>
-                            <Button onClick={() => navigate("/whatsapp-automation")} className="bg-[#25D366] hover:bg-[#1da851] text-white rounded-full" data-testid="open-whatsapp-btn">
+                    <Card className="rounded-xl border-0 shadow-sm border-l-4 border-[#25D366]">
+                        <CardContent className="p-6 text-center">
+                            <div className="w-16 h-16 rounded-full bg-[#25D366]/10 flex items-center justify-center mx-auto mb-3">
+                                <MessageSquare className="w-8 h-8 text-[#25D366]" />
+                            </div>
+                            <p className="font-semibold text-[#1A1A1A] text-lg mb-1">WhatsApp Automation</p>
+                            <p className="text-sm text-[#52525B] mb-4">Configure event-based WhatsApp messages to customers</p>
+                            <Button 
+                                onClick={() => navigate("/whatsapp-automation")} 
+                                className="bg-[#25D366] hover:bg-[#1da851] text-white rounded-full px-8 h-11" 
+                                data-testid="open-whatsapp-btn"
+                            >
                                 Open Automation
                             </Button>
                         </CardContent>
                     </Card>
                 )}
 
+                {/* Loyalty Tab Content */}
                 {activeSection === "loyalty" && (
-                    <Card className="rounded-xl border-0 shadow-sm mb-4 border-l-4 border-[#329937]">
-                        <CardContent className="p-4 text-center">
-                            <Gift className="w-10 h-10 text-[#329937] mx-auto mb-2" />
-                            <p className="font-medium text-[#1A1A1A] mb-1">Loyalty Program</p>
-                            <p className="text-xs text-[#52525B] mb-3">Configure points earning, redemption, tiers & bonuses</p>
-                            <Button onClick={() => navigate("/loyalty-settings")} className="bg-[#329937] hover:bg-[#287a2d] text-white rounded-full" data-testid="open-loyalty-btn">
+                    <Card className="rounded-xl border-0 shadow-sm border-l-4 border-[#329937]">
+                        <CardContent className="p-6 text-center">
+                            <div className="w-16 h-16 rounded-full bg-[#329937]/10 flex items-center justify-center mx-auto mb-3">
+                                <Gift className="w-8 h-8 text-[#329937]" />
+                            </div>
+                            <p className="font-semibold text-[#1A1A1A] text-lg mb-1">Loyalty Program</p>
+                            <p className="text-sm text-[#52525B] mb-4">Configure points earning, redemption, tiers & bonuses</p>
+                            <Button 
+                                onClick={() => navigate("/loyalty-settings")} 
+                                className="bg-[#329937] hover:bg-[#287a2d] text-white rounded-full px-8 h-11" 
+                                data-testid="open-loyalty-btn"
+                            >
                                 Open Loyalty Settings
                             </Button>
                         </CardContent>
                     </Card>
                 )}
 
-                {/* WhatsApp API Key - always visible */}
-                <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="whatsapp-api-key-card">
-                    <CardContent className="p-4 space-y-4">
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0">
-                                <KeyRound className="w-5 h-5 text-[#25D366]" />
-                            </div>
-                            <div>
-                                <p className="font-medium text-[#1A1A1A]">WhatsApp API Key</p>
-                                <p className="text-xs text-[#52525B] mt-1">Enter your AuthKey.io API key to authenticate and send WhatsApp messages.</p>
-                            </div>
-                        </div>
-                        <div>
-                            <Label className="form-label">API Key</Label>
-                            <Input type="password" value={whatsappApiKey} onChange={(e) => setWhatsappApiKey(e.target.value)} placeholder="Enter your AuthKey.io API key" className="h-12 rounded-xl font-mono" data-testid="whatsapp-api-key-input" />
-                        </div>
-                        <Button onClick={handleSaveApiKey} disabled={savingApiKey} className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white" data-testid="save-whatsapp-api-key-btn">
-                            {savingApiKey ? "Saving..." : "Save API Key"}
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                {/* Profile Section - always visible */}
-                <Card className="rounded-xl border-0 shadow-sm mb-4" data-testid="profile-card">
-                    <CardContent className="p-4 space-y-4">
-                        <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#F26B33]/10 flex items-center justify-center flex-shrink-0">
-                                <User className="w-5 h-5 text-[#F26B33]" />
-                            </div>
-                            <div>
-                                <p className="font-medium text-[#1A1A1A]">Profile</p>
-                                <p className="text-xs text-[#52525B] mt-1">Manage your business details</p>
-                            </div>
-                        </div>
-                        <div className="space-y-3">
-                            <div>
-                                <Label className="form-label">Business Name</Label>
-                                <Input value={user?.restaurant_name || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-name" />
-                            </div>
-                            <div>
-                                <Label className="form-label">Email</Label>
-                                <Input value={user?.email || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-email" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <Label className="form-label">POS ID</Label>
-                                    <Input value={user?.pos_id || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-id" />
-                                </div>
-                                <div>
-                                    <Label className="form-label">POS Name</Label>
-                                    <Input value={user?.pos_name || "MyGenie"} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-name" />
-                                </div>
-                            </div>
-                            <div>
-                                <Label className="form-label">Phone</Label>
-                                <Input value={profile.phone} onChange={(e) => setProfile(p => ({...p, phone: e.target.value}))} className="h-12 rounded-xl" data-testid="profile-phone" />
-                            </div>
-                            <div>
-                                <Label className="form-label">Address</Label>
-                                <Input value={profile.address} onChange={(e) => setProfile(p => ({...p, address: e.target.value}))} placeholder="Enter business address" className="h-12 rounded-xl" data-testid="profile-address" />
-                            </div>
-                        </div>
-                        <Button onClick={handleSaveProfile} disabled={savingProfile} className="w-full h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A] text-white" data-testid="save-profile-btn">
-                            {savingProfile ? "Saving..." : "Save Profile"}
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                {/* Logout */}
-                <Button onClick={handleLogout} variant="outline" className="w-full h-12 rounded-full border-red-500 text-red-500 hover:bg-red-50" data-testid="logout-btn">
-                    <LogOut className="w-4 h-4 mr-2" /> Logout
-                </Button>
+                {/* Logout - always visible at bottom */}
+                <div className="mt-6">
+                    <Button 
+                        onClick={handleLogout} 
+                        variant="outline" 
+                        className="w-full h-12 rounded-full border-red-500 text-red-500 hover:bg-red-50" 
+                        data-testid="logout-btn"
+                    >
+                        <LogOut className="w-4 h-4 mr-2" /> Logout
+                    </Button>
+                </div>
             </div>
         </MobileLayout>
     );
