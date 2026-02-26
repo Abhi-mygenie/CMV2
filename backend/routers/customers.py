@@ -387,6 +387,19 @@ async def list_customers(
     last_visit_days: Optional[int] = None,
     favorite: Optional[str] = None,
     city: Optional[str] = None,
+    # New filters
+    whatsapp_opt_in: Optional[str] = None,
+    vip_flag: Optional[str] = None,
+    diet_preference: Optional[str] = None,
+    lead_source: Optional[str] = None,
+    preferred_time_slot: Optional[str] = None,
+    preferred_dining_type: Optional[str] = None,
+    has_birthday_this_month: Optional[bool] = None,
+    has_anniversary_this_month: Optional[bool] = None,
+    total_visits: Optional[str] = None,
+    blacklist_flag: Optional[str] = None,
+    complaint_flag: Optional[str] = None,
+    # Sort options
     sort_by: str = "created_at",
     sort_order: str = "desc",
     limit: int = 100,
@@ -427,6 +440,58 @@ async def list_customers(
     
     if city:
         query["city"] = {"$regex": city, "$options": "i"}
+    
+    # New filter implementations
+    if whatsapp_opt_in and whatsapp_opt_in != "all":
+        query["whatsapp_opt_in"] = whatsapp_opt_in == "true"
+    
+    if vip_flag and vip_flag != "all":
+        query["vip_flag"] = vip_flag == "true"
+    
+    if diet_preference and diet_preference != "all":
+        query["diet_preference"] = diet_preference
+    
+    if lead_source and lead_source != "all":
+        query["lead_source"] = lead_source
+    
+    if preferred_time_slot and preferred_time_slot != "all":
+        query["preferred_time_slot"] = preferred_time_slot
+    
+    if preferred_dining_type and preferred_dining_type != "all":
+        query["preferred_dining_type"] = preferred_dining_type
+    
+    if blacklist_flag and blacklist_flag != "all":
+        query["blacklist_flag"] = blacklist_flag == "true"
+    
+    if complaint_flag and complaint_flag != "all":
+        query["complaint_flag"] = complaint_flag == "true"
+    
+    # Birthday this month filter
+    if has_birthday_this_month:
+        current_month = datetime.now(timezone.utc).month
+        month_str = f"-{current_month:02d}-"
+        and_conditions.append({
+            "dob": {"$regex": month_str}
+        })
+    
+    # Anniversary this month filter
+    if has_anniversary_this_month:
+        current_month = datetime.now(timezone.utc).month
+        month_str = f"-{current_month:02d}-"
+        and_conditions.append({
+            "anniversary": {"$regex": month_str}
+        })
+    
+    # Total visits filter
+    if total_visits and total_visits != "all":
+        if total_visits == "0":
+            query["total_visits"] = 0
+        elif total_visits == "1-5":
+            query["total_visits"] = {"$gte": 1, "$lte": 5}
+        elif total_visits == "6-10":
+            query["total_visits"] = {"$gte": 6, "$lte": 10}
+        elif total_visits == "10+":
+            query["total_visits"] = {"$gt": 10}
     
     if and_conditions:
         query["$and"] = and_conditions
