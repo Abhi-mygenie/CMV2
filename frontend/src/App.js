@@ -1067,7 +1067,18 @@ const CustomersPage = () => {
             last_visit_days: "all",
             city: "",
             sort_by: "created_at",
-            sort_order: "desc"
+            sort_order: "desc",
+            whatsapp_opt_in: "all",
+            vip_flag: "all",
+            diet_preference: "all",
+            lead_source: "all",
+            preferred_time_slot: "all",
+            preferred_dining_type: "all",
+            has_birthday_this_month: false,
+            has_anniversary_this_month: false,
+            total_visits: "all",
+            blacklist_flag: "all",
+            complaint_flag: "all"
         });
     };
 
@@ -1075,8 +1086,27 @@ const CustomersPage = () => {
         filters.tier !== "all" ? 1 : 0,
         filters.customer_type !== "all" ? 1 : 0,
         filters.last_visit_days !== "all" ? 1 : 0,
-        filters.city ? 1 : 0
+        filters.city ? 1 : 0,
+        filters.whatsapp_opt_in !== "all" ? 1 : 0,
+        filters.vip_flag !== "all" ? 1 : 0,
+        filters.diet_preference !== "all" ? 1 : 0,
+        filters.lead_source !== "all" ? 1 : 0,
+        filters.preferred_time_slot !== "all" ? 1 : 0,
+        filters.preferred_dining_type !== "all" ? 1 : 0,
+        filters.has_birthday_this_month ? 1 : 0,
+        filters.has_anniversary_this_month ? 1 : 0,
+        filters.total_visits !== "all" ? 1 : 0,
+        filters.blacklist_flag !== "all" ? 1 : 0,
+        filters.complaint_flag !== "all" ? 1 : 0
     ].reduce((a, b) => a + b, 0);
+
+    const toggleFilterGroup = (group) => {
+        setExpandedFilterGroups(prev => 
+            prev.includes(group) 
+                ? prev.filter(g => g !== group)
+                : [...prev, group]
+        );
+    };
 
     const openEditModal = (customer, e) => {
         e.stopPropagation(); // Prevent navigation to detail page
