@@ -747,8 +747,21 @@ const CustomersPage = () => {
         last_visit_days: "all",
         city: "",
         sort_by: "created_at",
-        sort_order: "desc"
+        sort_order: "desc",
+        // New filters
+        whatsapp_opt_in: "all",
+        vip_flag: "all",
+        diet_preference: "all",
+        lead_source: "all",
+        preferred_time_slot: "all",
+        preferred_dining_type: "all",
+        has_birthday_this_month: false,
+        has_anniversary_this_month: false,
+        total_visits: "all",
+        blacklist_flag: "all",
+        complaint_flag: "all"
     });
+    const [expandedFilterGroups, setExpandedFilterGroups] = useState(["basic"]);
     const [newCustomer, setNewCustomer] = useState({ 
         // Basic Information
         name: "", 
