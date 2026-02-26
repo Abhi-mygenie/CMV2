@@ -5730,151 +5730,184 @@ const SettingsPage = () => {
                 {/* Profile Tab Content */}
                 {activeSection === "profile" && (
                     <div className="space-y-4">
-                        {/* WhatsApp API Key Section */}
                         <Card className="rounded-xl border-0 shadow-sm" data-testid="whatsapp-api-key-card">
                             <CardContent className="p-4 space-y-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0">
-                                        <KeyRound className="w-5 h-5 text-[#25D366]" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-[#1A1A1A]">WhatsApp API Key</p>
-                                        <p className="text-xs text-[#52525B] mt-1">Enter your AuthKey.io API key to authenticate and send WhatsApp messages.</p>
-                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0"><KeyRound className="w-5 h-5 text-[#25D366]" /></div>
+                                    <div><p className="font-medium text-[#1A1A1A]">WhatsApp API Key</p><p className="text-xs text-[#52525B] mt-1">Enter your AuthKey.io API key</p></div>
                                 </div>
-                                <div>
-                                    <Label className="form-label">API Key</Label>
-                                    <Input 
-                                        type="password" 
-                                        value={whatsappApiKey} 
-                                        onChange={(e) => setWhatsappApiKey(e.target.value)} 
-                                        placeholder="Enter your AuthKey.io API key" 
-                                        className="h-12 rounded-xl font-mono" 
-                                        data-testid="whatsapp-api-key-input" 
-                                    />
-                                </div>
-                                <Button 
-                                    onClick={handleSaveApiKey} 
-                                    disabled={savingApiKey} 
-                                    className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white" 
-                                    data-testid="save-whatsapp-api-key-btn"
-                                >
-                                    {savingApiKey ? "Saving..." : "Save API Key"}
-                                </Button>
+                                <div><Label className="form-label">API Key</Label><Input type="password" value={whatsappApiKey} onChange={(e) => setWhatsappApiKey(e.target.value)} placeholder="Enter your AuthKey.io API key" className="h-12 rounded-xl font-mono" data-testid="whatsapp-api-key-input" /></div>
+                                <Button onClick={handleSaveApiKey} disabled={savingApiKey} className="w-full h-12 rounded-xl bg-[#25D366] hover:bg-[#1da851] text-white" data-testid="save-whatsapp-api-key-btn">{savingApiKey ? "Saving..." : "Save API Key"}</Button>
                             </CardContent>
                         </Card>
-
-                        {/* Profile Section */}
                         <Card className="rounded-xl border-0 shadow-sm" data-testid="profile-card">
                             <CardContent className="p-4 space-y-4">
                                 <div className="flex items-start gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-[#F26B33]/10 flex items-center justify-center flex-shrink-0">
-                                        <User className="w-5 h-5 text-[#F26B33]" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-[#1A1A1A]">Business Profile</p>
-                                        <p className="text-xs text-[#52525B] mt-1">Manage your business details</p>
-                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-[#F26B33]/10 flex items-center justify-center flex-shrink-0"><User className="w-5 h-5 text-[#F26B33]" /></div>
+                                    <div><p className="font-medium text-[#1A1A1A]">Business Profile</p><p className="text-xs text-[#52525B] mt-1">Manage your business details</p></div>
                                 </div>
                                 <div className="space-y-3">
-                                    <div>
-                                        <Label className="form-label">Business Name</Label>
-                                        <Input value={user?.restaurant_name || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-name" />
-                                    </div>
-                                    <div>
-                                        <Label className="form-label">Email</Label>
-                                        <Input value={user?.email || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-email" />
-                                    </div>
+                                    <div><Label className="form-label">Business Name</Label><Input value={user?.restaurant_name || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" /></div>
+                                    <div><Label className="form-label">Email</Label><Input value={user?.email || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" /></div>
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div>
-                                            <Label className="form-label">POS ID</Label>
-                                            <Input value={user?.pos_id || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-id" />
-                                        </div>
-                                        <div>
-                                            <Label className="form-label">POS Name</Label>
-                                            <Input value={user?.pos_name || "MyGenie"} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" data-testid="profile-pos-name" />
-                                        </div>
+                                        <div><Label className="form-label">POS ID</Label><Input value={user?.pos_id || ""} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" /></div>
+                                        <div><Label className="form-label">POS Name</Label><Input value={user?.pos_name || "MyGenie"} disabled className="h-12 rounded-xl bg-gray-50 text-gray-500" /></div>
                                     </div>
-                                    <div>
-                                        <Label className="form-label">Phone</Label>
-                                        <Input value={profile.phone} onChange={(e) => setProfile(p => ({...p, phone: e.target.value}))} className="h-12 rounded-xl" data-testid="profile-phone" />
-                                    </div>
-                                    <div>
-                                        <Label className="form-label">Address</Label>
-                                        <Input value={profile.address} onChange={(e) => setProfile(p => ({...p, address: e.target.value}))} placeholder="Enter business address" className="h-12 rounded-xl" data-testid="profile-address" />
-                                    </div>
+                                    <div><Label className="form-label">Phone</Label><Input value={profile.phone} onChange={(e) => setProfile(p => ({...p, phone: e.target.value}))} className="h-12 rounded-xl" /></div>
+                                    <div><Label className="form-label">Address</Label><Input value={profile.address} onChange={(e) => setProfile(p => ({...p, address: e.target.value}))} placeholder="Enter business address" className="h-12 rounded-xl" /></div>
                                 </div>
-                                <Button 
-                                    onClick={handleSaveProfile} 
-                                    disabled={savingProfile} 
-                                    className="w-full h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A] text-white" 
-                                    data-testid="save-profile-btn"
-                                >
-                                    {savingProfile ? "Saving..." : "Save Profile"}
-                                </Button>
+                                <Button onClick={handleSaveProfile} disabled={savingProfile} className="w-full h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A] text-white" data-testid="save-profile-btn">{savingProfile ? "Saving..." : "Save Profile"}</Button>
                             </CardContent>
                         </Card>
                     </div>
                 )}
 
-                {/* Coupons Tab Content */}
+                {/* Coupons Tab Content - Full Inline */}
                 {activeSection === "coupons" && (
-                    <Card className="rounded-xl border-0 shadow-sm border-l-4 border-[#F26B33]">
-                        <CardContent className="p-6 text-center">
-                            <div className="w-16 h-16 rounded-full bg-[#F26B33]/10 flex items-center justify-center mx-auto mb-3">
-                                <Tag className="w-8 h-8 text-[#F26B33]" />
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <p className="text-sm text-[#52525B]">Manage promotional coupons</p>
+                            <Button onClick={() => { resetCouponForm(); setShowAddCouponModal(true); }} className="h-10 rounded-full bg-[#F26B33] hover:bg-[#D85A2A] px-4" data-testid="add-coupon-btn"><Plus className="w-4 h-4 mr-1" /> New</Button>
+                        </div>
+                        {couponsLoading ? (
+                            <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="bg-white rounded-xl p-4 border animate-pulse"><div className="h-5 bg-gray-200 rounded w-32 mb-2"></div><div className="h-4 bg-gray-200 rounded w-40"></div></div>)}</div>
+                        ) : coupons.length === 0 ? (
+                            <div className="text-center py-12"><Tag className="w-16 h-16 mx-auto text-gray-300 mb-4" /><p className="text-[#52525B] mb-4">No coupons yet</p><Button onClick={() => setShowAddCouponModal(true)} className="bg-[#F26B33] hover:bg-[#D85A2A] rounded-full">Create your first coupon</Button></div>
+                        ) : (
+                            <div className="space-y-3">
+                                {coupons.map(coupon => (
+                                    <Card key={coupon.id} className={`rounded-xl border ${isCouponActive(coupon) ? 'border-[#329937]/30 bg-white' : 'border-gray-200 bg-gray-50'}`}>
+                                        <CardContent className="p-4">
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-bold text-[#1A1A1A] text-lg">{coupon.code}</p>
+                                                        {isCouponActive(coupon) && <Badge className="bg-[#329937]/10 text-[#329937] text-xs border-0">Active</Badge>}
+                                                        {!coupon.is_active && <Badge variant="outline" className="text-xs text-gray-500">Inactive</Badge>}
+                                                        {coupon.is_active && new Date(coupon.end_date) < new Date() && <Badge variant="outline" className="text-xs text-red-500 border-red-200">Expired</Badge>}
+                                                    </div>
+                                                    <p className="text-sm text-[#F26B33] font-medium mt-1">{coupon.discount_type === "percentage" ? `${coupon.discount_value}% off` : `₹${coupon.discount_value} off`}{coupon.max_discount && coupon.discount_type === "percentage" && ` (max ₹${coupon.max_discount})`}</p>
+                                                    <p className="text-xs text-[#A1A1AA] mt-1">{formatDate(coupon.start_date)} - {formatDate(coupon.end_date)}</p>
+                                                    <Badge variant="outline" className="text-xs bg-gray-50 mt-2">Used: {coupon.total_used}{coupon.usage_limit ? `/${coupon.usage_limit}` : ''}</Badge>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <Button variant="ghost" size="sm" onClick={() => handleEditCoupon(coupon)} className="h-9 w-9 p-0 text-[#52525B] hover:text-[#F26B33]"><Edit2 className="w-4 h-4" /></Button>
+                                                    <Button variant="ghost" size="sm" onClick={() => handleDeleteCoupon(coupon.id)} className="h-9 w-9 p-0 text-[#52525B] hover:text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
                             </div>
-                            <p className="font-semibold text-[#1A1A1A] text-lg mb-1">Coupon Management</p>
-                            <p className="text-sm text-[#52525B] mb-4">Create and manage discount coupons for your customers</p>
-                            <Button 
-                                onClick={() => navigate("/coupons")} 
-                                className="bg-[#F26B33] hover:bg-[#D85A2A] text-white rounded-full px-8 h-11" 
-                                data-testid="open-coupons-btn"
-                            >
-                                Open Coupons
-                            </Button>
-                        </CardContent>
-                    </Card>
+                        )}
+                        <Dialog open={showAddCouponModal} onOpenChange={(open) => { setShowAddCouponModal(open); if (!open) resetCouponForm(); }}>
+                            <DialogContent className="max-w-md mx-4 rounded-2xl max-h-[90vh] overflow-hidden flex flex-col">
+                                <DialogHeader><DialogTitle>{editingCoupon ? "Edit Coupon" : "Create Coupon"}</DialogTitle></DialogHeader>
+                                <form onSubmit={handleCouponSubmit} className="flex-1 overflow-hidden">
+                                    <ScrollArea className="h-[calc(90vh-200px)] pr-4">
+                                        <div className="space-y-4">
+                                            <div><Label className="form-label">Coupon Code</Label><Input value={newCoupon.code} onChange={(e) => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})} placeholder="e.g., SAVE10" className="h-12 rounded-xl uppercase" required /></div>
+                                            <div><Label className="form-label">Discount Type</Label><Select value={newCoupon.discount_type} onValueChange={(v) => setNewCoupon({...newCoupon, discount_type: v})}><SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="percentage">Percentage (%)</SelectItem><SelectItem value="fixed">Fixed Amount (₹)</SelectItem></SelectContent></Select></div>
+                                            <div><Label className="form-label">Discount Value</Label><Input type="number" value={newCoupon.discount_value} onChange={(e) => setNewCoupon({...newCoupon, discount_value: e.target.value})} className="h-12 rounded-xl" required min="0" /></div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div><Label className="form-label">Start Date</Label><Input type="date" value={newCoupon.start_date} onChange={(e) => setNewCoupon({...newCoupon, start_date: e.target.value})} className="h-12 rounded-xl" required /></div>
+                                                <div><Label className="form-label">End Date</Label><Input type="date" value={newCoupon.end_date} onChange={(e) => setNewCoupon({...newCoupon, end_date: e.target.value})} className="h-12 rounded-xl" required /></div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div><Label className="form-label">Usage Limit</Label><Input type="number" value={newCoupon.usage_limit} onChange={(e) => setNewCoupon({...newCoupon, usage_limit: e.target.value})} placeholder="Unlimited" className="h-12 rounded-xl" min="1" /></div>
+                                                <div><Label className="form-label">Per User</Label><Input type="number" value={newCoupon.per_user_limit} onChange={(e) => setNewCoupon({...newCoupon, per_user_limit: e.target.value})} className="h-12 rounded-xl" min="1" /></div>
+                                            </div>
+                                            {newCoupon.discount_type === "percentage" && <div><Label className="form-label">Max Discount (₹)</Label><Input type="number" value={newCoupon.max_discount} onChange={(e) => setNewCoupon({...newCoupon, max_discount: e.target.value})} placeholder="No limit" className="h-12 rounded-xl" /></div>}
+                                            <div><Label className="form-label">Min Order (₹)</Label><Input type="number" value={newCoupon.min_order_value} onChange={(e) => setNewCoupon({...newCoupon, min_order_value: e.target.value})} className="h-12 rounded-xl" min="0" /></div>
+                                            <div className="space-y-2 border-t pt-4">
+                                                <p className="text-sm font-semibold">Channels</p>
+                                                {[{id:"delivery",label:"Delivery"},{id:"takeaway",label:"Takeaway"},{id:"dine_in",label:"Dine In"}].map(ch => (
+                                                    <label key={ch.id} className="flex items-center justify-between py-1"><span className="text-sm">{ch.label}</span><Checkbox checked={newCoupon.applicable_channels.includes(ch.id)} onCheckedChange={() => toggleChannel(ch.id)} /></label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </ScrollArea>
+                                    <div className="flex gap-2 mt-4 pt-4 border-t">
+                                        <Button type="button" variant="outline" onClick={() => setShowAddCouponModal(false)} className="flex-1 h-12 rounded-xl">Cancel</Button>
+                                        <Button type="submit" disabled={submittingCoupon} className="flex-1 h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A]">{submittingCoupon ? "Saving..." : "Save"}</Button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 )}
 
                 {/* WhatsApp Tab Content */}
                 {activeSection === "whatsapp" && (
                     <Card className="rounded-xl border-0 shadow-sm border-l-4 border-[#25D366]">
                         <CardContent className="p-6 text-center">
-                            <div className="w-16 h-16 rounded-full bg-[#25D366]/10 flex items-center justify-center mx-auto mb-3">
-                                <MessageSquare className="w-8 h-8 text-[#25D366]" />
-                            </div>
+                            <div className="w-16 h-16 rounded-full bg-[#25D366]/10 flex items-center justify-center mx-auto mb-3"><MessageSquare className="w-8 h-8 text-[#25D366]" /></div>
                             <p className="font-semibold text-[#1A1A1A] text-lg mb-1">WhatsApp Automation</p>
-                            <p className="text-sm text-[#52525B] mb-4">Configure event-based WhatsApp messages to customers</p>
-                            <Button 
-                                onClick={() => navigate("/whatsapp-automation")} 
-                                className="bg-[#25D366] hover:bg-[#1da851] text-white rounded-full px-8 h-11" 
-                                data-testid="open-whatsapp-btn"
-                            >
-                                Open Automation
-                            </Button>
+                            <p className="text-sm text-[#52525B] mb-4">Configure event-based WhatsApp messages</p>
+                            <Button onClick={() => navigate("/whatsapp-automation")} className="bg-[#25D366] hover:bg-[#1da851] text-white rounded-full px-8 h-11" data-testid="open-whatsapp-btn">Open Automation</Button>
                         </CardContent>
                     </Card>
                 )}
 
-                {/* Loyalty Tab Content */}
+                {/* Loyalty Tab Content - Full Inline */}
                 {activeSection === "loyalty" && (
-                    <Card className="rounded-xl border-0 shadow-sm border-l-4 border-[#329937]">
-                        <CardContent className="p-6 text-center">
-                            <div className="w-16 h-16 rounded-full bg-[#329937]/10 flex items-center justify-center mx-auto mb-3">
-                                <Gift className="w-8 h-8 text-[#329937]" />
-                            </div>
-                            <p className="font-semibold text-[#1A1A1A] text-lg mb-1">Loyalty Program</p>
-                            <p className="text-sm text-[#52525B] mb-4">Configure points earning, redemption, tiers & bonuses</p>
-                            <Button 
-                                onClick={() => navigate("/loyalty-settings")} 
-                                className="bg-[#329937] hover:bg-[#287a2d] text-white rounded-full px-8 h-11" 
-                                data-testid="open-loyalty-btn"
-                            >
-                                Open Loyalty Settings
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <div className="space-y-4">
+                        {loyaltyLoading ? (
+                            <div className="animate-pulse space-y-4"><div className="h-32 bg-gray-200 rounded-xl"></div><div className="h-32 bg-gray-200 rounded-xl"></div></div>
+                        ) : loyaltySettings && (
+                            <>
+                                <Card className="rounded-xl border-0 shadow-sm">
+                                    <CardContent className="p-4 space-y-4">
+                                        <div className="flex items-center gap-2"><TrendingUp className="w-5 h-5 text-[#329937]" /><p className="font-semibold text-[#1A1A1A]">Points Earning</p></div>
+                                        <div><Label className="form-label">Min Order Value (₹)</Label><Input type="number" min="0" value={loyaltySettings.min_order_value} onChange={(e) => setLoyaltySettings({...loyaltySettings, min_order_value: parseFloat(e.target.value)})} className="h-12 rounded-xl" /></div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="rounded-xl border-0 shadow-sm">
+                                    <CardContent className="p-4">
+                                        <p className="font-semibold text-[#1A1A1A] mb-3">Earning % by Tier</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div><Label className="form-label text-xs flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-600"></span>Bronze</Label><Input type="number" step="0.5" min="0" max="100" value={loyaltySettings.bronze_earn_percent} onChange={(e) => setLoyaltySettings({...loyaltySettings, bronze_earn_percent: parseFloat(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                            <div><Label className="form-label text-xs flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-400"></span>Silver</Label><Input type="number" step="0.5" min="0" max="100" value={loyaltySettings.silver_earn_percent} onChange={(e) => setLoyaltySettings({...loyaltySettings, silver_earn_percent: parseFloat(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                            <div><Label className="form-label text-xs flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500"></span>Gold</Label><Input type="number" step="0.5" min="0" max="100" value={loyaltySettings.gold_earn_percent} onChange={(e) => setLoyaltySettings({...loyaltySettings, gold_earn_percent: parseFloat(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                            <div><Label className="form-label text-xs flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-purple-500"></span>Platinum</Label><Input type="number" step="0.5" min="0" max="100" value={loyaltySettings.platinum_earn_percent} onChange={(e) => setLoyaltySettings({...loyaltySettings, platinum_earn_percent: parseFloat(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="rounded-xl border-0 shadow-sm">
+                                    <CardContent className="p-4 space-y-4">
+                                        <p className="font-semibold text-[#1A1A1A]">Points Redemption</p>
+                                        <div className="bg-[#329937]/10 p-3 rounded-lg"><p className="text-sm text-[#329937] font-medium">1 Point = ₹{loyaltySettings.redemption_value}</p></div>
+                                        <div><Label className="form-label">Point Value (₹)</Label><Input type="number" step="0.5" min="0.5" value={loyaltySettings.redemption_value} onChange={(e) => setLoyaltySettings({...loyaltySettings, redemption_value: parseFloat(e.target.value)})} className="h-12 rounded-xl" /></div>
+                                        <div><Label className="form-label">Min Points to Redeem</Label><Input type="number" min="0" value={loyaltySettings.min_redemption_points} onChange={(e) => setLoyaltySettings({...loyaltySettings, min_redemption_points: parseInt(e.target.value)})} className="h-12 rounded-xl" /></div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div><Label className="form-label text-xs">Max % of Bill</Label><Input type="number" min="1" max="100" value={loyaltySettings.max_redemption_percent || 50} onChange={(e) => setLoyaltySettings({...loyaltySettings, max_redemption_percent: parseFloat(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                            <div><Label className="form-label text-xs">Max ₹ Amount</Label><Input type="number" min="0" value={loyaltySettings.max_redemption_amount || 500} onChange={(e) => setLoyaltySettings({...loyaltySettings, max_redemption_amount: parseFloat(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="rounded-xl border-0 shadow-sm">
+                                    <CardContent className="p-4 space-y-4">
+                                        <p className="font-semibold text-[#1A1A1A]">Tier Thresholds (Points)</p>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div><Label className="form-label text-xs">Silver</Label><Input type="number" min="0" value={loyaltySettings.tier_silver_min} onChange={(e) => setLoyaltySettings({...loyaltySettings, tier_silver_min: parseInt(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                            <div><Label className="form-label text-xs">Gold</Label><Input type="number" min="0" value={loyaltySettings.tier_gold_min} onChange={(e) => setLoyaltySettings({...loyaltySettings, tier_gold_min: parseInt(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                            <div><Label className="form-label text-xs">Platinum</Label><Input type="number" min="0" value={loyaltySettings.tier_platinum_min} onChange={(e) => setLoyaltySettings({...loyaltySettings, tier_platinum_min: parseInt(e.target.value)})} className="h-10 rounded-lg" /></div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="rounded-xl border-0 shadow-sm">
+                                    <CardContent className="p-4 space-y-3">
+                                        <p className="font-semibold text-[#1A1A1A]">Bonus Features</p>
+                                        <div className="flex items-center justify-between"><div><p className="text-sm font-medium">First Visit Bonus</p><p className="text-xs text-[#52525B]">{loyaltySettings.first_visit_bonus_points || 50} pts</p></div><Switch checked={loyaltySettings.first_visit_bonus_enabled ?? true} onCheckedChange={(c) => setLoyaltySettings({...loyaltySettings, first_visit_bonus_enabled: c})} /></div>
+                                        <div className="flex items-center justify-between"><div><p className="text-sm font-medium">Birthday Bonus</p><p className="text-xs text-[#52525B]">{loyaltySettings.birthday_bonus_points || 100} pts</p></div><Switch checked={loyaltySettings.birthday_bonus_enabled ?? true} onCheckedChange={(c) => setLoyaltySettings({...loyaltySettings, birthday_bonus_enabled: c})} /></div>
+                                        <div className="flex items-center justify-between"><div><p className="text-sm font-medium">Anniversary Bonus</p><p className="text-xs text-[#52525B]">{loyaltySettings.anniversary_bonus_points || 150} pts</p></div><Switch checked={loyaltySettings.anniversary_bonus_enabled ?? true} onCheckedChange={(c) => setLoyaltySettings({...loyaltySettings, anniversary_bonus_enabled: c})} /></div>
+                                        <div className="flex items-center justify-between"><div><p className="text-sm font-medium">Feedback Bonus</p><p className="text-xs text-[#52525B]">{loyaltySettings.feedback_bonus_points || 25} pts</p></div><Switch checked={loyaltySettings.feedback_bonus_enabled ?? true} onCheckedChange={(c) => setLoyaltySettings({...loyaltySettings, feedback_bonus_enabled: c})} /></div>
+                                    </CardContent>
+                                </Card>
+                                <Button onClick={handleSaveLoyalty} className="w-full h-12 bg-[#329937] hover:bg-[#287a2d] rounded-full" disabled={savingLoyalty} data-testid="save-loyalty-btn">{savingLoyalty ? "Saving..." : "Save Loyalty Settings"}</Button>
+                            </>
+                        )}
+                    </div>
                 )}
 
                 {/* Logout - always visible at bottom */}
