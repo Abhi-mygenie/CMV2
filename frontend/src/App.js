@@ -5578,56 +5578,115 @@ const SegmentsPage = () => {
 const SettingsPage = () => {
     const { user, api, logout } = useAuth();
     const navigate = useNavigate();
+    const [activeSection, setActiveSection] = useState("profile");
+    
+    // Profile state
     const [whatsappApiKey, setWhatsappApiKey] = useState("");
     const [savingApiKey, setSavingApiKey] = useState(false);
-    const [activeSection, setActiveSection] = useState("profile"); // Default to profile
     const [profile, setProfile] = useState({ restaurant_name: "", phone: "", address: "" });
     const [savingProfile, setSavingProfile] = useState(false);
 
+    // Coupons state
+    const [coupons, setCoupons] = useState([]);
+    const [couponsLoading, setCouponsLoading] = useState(false);
+    const [showAddCouponModal, setShowAddCouponModal] = useState(false);
+    const [editingCoupon, setEditingCoupon] = useState(null);
+    const [customers, setCustomers] = useState([]);
+    const [submittingCoupon, setSubmittingCoupon] = useState(false);
+    const [newCoupon, setNewCoupon] = useState({
+        code: "", discount_type: "percentage", discount_value: "", start_date: "", end_date: "",
+        usage_limit: "", per_user_limit: "1", min_order_value: "0", max_discount: "",
+        specific_users: [], applicable_channels: ["delivery", "takeaway", "dine_in"], description: ""
+    });
+    const [showSpecificUsers, setShowSpecificUsers] = useState(false);
+
+    // Loyalty state
+    const [loyaltySettings, setLoyaltySettings] = useState(null);
+    const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+    const [savingLoyalty, setSavingLoyalty] = useState(false);
+
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchProfileData = async () => {
             try {
                 const res = await api.get("/whatsapp/api-key");
                 setWhatsappApiKey(res.data.authkey_api_key || "");
             } catch (_) {}
-            setProfile({
-                restaurant_name: user?.restaurant_name || "",
-                phone: user?.phone || "",
-                address: user?.address || ""
-            });
+            setProfile({ restaurant_name: user?.restaurant_name || "", phone: user?.phone || "", address: user?.address || "" });
         };
-        fetchData();
+        fetchProfileData();
     }, []);
+
+    useEffect(() => {
+        if (activeSection === "coupons" && coupons.length === 0) {
+            fetchCoupons();
+            fetchCustomers();
+        }
+    }, [activeSection]);
+
+    useEffect(() => {
+        if (activeSection === "loyalty" && !loyaltySettings) {
+            fetchLoyaltySettings();
+        }
+    }, [activeSection]);
+
+    const fetchCoupons = async () => {
+        setCouponsLoading(true);
+        try { const res = await api.get("/coupons"); setCoupons(res.data); } catch (_) { toast.error("Failed to load coupons"); } finally { setCouponsLoading(false); }
+    };
+
+    const fetchCustomers = async () => {
+        try { const res = await api.get("/customers?limit=500"); setCustomers(res.data); } catch (_) {}
+    };
+
+    const fetchLoyaltySettings = async () => {
+        setLoyaltyLoading(true);
+        try { const res = await api.get("/loyalty/settings"); setLoyaltySettings(res.data); } catch (_) { toast.error("Failed to load loyalty settings"); } finally { setLoyaltyLoading(false); }
+    };
 
     const handleSaveApiKey = async () => {
         setSavingApiKey(true);
-        try {
-            await api.put("/whatsapp/api-key", { authkey_api_key: whatsappApiKey });
-            toast.success("WhatsApp API key saved!");
-        } catch (err) {
-            toast.error("Failed to save API key");
-        } finally {
-            setSavingApiKey(false);
-        }
+        try { await api.put("/whatsapp/api-key", { authkey_api_key: whatsappApiKey }); toast.success("WhatsApp API key saved!"); } catch (_) { toast.error("Failed to save API key"); } finally { setSavingApiKey(false); }
     };
 
     const handleSaveProfile = async () => {
         setSavingProfile(true);
-        try {
-            await api.put("/auth/profile", profile);
-            toast.success("Profile updated!");
-        } catch (err) {
-            toast.error("Failed to update profile");
-        } finally {
-            setSavingProfile(false);
-        }
+        try { await api.put("/auth/profile", profile); toast.success("Profile updated!"); } catch (_) { toast.error("Failed to update profile"); } finally { setSavingProfile(false); }
     };
 
-    const handleLogout = () => {
-        logout();
-        navigate("/login");
-        toast.success("Logged out successfully");
+    const handleSaveLoyalty = async () => {
+        setSavingLoyalty(true);
+        try { await api.put("/loyalty/settings", loyaltySettings); toast.success("Loyalty settings saved!"); } catch (_) { toast.error("Failed to save settings"); } finally { setSavingLoyalty(false); }
     };
+
+    const handleLogout = () => { logout(); navigate("/login"); toast.success("Logged out successfully"); };
+
+    const resetCouponForm = () => {
+        setNewCoupon({ code: "", discount_type: "percentage", discount_value: "", start_date: "", end_date: "", usage_limit: "", per_user_limit: "1", min_order_value: "0", max_discount: "", specific_users: [], applicable_channels: ["delivery", "takeaway", "dine_in"], description: "" });
+        setShowSpecificUsers(false); setEditingCoupon(null);
+    };
+
+    const handleCouponSubmit = async (e) => {
+        e.preventDefault(); setSubmittingCoupon(true);
+        try {
+            const couponData = { code: newCoupon.code, discount_type: newCoupon.discount_type, discount_value: parseFloat(newCoupon.discount_value), start_date: newCoupon.start_date, end_date: newCoupon.end_date, usage_limit: newCoupon.usage_limit ? parseInt(newCoupon.usage_limit) : null, per_user_limit: parseInt(newCoupon.per_user_limit) || 1, min_order_value: parseFloat(newCoupon.min_order_value) || 0, max_discount: newCoupon.max_discount ? parseFloat(newCoupon.max_discount) : null, specific_users: showSpecificUsers && newCoupon.specific_users.length > 0 ? newCoupon.specific_users : null, applicable_channels: newCoupon.applicable_channels, description: newCoupon.description || null };
+            if (editingCoupon) { await api.put(`/coupons/${editingCoupon.id}`, couponData); toast.success("Coupon updated!"); } else { await api.post("/coupons", couponData); toast.success("Coupon created!"); }
+            setShowAddCouponModal(false); resetCouponForm(); fetchCoupons();
+        } catch (err) { toast.error(err.response?.data?.detail || "Failed to save coupon"); } finally { setSubmittingCoupon(false); }
+    };
+
+    const handleEditCoupon = (coupon) => {
+        setEditingCoupon(coupon);
+        setNewCoupon({ code: coupon.code, discount_type: coupon.discount_type, discount_value: coupon.discount_value.toString(), start_date: coupon.start_date.split("T")[0], end_date: coupon.end_date.split("T")[0], usage_limit: coupon.usage_limit?.toString() || "", per_user_limit: coupon.per_user_limit.toString(), min_order_value: coupon.min_order_value.toString(), max_discount: coupon.max_discount?.toString() || "", specific_users: coupon.specific_users || [], applicable_channels: coupon.applicable_channels, description: coupon.description || "" });
+        setShowSpecificUsers(coupon.specific_users && coupon.specific_users.length > 0); setShowAddCouponModal(true);
+    };
+
+    const handleDeleteCoupon = async (couponId) => { if (!confirm("Delete this coupon?")) return; try { await api.delete(`/coupons/${couponId}`); toast.success("Coupon deleted"); fetchCoupons(); } catch (_) { toast.error("Failed to delete coupon"); } };
+
+    const toggleChannel = (channel) => { setNewCoupon(prev => ({ ...prev, applicable_channels: prev.applicable_channels.includes(channel) ? prev.applicable_channels.filter(c => c !== channel) : [...prev.applicable_channels, channel] })); };
+
+    const formatDate = (dateStr) => { if (!dateStr) return ""; return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); };
+
+    const isCouponActive = (coupon) => { const now = new Date(); return coupon.is_active && now >= new Date(coupon.start_date) && now <= new Date(coupon.end_date); };
 
     const tabs = [
         { key: "profile", icon: User, label: "Profile", color: "#F26B33" },
