@@ -1290,7 +1290,7 @@ const CustomersPage = () => {
                 {customerTab === "customers" && (
                 <>
                 {/* Search & Filter Row */}
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-3">
                     <div className="relative flex-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A1A1AA]" />
                         <Input
@@ -1302,145 +1302,500 @@ const CustomersPage = () => {
                             data-testid="customer-search-input"
                         />
                     </div>
-                    <Popover open={showFilters} onOpenChange={setShowFilters}>
-                        <PopoverTrigger asChild>
-                            <Button 
-                                variant="outline" 
-                                className={`h-12 px-3 rounded-xl relative ${activeFiltersCount > 0 ? 'border-[#F26B33] text-[#F26B33]' : ''}`}
-                                data-testid="filter-btn"
-                            >
-                                <Filter className="w-5 h-5" />
-                                {activeFiltersCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#F26B33] text-white text-xs rounded-full flex items-center justify-center">
-                                        {activeFiltersCount}
-                                    </span>
-                                )}
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 p-4" align="end">
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold text-[#1A1A1A]">Filters</h3>
-                                    {activeFiltersCount > 0 && (
-                                        <button onClick={clearFilters} className="text-sm text-[#F26B33]">Clear all</button>
+                    <Button 
+                        variant="outline" 
+                        onClick={() => setShowFilters(true)}
+                        className={`h-12 px-3 rounded-xl relative ${activeFiltersCount > 0 ? 'border-[#F26B33] text-[#F26B33]' : ''}`}
+                        data-testid="filter-btn"
+                    >
+                        <Filter className="w-5 h-5" />
+                        {activeFiltersCount > 0 && (
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#F26B33] text-white text-xs rounded-full flex items-center justify-center">
+                                {activeFiltersCount}
+                            </span>
+                        )}
+                    </Button>
+                </div>
+
+                {/* Quick Filter Chips */}
+                <div className="flex gap-2 overflow-x-auto pb-3 mb-3 -mx-4 px-4 scrollbar-hide">
+                    <button
+                        onClick={() => setFilters({...filters, vip_flag: filters.vip_flag === "true" ? "all" : "true"})}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                            filters.vip_flag === "true" 
+                                ? 'bg-amber-500 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        data-testid="quick-filter-vip"
+                    >
+                        <Crown className="w-3 h-3" /> VIP
+                    </button>
+                    <button
+                        onClick={() => setFilters({...filters, whatsapp_opt_in: filters.whatsapp_opt_in === "true" ? "all" : "true"})}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                            filters.whatsapp_opt_in === "true" 
+                                ? 'bg-green-500 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        data-testid="quick-filter-whatsapp"
+                    >
+                        <MessageCircle className="w-3 h-3" /> WhatsApp
+                    </button>
+                    <button
+                        onClick={() => setFilters({...filters, has_birthday_this_month: !filters.has_birthday_this_month})}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                            filters.has_birthday_this_month 
+                                ? 'bg-pink-500 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        data-testid="quick-filter-birthday"
+                    >
+                        <Cake className="w-3 h-3" /> Birthday
+                    </button>
+                    <button
+                        onClick={() => setFilters({...filters, diet_preference: filters.diet_preference === "veg" ? "all" : "veg"})}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                            filters.diet_preference === "veg" 
+                                ? 'bg-green-600 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        data-testid="quick-filter-veg"
+                    >
+                        <Leaf className="w-3 h-3" /> Veg
+                    </button>
+                    <button
+                        onClick={() => setFilters({...filters, last_visit_days: filters.last_visit_days === "30" ? "all" : "30"})}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                            filters.last_visit_days === "30" 
+                                ? 'bg-orange-500 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        data-testid="quick-filter-inactive"
+                    >
+                        <Clock className="w-3 h-3" /> Inactive 30d
+                    </button>
+                    <button
+                        onClick={() => setFilters({...filters, customer_type: filters.customer_type === "corporate" ? "all" : "corporate"})}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                            filters.customer_type === "corporate" 
+                                ? 'bg-blue-500 text-white' 
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        data-testid="quick-filter-corporate"
+                    >
+                        <Building2 className="w-3 h-3" /> Corporate
+                    </button>
+                </div>
+
+                {/* Full Screen Filter Drawer */}
+                {showFilters && (
+                    <div className="fixed inset-0 bg-white z-50 flex flex-col" data-testid="filter-drawer">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
+                            <button onClick={() => setShowFilters(false)} className="p-2 -ml-2">
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <h2 className="text-lg font-semibold">Filters</h2>
+                            {activeFiltersCount > 0 ? (
+                                <button onClick={clearFilters} className="text-sm text-[#F26B33] font-medium">
+                                    Clear all
+                                </button>
+                            ) : (
+                                <div className="w-16"></div>
+                            )}
+                        </div>
+
+                        {/* Filter Content */}
+                        <ScrollArea className="flex-1">
+                            <div className="p-4 space-y-2">
+                                
+                                {/* Basic Filters Group */}
+                                <div className="border rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => toggleFilterGroup("basic")}
+                                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Users className="w-4 h-4 text-[#F26B33]" />
+                                            <span className="font-medium text-sm">Basic Filters</span>
+                                        </div>
+                                        {expandedFilterGroups.includes("basic") ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                    {expandedFilterGroups.includes("basic") && (
+                                        <div className="p-4 space-y-4 bg-white">
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Tier</Label>
+                                                <Select value={filters.tier} onValueChange={(v) => setFilters({...filters, tier: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All tiers" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All tiers</SelectItem>
+                                                        <SelectItem value="Bronze">Bronze</SelectItem>
+                                                        <SelectItem value="Silver">Silver</SelectItem>
+                                                        <SelectItem value="Gold">Gold</SelectItem>
+                                                        <SelectItem value="Platinum">Platinum</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Customer Type</Label>
+                                                <Select value={filters.customer_type} onValueChange={(v) => setFilters({...filters, customer_type: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All types" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All types</SelectItem>
+                                                        <SelectItem value="normal">Normal</SelectItem>
+                                                        <SelectItem value="corporate">Corporate</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">City</Label>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="Enter city..."
+                                                    value={filters.city}
+                                                    onChange={(e) => setFilters({...filters, city: e.target.value})}
+                                                    className="h-10 mt-1"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Lead Source</Label>
+                                                <Select value={filters.lead_source} onValueChange={(v) => setFilters({...filters, lead_source: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All sources" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All sources</SelectItem>
+                                                        <SelectItem value="Walk-in">Walk-in</SelectItem>
+                                                        <SelectItem value="Swiggy">Swiggy</SelectItem>
+                                                        <SelectItem value="Zomato">Zomato</SelectItem>
+                                                        <SelectItem value="Instagram">Instagram</SelectItem>
+                                                        <SelectItem value="Facebook">Facebook</SelectItem>
+                                                        <SelectItem value="Google">Google</SelectItem>
+                                                        <SelectItem value="Referral">Referral</SelectItem>
+                                                        <SelectItem value="WhatsApp">WhatsApp</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
-                                
-                                <div>
-                                    <Label className="text-xs text-[#52525B]">Tier</Label>
-                                    <Select value={filters.tier} onValueChange={(v) => setFilters({...filters, tier: v})}>
-                                        <SelectTrigger className="h-10 mt-1">
-                                            <SelectValue placeholder="All tiers" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All tiers</SelectItem>
-                                            <SelectItem value="Bronze">Bronze</SelectItem>
-                                            <SelectItem value="Silver">Silver</SelectItem>
-                                            <SelectItem value="Gold">Gold</SelectItem>
-                                            <SelectItem value="Platinum">Platinum</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
 
-                                <div>
-                                    <Label className="text-xs text-[#52525B]">Customer Type</Label>
-                                    <Select value={filters.customer_type} onValueChange={(v) => setFilters({...filters, customer_type: v})}>
-                                        <SelectTrigger className="h-10 mt-1">
-                                            <SelectValue placeholder="All types" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All types</SelectItem>
-                                            <SelectItem value="normal">Normal</SelectItem>
-                                            <SelectItem value="corporate">Corporate</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div>
-                                    <Label className="text-xs text-[#52525B]">Inactive For (Win-back)</Label>
-                                    <Select value={filters.last_visit_days} onValueChange={(v) => setFilters({...filters, last_visit_days: v})}>
-                                        <SelectTrigger className="h-10 mt-1">
-                                            <SelectValue placeholder="All customers" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All customers</SelectItem>
-                                            <SelectItem value="7">7+ days</SelectItem>
-                                            <SelectItem value="14">14+ days</SelectItem>
-                                            <SelectItem value="30">30+ days</SelectItem>
-                                            <SelectItem value="60">60+ days</SelectItem>
-                                            <SelectItem value="90">90+ days</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div>
-                                    <Label className="text-xs text-[#52525B]">Sort By</Label>
-                                    <Select value={filters.sort_by} onValueChange={(v) => setFilters({...filters, sort_by: v})}>
-                                        <SelectTrigger className="h-10 mt-1">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="created_at">Date Added</SelectItem>
-                                            <SelectItem value="last_visit">Last Visit</SelectItem>
-                                            <SelectItem value="total_spent">Total Spent</SelectItem>
-                                            <SelectItem value="total_points">Points</SelectItem>
-                                            <SelectItem value="name">Name</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {segments && (
-                                    <div className="pt-2 border-t">
-                                        <p className="text-xs font-semibold text-[#52525B] mb-2">Quick Segments</p>
-                                        <div className="flex flex-wrap gap-2">
-                                            <Badge 
-                                                variant="outline" 
-                                                className="cursor-pointer hover:bg-[#F26B33]/10"
-                                                onClick={() => setFilters({...filters, last_visit_days: "30"})}
-                                            >
-                                                <Clock className="w-3 h-3 mr-1" /> Inactive 30d ({segments.inactive_30_days})
-                                            </Badge>
-                                            <Badge 
-                                                variant="outline" 
-                                                className="cursor-pointer hover:bg-[#F26B33]/10"
-                                                onClick={() => setFilters({...filters, tier: "Gold"})}
-                                            >
-                                                Gold ({segments.by_tier?.gold || 0})
-                                            </Badge>
-                                            <Badge 
-                                                variant="outline" 
-                                                className="cursor-pointer hover:bg-[#F26B33]/10"
-                                                onClick={() => setFilters({...filters, customer_type: "corporate"})}
-                                            >
-                                                <Building2 className="w-3 h-3 mr-1" /> Corporate ({segments.by_type?.corporate || 0})
-                                            </Badge>
+                                {/* Activity & Engagement Group */}
+                                <div className="border rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => toggleFilterGroup("activity")}
+                                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-blue-500" />
+                                            <span className="font-medium text-sm">Activity & Engagement</span>
                                         </div>
-                                    </div>
-                                )}
+                                        {expandedFilterGroups.includes("activity") ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                    {expandedFilterGroups.includes("activity") && (
+                                        <div className="p-4 space-y-4 bg-white">
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Inactive For (Win-back)</Label>
+                                                <Select value={filters.last_visit_days} onValueChange={(v) => setFilters({...filters, last_visit_days: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All customers" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All customers</SelectItem>
+                                                        <SelectItem value="7">7+ days</SelectItem>
+                                                        <SelectItem value="14">14+ days</SelectItem>
+                                                        <SelectItem value="30">30+ days</SelectItem>
+                                                        <SelectItem value="60">60+ days</SelectItem>
+                                                        <SelectItem value="90">90+ days</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Total Visits</Label>
+                                                <Select value={filters.total_visits} onValueChange={(v) => setFilters({...filters, total_visits: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="Any" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">Any</SelectItem>
+                                                        <SelectItem value="0">New (0 visits)</SelectItem>
+                                                        <SelectItem value="1-5">1-5 visits</SelectItem>
+                                                        <SelectItem value="6-10">6-10 visits</SelectItem>
+                                                        <SelectItem value="10+">10+ visits</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
-                                {/* Save as Segment Button */}
-                                {activeFiltersCount > 0 && (
-                                    <div className="pt-3 border-t">
-                                        <Button 
-                                            onClick={() => {
-                                                setShowSaveSegmentDialog(true);
-                                                setShowFilters(false); // Close filter popup
-                                            }}
-                                            className="w-full h-9 text-xs bg-[#F26B33] hover:bg-[#D85A2A]"
-                                            data-testid="save-segment-btn"
-                                        >
-                                            <Save className="w-3 h-3 mr-1" /> Save as Segment
-                                        </Button>
-                                    </div>
-                                )}
+                                {/* Dining Preferences Group */}
+                                <div className="border rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => toggleFilterGroup("dining")}
+                                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Utensils className="w-4 h-4 text-green-500" />
+                                            <span className="font-medium text-sm">Dining Preferences</span>
+                                        </div>
+                                        {expandedFilterGroups.includes("dining") ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                    {expandedFilterGroups.includes("dining") && (
+                                        <div className="p-4 space-y-4 bg-white">
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Diet Preference</Label>
+                                                <Select value={filters.diet_preference} onValueChange={(v) => setFilters({...filters, diet_preference: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All</SelectItem>
+                                                        <SelectItem value="veg">Vegetarian</SelectItem>
+                                                        <SelectItem value="non_veg">Non-Vegetarian</SelectItem>
+                                                        <SelectItem value="vegan">Vegan</SelectItem>
+                                                        <SelectItem value="jain">Jain</SelectItem>
+                                                        <SelectItem value="eggetarian">Eggetarian</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Preferred Time Slot</Label>
+                                                <Select value={filters.preferred_time_slot} onValueChange={(v) => setFilters({...filters, preferred_time_slot: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All</SelectItem>
+                                                        <SelectItem value="breakfast">Breakfast (8-11 AM)</SelectItem>
+                                                        <SelectItem value="lunch">Lunch (12-3 PM)</SelectItem>
+                                                        <SelectItem value="evening">Evening (4-7 PM)</SelectItem>
+                                                        <SelectItem value="dinner">Dinner (7-11 PM)</SelectItem>
+                                                        <SelectItem value="late_night">Late Night (11 PM+)</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Dining Type</Label>
+                                                <Select value={filters.preferred_dining_type} onValueChange={(v) => setFilters({...filters, preferred_dining_type: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All</SelectItem>
+                                                        <SelectItem value="Dine-In">Dine-In</SelectItem>
+                                                        <SelectItem value="Takeaway">Takeaway</SelectItem>
+                                                        <SelectItem value="Delivery">Delivery</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Marketing Permissions Group */}
+                                <div className="border rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => toggleFilterGroup("marketing")}
+                                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <MessageCircle className="w-4 h-4 text-purple-500" />
+                                            <span className="font-medium text-sm">Marketing Permissions</span>
+                                        </div>
+                                        {expandedFilterGroups.includes("marketing") ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                    {expandedFilterGroups.includes("marketing") && (
+                                        <div className="p-4 space-y-4 bg-white">
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">WhatsApp Opt-In</Label>
+                                                <Select value={filters.whatsapp_opt_in} onValueChange={(v) => setFilters({...filters, whatsapp_opt_in: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All</SelectItem>
+                                                        <SelectItem value="true">Opted-In</SelectItem>
+                                                        <SelectItem value="false">Not Opted-In</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Special Occasions Group */}
+                                <div className="border rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => toggleFilterGroup("occasions")}
+                                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Cake className="w-4 h-4 text-pink-500" />
+                                            <span className="font-medium text-sm">Special Occasions</span>
+                                        </div>
+                                        {expandedFilterGroups.includes("occasions") ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                    {expandedFilterGroups.includes("occasions") && (
+                                        <div className="p-4 space-y-3 bg-white">
+                                            <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors">
+                                                <Checkbox 
+                                                    checked={filters.has_birthday_this_month}
+                                                    onCheckedChange={(checked) => setFilters({...filters, has_birthday_this_month: checked})}
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <Cake className="w-4 h-4 text-pink-500" />
+                                                    <span className="text-sm">Birthday this month</span>
+                                                </div>
+                                            </label>
+                                            <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors">
+                                                <Checkbox 
+                                                    checked={filters.has_anniversary_this_month}
+                                                    onCheckedChange={(checked) => setFilters({...filters, has_anniversary_this_month: checked})}
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <Heart className="w-4 h-4 text-red-500" />
+                                                    <span className="text-sm">Anniversary this month</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Flags & Status Group */}
+                                <div className="border rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => toggleFilterGroup("flags")}
+                                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <Flag className="w-4 h-4 text-red-500" />
+                                            <span className="font-medium text-sm">Flags & Status</span>
+                                        </div>
+                                        {expandedFilterGroups.includes("flags") ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                    {expandedFilterGroups.includes("flags") && (
+                                        <div className="p-4 space-y-4 bg-white">
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">VIP Status</Label>
+                                                <Select value={filters.vip_flag} onValueChange={(v) => setFilters({...filters, vip_flag: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All</SelectItem>
+                                                        <SelectItem value="true">VIP Only</SelectItem>
+                                                        <SelectItem value="false">Non-VIP</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Complaint Flag</Label>
+                                                <Select value={filters.complaint_flag} onValueChange={(v) => setFilters({...filters, complaint_flag: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All</SelectItem>
+                                                        <SelectItem value="true">Has Complaints</SelectItem>
+                                                        <SelectItem value="false">No Complaints</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Blacklist Status</Label>
+                                                <Select value={filters.blacklist_flag} onValueChange={(v) => setFilters({...filters, blacklist_flag: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue placeholder="All" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All</SelectItem>
+                                                        <SelectItem value="true">Blacklisted</SelectItem>
+                                                        <SelectItem value="false">Not Blacklisted</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Sort Options Group */}
+                                <div className="border rounded-xl overflow-hidden">
+                                    <button 
+                                        onClick={() => toggleFilterGroup("sort")}
+                                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <TrendingUp className="w-4 h-4 text-gray-500" />
+                                            <span className="font-medium text-sm">Sort Options</span>
+                                        </div>
+                                        {expandedFilterGroups.includes("sort") ? (
+                                            <ChevronUp className="w-4 h-4 text-gray-400" />
+                                        ) : (
+                                            <ChevronDown className="w-4 h-4 text-gray-400" />
+                                        )}
+                                    </button>
+                                    {expandedFilterGroups.includes("sort") && (
+                                        <div className="p-4 space-y-4 bg-white">
+                                            <div>
+                                                <Label className="text-xs text-[#52525B]">Sort By</Label>
+                                                <Select value={filters.sort_by} onValueChange={(v) => setFilters({...filters, sort_by: v})}>
+                                                    <SelectTrigger className="h-10 mt-1">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="created_at">Date Added</SelectItem>
+                                                        <SelectItem value="last_visit">Last Visit</SelectItem>
+                                                        <SelectItem value="total_spent">Total Spent</SelectItem>
+                                                        <SelectItem value="total_points">Points</SelectItem>
+                                                        <SelectItem value="name">Name</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Saved Segments */}
                                 {savedSegments.length > 0 && (
-                                    <div className="pt-3 border-t">
-                                        <p className="text-xs font-semibold text-[#52525B] mb-2">Saved Segments</p>
-                                        <div className="space-y-2">
+                                    <div className="border rounded-xl overflow-hidden">
+                                        <div className="p-4 bg-gray-50">
+                                            <div className="flex items-center gap-2">
+                                                <Layers className="w-4 h-4 text-indigo-500" />
+                                                <span className="font-medium text-sm">Saved Segments</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-4 space-y-2 bg-white">
                                             {savedSegments.map(segment => (
-                                                <div key={segment.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                                <div key={segment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                                     <button
                                                         onClick={() => {
                                                             loadSegment(segment);
@@ -1448,28 +1803,52 @@ const CustomersPage = () => {
                                                         }}
                                                         className="flex-1 text-left"
                                                     >
-                                                        <p className="text-xs font-medium text-[#1A1A1A]">{segment.name}</p>
-                                                        <p className="text-[10px] text-[#52525B]">{segment.customer_count} customers</p>
+                                                        <p className="text-sm font-medium text-[#1A1A1A]">{segment.name}</p>
+                                                        <p className="text-xs text-[#52525B]">{segment.customer_count} customers</p>
                                                     </button>
                                                     <button
                                                         onClick={() => deleteSegment(segment.id)}
-                                                        className="ml-2 text-red-500 hover:text-red-700"
+                                                        className="ml-2 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                                                     >
-                                                        <Trash2 className="w-3 h-3" />
+                                                        <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 )}
+
                             </div>
-                        </PopoverContent>
-                    </Popover>
-                </div>
+                        </ScrollArea>
+
+                        {/* Footer with Apply Button */}
+                        <div className="p-4 border-t bg-white sticky bottom-0 space-y-2">
+                            {activeFiltersCount > 0 && (
+                                <Button 
+                                    onClick={() => {
+                                        setShowSaveSegmentDialog(true);
+                                    }}
+                                    variant="outline"
+                                    className="w-full h-11 rounded-xl border-[#F26B33] text-[#F26B33] hover:bg-[#F26B33]/5"
+                                    data-testid="save-segment-btn"
+                                >
+                                    <Save className="w-4 h-4 mr-2" /> Save as Segment
+                                </Button>
+                            )}
+                            <Button 
+                                onClick={() => setShowFilters(false)}
+                                className="w-full h-12 rounded-xl bg-[#F26B33] hover:bg-[#D85A2A] text-white font-semibold"
+                                data-testid="apply-filters-btn"
+                            >
+                                Show {customers.length} Customers
+                            </Button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Save Segment Dialog */}
                 {showSaveSegmentDialog && (
-                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowSaveSegmentDialog(false)}>
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4" onClick={() => setShowSaveSegmentDialog(false)}>
                         <div className="bg-white rounded-2xl p-6 w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
                             <h3 className="text-lg font-semibold mb-4">Save Segment</h3>
                             <div className="space-y-4">
@@ -1484,13 +1863,24 @@ const CustomersPage = () => {
                                         data-testid="segment-name-input"
                                     />
                                 </div>
-                                <div className="bg-gray-50 p-3 rounded-lg">
+                                <div className="bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
                                     <p className="text-xs font-medium text-[#52525B] mb-2">Current Filters:</p>
                                     <div className="space-y-1 text-xs text-[#1A1A1A]">
                                         {filters.tier !== "all" && <p>• Tier: {filters.tier}</p>}
                                         {filters.customer_type !== "all" && <p>• Type: {filters.customer_type}</p>}
-                                        {filters.last_visit_days !== "all" && <p>• Last Visit: {filters.last_visit_days} days</p>}
+                                        {filters.last_visit_days !== "all" && <p>• Inactive: {filters.last_visit_days}+ days</p>}
                                         {filters.city && <p>• City: {filters.city}</p>}
+                                        {filters.whatsapp_opt_in !== "all" && <p>• WhatsApp: {filters.whatsapp_opt_in === "true" ? "Opted-In" : "Not Opted"}</p>}
+                                        {filters.vip_flag !== "all" && <p>• VIP: {filters.vip_flag === "true" ? "Yes" : "No"}</p>}
+                                        {filters.diet_preference !== "all" && <p>• Diet: {filters.diet_preference}</p>}
+                                        {filters.lead_source !== "all" && <p>• Source: {filters.lead_source}</p>}
+                                        {filters.preferred_time_slot !== "all" && <p>• Time Slot: {filters.preferred_time_slot}</p>}
+                                        {filters.preferred_dining_type !== "all" && <p>• Dining: {filters.preferred_dining_type}</p>}
+                                        {filters.has_birthday_this_month && <p>• Birthday this month</p>}
+                                        {filters.has_anniversary_this_month && <p>• Anniversary this month</p>}
+                                        {filters.total_visits !== "all" && <p>• Visits: {filters.total_visits}</p>}
+                                        {filters.complaint_flag !== "all" && <p>• Complaints: {filters.complaint_flag === "true" ? "Yes" : "No"}</p>}
+                                        {filters.blacklist_flag !== "all" && <p>• Blacklist: {filters.blacklist_flag === "true" ? "Yes" : "No"}</p>}
                                         {search && <p>• Search: {search}</p>}
                                     </div>
                                 </div>
