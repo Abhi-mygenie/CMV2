@@ -879,6 +879,18 @@ const CustomersPage = () => {
         if (filters.city) params.append("city", filters.city);
         if (filters.sort_by) params.append("sort_by", filters.sort_by);
         if (filters.sort_order) params.append("sort_order", filters.sort_order);
+        // New filter params
+        if (filters.whatsapp_opt_in && filters.whatsapp_opt_in !== "all") params.append("whatsapp_opt_in", filters.whatsapp_opt_in);
+        if (filters.vip_flag && filters.vip_flag !== "all") params.append("vip_flag", filters.vip_flag);
+        if (filters.diet_preference && filters.diet_preference !== "all") params.append("diet_preference", filters.diet_preference);
+        if (filters.lead_source && filters.lead_source !== "all") params.append("lead_source", filters.lead_source);
+        if (filters.preferred_time_slot && filters.preferred_time_slot !== "all") params.append("preferred_time_slot", filters.preferred_time_slot);
+        if (filters.preferred_dining_type && filters.preferred_dining_type !== "all") params.append("preferred_dining_type", filters.preferred_dining_type);
+        if (filters.has_birthday_this_month) params.append("has_birthday_this_month", "true");
+        if (filters.has_anniversary_this_month) params.append("has_anniversary_this_month", "true");
+        if (filters.total_visits && filters.total_visits !== "all") params.append("total_visits", filters.total_visits);
+        if (filters.blacklist_flag && filters.blacklist_flag !== "all") params.append("blacklist_flag", filters.blacklist_flag);
+        if (filters.complaint_flag && filters.complaint_flag !== "all") params.append("complaint_flag", filters.complaint_flag);
         return params.toString();
     };
 
