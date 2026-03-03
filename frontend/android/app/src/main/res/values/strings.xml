@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MyGenie CRM</string>
+    <string name="title_activity_main">MyGenie CRM</string>
+    <string name="package_name">com.crmmygenie.app</string>
+    <string name="custom_url_scheme">com.crmmygenie.app</string>
+</resources>
