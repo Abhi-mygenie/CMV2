@@ -542,3 +542,12 @@ Currently no rate limits are enforced. Please use responsibly.
 ## Contact
 
 For API support or questions, please contact the development team.
+
+## File References (Post-Refactor)
+- **Backend API**: `/app/backend/server.py`
+- **Auth Router**: `/app/backend/routers/auth.py`
+- **Frontend Routing**: `/app/frontend/src/App.js`
+- **Settings Page**: `/app/frontend/src/pages/SettingsPage.jsx`
+- **Customer Management**: `/app/frontend/src/pages/CustomersPage.jsx`
+
+**Last Updated**: March 3, 2026
