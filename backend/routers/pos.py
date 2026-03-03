@@ -756,6 +756,7 @@ async def _save_order_and_transactions(
                 "item_qty": item.item_qty,
                 "item_price": item.item_price,
                 "item_notes": item.item_notes,
+                "item_category": item.item_category,
                 "created_at": now,
             })
         await db.order_items.insert_many(order_items_docs)
@@ -797,6 +798,7 @@ class OrderItem(BaseModel):
     item_qty: int = 1
     item_price: float = 0.0
     item_notes: Optional[str] = None
+    item_category: Optional[str] = None
 
 
 class POSOrderWebhook(BaseModel):
