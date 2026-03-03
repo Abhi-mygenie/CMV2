@@ -5837,16 +5837,9 @@ const SettingsPage = () => {
                     </div>
                 )}
 
-                {/* WhatsApp Tab Content */}
+                {/* WhatsApp Tab Content - Full Inline */}
                 {activeSection === "whatsapp" && (
-                    <Card className="rounded-xl border-0 shadow-sm border-l-4 border-[#25D366]">
-                        <CardContent className="p-6 text-center">
-                            <div className="w-16 h-16 rounded-full bg-[#25D366]/10 flex items-center justify-center mx-auto mb-3"><MessageSquare className="w-8 h-8 text-[#25D366]" /></div>
-                            <p className="font-semibold text-[#1A1A1A] text-lg mb-1">WhatsApp Automation</p>
-                            <p className="text-sm text-[#52525B] mb-4">Configure event-based WhatsApp messages</p>
-                            <Button onClick={() => navigate("/whatsapp-automation")} className="bg-[#25D366] hover:bg-[#1da851] text-white rounded-full px-8 h-11" data-testid="open-whatsapp-btn">Open Automation</Button>
-                        </CardContent>
-                    </Card>
+                    <WhatsAppAutomationContent embedded />
                 )}
 
                 {/* Loyalty Tab Content - Full Inline */}
@@ -6202,7 +6195,7 @@ const LoyaltySettingsPage = () => {
 
 // ============ WHATSAPP AUTOMATION PAGE ============
 
-const WhatsAppAutomationPage = () => {
+const WhatsAppAutomationContent = ({ embedded = false }) => {
     const { api } = useAuth();
     const navigate = useNavigate();
     const [templates, setTemplates] = useState([]);
@@ -6789,38 +6782,47 @@ const WhatsAppAutomationPage = () => {
     };
 
     if (loading) {
+        const loadingUI = (
+            <div className={embedded ? "" : "p-4 max-w-lg mx-auto"}>
+                <div className="animate-pulse space-y-4">
+                    <div className="h-8 bg-gray-200 rounded w-48"></div>
+                    <div className="h-32 bg-gray-200 rounded-xl"></div>
+                    <div className="h-32 bg-gray-200 rounded-xl"></div>
+                </div>
+            </div>
+        );
+        return embedded ? loadingUI : <MobileLayout>{loadingUI}</MobileLayout>;
+    }
+
+    const ContentWrapper = ({ children }) => {
+        if (embedded) return <>{children}</>;
         return (
             <MobileLayout>
                 <div className="p-4 max-w-lg mx-auto">
-                    <div className="animate-pulse space-y-4">
-                        <div className="h-8 bg-gray-200 rounded w-48"></div>
-                        <div className="h-32 bg-gray-200 rounded-xl"></div>
-                        <div className="h-32 bg-gray-200 rounded-xl"></div>
+                    {/* Header */}
+                    <div className="flex items-center gap-3 mb-6">
+                        <button 
+                            onClick={() => navigate("/settings")}
+                            className="p-2 hover:bg-gray-100 rounded-full"
+                            data-testid="back-btn"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <div>
+                            <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="whatsapp-title">
+                                WhatsApp Automation
+                            </h1>
+                            <p className="text-sm text-[#52525B]">Templates & event triggers</p>
+                        </div>
                     </div>
+                    {children}
                 </div>
             </MobileLayout>
         );
-    }
+    };
 
     return (
-        <MobileLayout>
-            <div className="p-4 max-w-lg mx-auto">
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-6">
-                    <button 
-                        onClick={() => navigate("/settings")}
-                        className="p-2 hover:bg-gray-100 rounded-full"
-                        data-testid="back-btn"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-[#1A1A1A] font-['Montserrat']" data-testid="whatsapp-title">
-                            WhatsApp Automation
-                        </h1>
-                        <p className="text-sm text-[#52525B]">Templates & event triggers</p>
-                    </div>
-                </div>
+        <ContentWrapper>
 
                 {/* Info Banner */}
                 <Card className="rounded-xl border-0 shadow-sm mb-4 bg-[#25D366]/10">
@@ -6844,10 +6846,10 @@ const WhatsAppAutomationPage = () => {
                                 <CardContent className="p-8 text-center">
                                     <KeyRound className="w-12 h-12 text-amber-400 mx-auto mb-3" />
                                     <p className="text-[#52525B]">API Key Required</p>
-                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in Settings to use automation</p>
-                                    <Button onClick={() => navigate("/settings")} variant="outline" className="mt-4">
+                                    <p className="text-xs text-gray-400 mt-1">Add your AuthKey.io API key in {embedded ? "the Profile tab" : "Settings"} to use automation</p>
+                                    {!embedded && <Button onClick={() => navigate("/settings")} variant="outline" className="mt-4">
                                         Go to Settings
-                                    </Button>
+                                    </Button>}
                                 </CardContent>
                             </Card>
                         ) : (
@@ -7796,10 +7798,11 @@ const WhatsAppAutomationPage = () => {
                         )}
                     </DialogContent>
                 </Dialog>
-            </div>
-        </MobileLayout>
+        </ContentWrapper>
     );
 };
+
+const WhatsAppAutomationPage = () => <WhatsAppAutomationContent />;
 
 // ============ TEMPLATES PAGE (top-level nav) ============
 const TemplatesPage = () => {
