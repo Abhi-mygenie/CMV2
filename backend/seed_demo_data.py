@@ -6,10 +6,11 @@ Creates a demo restaurant account with 55+ customers and all features
 
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 import bcrypt
 import random
+import uuid
 
 # MongoDB connection
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
@@ -28,6 +29,8 @@ if demo_user:
     db.customers.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
     db.points_transactions.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
     db.wallet_transactions.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
+    db.orders.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
+    db.order_items.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
     db.coupons.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
     db.segments.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
     db.feedback.delete_many({"$or": [{"user_id": demo_user_id}, {"restaurant_id": demo_user_id}]})
@@ -51,7 +54,7 @@ demo_user = {
     "api_key": "demo-api-key-12345",
     "restaurant_name": "Demo Restaurant & Cafe",
     "phone": "+919876543210",
-    "created_at": datetime.utcnow().isoformat()
+    "created_at": datetime.now(timezone.utc).isoformat()
 }
 db.users.insert_one(demo_user)
 print(f"✅ Created demo user: demo@restaurant.com / demo123")
@@ -59,7 +62,7 @@ print(f"✅ Created demo user: demo@restaurant.com / demo123")
 # Helper functions
 def random_date_ago(max_days):
     days_ago = random.randint(1, max_days)
-    return (datetime.utcnow() - timedelta(days=days_ago)).isoformat()
+    return (datetime.now(timezone.utc) - timedelta(days=days_ago)).isoformat()
 
 # Generate customers
 print("👥 Creating 55+ customers...")
@@ -125,6 +128,129 @@ for i in range(55):
 
 db.customers.insert_many(customers)
 print(f"✅ Created {len(customers)} customers")
+
+# Menu items with categories for realistic orders
+MENU_ITEMS = [
+    {"name": "Butter Chicken", "price": 380, "category": "North Indian", "notes": ["Extra gravy", "Less spicy", "No cream", None]},
+    {"name": "Paneer Tikka", "price": 280, "category": "North Indian", "notes": ["Extra charred", "No onion", None, None]},
+    {"name": "Dal Makhani", "price": 260, "category": "North Indian", "notes": ["Extra butter", None, None]},
+    {"name": "Biryani", "price": 350, "category": "North Indian", "notes": ["Extra raita", "Less spicy", "No salan", None]},
+    {"name": "Naan", "price": 60, "category": "Breads", "notes": ["Extra butter", "Well done", None, None]},
+    {"name": "Garlic Naan", "price": 80, "category": "Breads", "notes": [None, None]},
+    {"name": "Masala Dosa", "price": 180, "category": "South Indian", "notes": ["Extra chutney", "Crispy", None]},
+    {"name": "Idli Sambar", "price": 120, "category": "South Indian", "notes": [None, None]},
+    {"name": "Veg Fried Rice", "price": 220, "category": "Chinese", "notes": ["Extra spicy", "No MSG", None]},
+    {"name": "Manchurian", "price": 240, "category": "Chinese", "notes": ["Dry", "Extra gravy", None]},
+    {"name": "Pasta Alfredo", "price": 320, "category": "Continental", "notes": ["Extra cheese", "Gluten-free pasta", None]},
+    {"name": "Caesar Salad", "price": 280, "category": "Continental", "notes": ["No croutons", "Dressing on side", None]},
+    {"name": "Margherita Pizza", "price": 350, "category": "Continental", "notes": ["Thin crust", "Extra cheese", None]},
+    {"name": "Gulab Jamun", "price": 120, "category": "Desserts", "notes": ["Warm", None]},
+    {"name": "Rasmalai", "price": 150, "category": "Desserts", "notes": [None, None]},
+    {"name": "Brownie Sundae", "price": 220, "category": "Desserts", "notes": ["Extra ice cream", None]},
+    {"name": "Mango Lassi", "price": 120, "category": "Beverages", "notes": ["Less sugar", None]},
+    {"name": "Masala Chai", "price": 60, "category": "Beverages", "notes": ["Extra ginger", "No sugar", None]},
+    {"name": "Cold Coffee", "price": 180, "category": "Beverages", "notes": ["Extra shot", None]},
+    {"name": "Fresh Lime Soda", "price": 90, "category": "Beverages", "notes": [None, None]},
+]
+
+ORDER_NOTES_LIST = [
+    "Table 5 - Window seat",
+    "Birthday celebration",
+    "Takeaway order",
+    "Corporate lunch",
+    "Rush order",
+    "Regular customer - preferred seating",
+    "Allergic to peanuts - please check",
+    "Party of 6",
+    None, None, None, None, None,
+]
+
+# Generate orders and order_items
+print("📦 Creating orders and order_items...")
+orders_list = []
+order_items_list = []
+import uuid
+
+for customer in customers[:40]:
+    num_orders = random.randint(3, 12)
+    order_amounts = []
+    
+    for j in range(num_orders):
+        order_id = f"order-demo-{customer['id']}-{j}"
+        order_date = datetime.now(timezone.utc) - timedelta(days=random.randint(1, 180))
+        order_hour = random.choice([9, 10, 12, 13, 14, 17, 18, 19, 20, 21])
+        order_date = order_date.replace(hour=order_hour, minute=random.randint(0, 59))
+        
+        num_items = random.randint(2, 5)
+        selected_items = random.sample(MENU_ITEMS, min(num_items, len(MENU_ITEMS)))
+        
+        items_embedded = []
+        total = 0
+        for menu_item in selected_items:
+            qty = random.randint(1, 3)
+            price = menu_item["price"]
+            total += price * qty
+            item_note = random.choice(menu_item["notes"])
+            
+            item_doc = {
+                "item_name": menu_item["name"],
+                "item_qty": qty,
+                "item_price": price,
+                "item_notes": item_note,
+                "item_category": menu_item["category"],
+            }
+            items_embedded.append(item_doc)
+            
+            order_items_list.append({
+                "id": str(uuid.uuid4()),
+                "order_id": order_id,
+                "customer_id": customer["id"],
+                "user_id": demo_user_id,
+                "item_name": menu_item["name"],
+                "item_qty": qty,
+                "item_price": price,
+                "item_notes": item_note,
+                "item_category": menu_item["category"],
+                "created_at": order_date.isoformat(),
+            })
+        
+        order_amounts.append(total)
+        
+        orders_list.append({
+            "id": order_id,
+            "user_id": demo_user_id,
+            "customer_id": customer["id"],
+            "pos_id": "mygenie",
+            "pos_restaurant_id": demo_user_id,
+            "pos_order_id": f"MG-{random.randint(10000, 99999)}",
+            "order_amount": total,
+            "wallet_used": 0,
+            "coupon_code": None,
+            "coupon_discount": 0,
+            "points_earned": int(total * 0.1),
+            "off_peak_bonus": 0,
+            "payment_method": random.choice(["cash", "upi", "card"]),
+            "payment_status": "success",
+            "order_type": random.choice(["pos", "dine_in", "takeaway", "delivery"]),
+            "order_notes": random.choice(ORDER_NOTES_LIST),
+            "items": items_embedded,
+            "created_at": order_date.isoformat(),
+        })
+    
+    if order_amounts:
+        avg_val = round(sum(order_amounts) / len(order_amounts), 2)
+        db.customers.update_one(
+            {"id": customer["id"]},
+            {"$set": {"avg_order_value": avg_val}}
+        )
+
+if orders_list:
+    db.orders.insert_many(orders_list)
+    print(f"✅ Created {len(orders_list)} orders")
+
+if order_items_list:
+    db.order_items.insert_many(order_items_list)
+    print(f"✅ Created {len(order_items_list)} order items (for AI Insights)")
 
 # Generate points transactions
 print("💰 Creating points transactions...")
@@ -194,7 +320,7 @@ if wallet_transactions:
 
 # Create coupons
 print("🎟️ Creating coupons...")
-now = datetime.utcnow()
+now = datetime.now(timezone.utc)
 coupons = [
     {
         "id": "coupon-demo-1",
@@ -424,6 +550,8 @@ print("   Email: demo@restaurant.com")
 print("   Password: demo123")
 print("\n📊 Seeded Data Summary:")
 print(f"   ✅ {len(customers)} Customers (Bronze, Silver, Gold, Platinum)")
+print(f"   ✅ {len(orders_list)} Orders (with items, notes, categories)")
+print(f"   ✅ {len(order_items_list)} Order Items (AI Insights ready)")
 print(f"   ✅ {len(points_transactions)} Points Transactions")
 print(f"   ✅ {len(wallet_transactions)} Wallet Transactions")
 print(f"   ✅ {len(coupons)} Coupons")
@@ -432,5 +560,5 @@ print(f"   ✅ {len(feedback_list)} Feedback Entries")
 print(f"   ✅ {len(templates)} WhatsApp Templates")
 print(f"   ✅ {len(rules)} Automation Rules")
 print(f"   ✅ Loyalty Settings Configured")
-print("\n🌐 Login at: https://whatsapp-tab-embed.preview.emergentagent.com/login")
+print("\n🌐 Login at: https://hybrid-pos-system-3.preview.emergentagent.com/login")
 print("="*50)

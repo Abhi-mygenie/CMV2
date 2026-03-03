@@ -76,10 +76,14 @@ frontend/capacitor.config.ts      # Capacitor config (plugins, splash, status ba
 - **Mar 2026**: item_category added to OrderItem schema
 - **Mar 2026**: Capacitor native app setup (Android + iOS + plugins + icons)
 - **Mar 2026**: P0 AI Insights on Customer Detail page (top items, preferred cuisine, visit pattern, common requests)
+- **Mar 2026**: Complete 25-screen video reel (1080x1920, 2min, crossfade transitions)
+- **Mar 2026**: Demo data script updated with orders, order_items, categories, notes (AI Insights ready)
 
 ## Prioritized Backlog
-- P1 AI Insights: Churn risk, next visit prediction, birthday alerts (rules-based)
-- P2 AI Insights: Upsell recommendations, sentiment analysis, allergy detection (LLM-powered)
-- Migration script for existing POS data
-- Display order items + notes in Customer Detail UI
-- App Store / Play Store signing & submission
+- P1: Build Data Migration Script (bulk import from legacy POS)
+- P1: AI Insights Phase 2 - Churn risk, next visit prediction, birthday alerts (rules-based)
+- P2: AI Insights Phase 3 - Upsell recommendations, sentiment analysis (LLM-powered)
+- P2: Activate native features (push notifications, offline data)
+- P2: Connect WhatsApp integration to live API
+- P3: Display order items + notes in Customer Detail UI
+- P3: App Store / Play Store signing & submission
