@@ -889,14 +889,19 @@ async def pos_order_webhook(
         new_points = current_points + points_earned
         new_tier = calculate_tier(new_points, settings)
 
+        new_total_visits = customer.get("total_visits", 0) + 1
+        new_total_spent = customer.get("total_spent", 0) + order_data.order_amount
+        new_avg_order_value = round(new_total_spent / new_total_visits, 2)
+
         await db.customers.update_one(
             {"id": customer["id"]},
             {"$set": {
                 "total_points": new_points,
                 "tier": new_tier,
                 "wallet_balance": new_wallet_balance,
-                "total_visits": customer.get("total_visits", 0) + 1,
-                "total_spent": customer.get("total_spent", 0) + order_data.order_amount,
+                "total_visits": new_total_visits,
+                "total_spent": new_total_spent,
+                "avg_order_value": new_avg_order_value,
                 "last_visit": now,
             }},
         )
@@ -1202,13 +1207,18 @@ async def pos_payment_received(
                 new_points = current_points + points_earned
                 new_tier = calculate_tier(new_points, settings)
                 
+                new_total_visits = customer.get("total_visits", 0) + 1
+                new_total_spent = customer.get("total_spent", 0) + webhook_data.bill_amount
+                new_avg_order_value = round(new_total_spent / new_total_visits, 2)
+                
                 await db.customers.update_one(
                     {"id": customer["id"]},
                     {"$set": {
                         "total_points": new_points,
                         "tier": new_tier,
-                        "total_visits": customer.get("total_visits", 0) + 1,
-                        "total_spent": customer.get("total_spent", 0) + webhook_data.bill_amount,
+                        "total_visits": new_total_visits,
+                        "total_spent": new_total_spent,
+                        "avg_order_value": new_avg_order_value,
                         "last_visit": datetime.now(timezone.utc).isoformat()
                     }}
                 )
@@ -1238,11 +1248,16 @@ async def pos_payment_received(
                     "description": f"Earned {earn_percent}% on purchase"
                 })
         else:
+            new_total_visits = customer.get("total_visits", 0) + 1
+            new_total_spent = customer.get("total_spent", 0) + webhook_data.bill_amount
+            new_avg_order_value = round(new_total_spent / new_total_visits, 2)
+            
             await db.customers.update_one(
                 {"id": customer["id"]},
                 {"$set": {
-                    "total_visits": customer.get("total_visits", 0) + 1,
-                    "total_spent": customer.get("total_spent", 0) + webhook_data.bill_amount,
+                    "total_visits": new_total_visits,
+                    "total_spent": new_total_spent,
+                    "avg_order_value": new_avg_order_value,
                     "last_visit": datetime.now(timezone.utc).isoformat()
                 }}
             )
