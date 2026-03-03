@@ -1,4 +1,4 @@
-# Authentication Flow - Visual Summary
+# Authentication & Data Flow - Visual Summary
 
 ## Current Implementation (March 2026)
 
@@ -48,7 +48,7 @@
 | `/auth/demo-login` | POST | Demo mode access | Local MongoDB | true |
 | `/auth/register` | POST | New user signup | Local MongoDB | false |
 
-## Frontend Architecture (Post-Refactor)
+## Frontend Architecture
 
 ```
 App.js (Routing Only - 59 lines)
@@ -61,14 +61,13 @@ App.js (Routing Only - 59 lines)
   |     +-- DashboardPage.jsx ......... /
   |     +-- CustomersPage.jsx ......... /customers
   |     +-- CustomerDetailPage.jsx .... /customers/:id
-  |     +-- SegmentsPage.jsx .......... /segments (redirects to /customers)
+  |     +-- SegmentsPage.jsx .......... /segments
   |     +-- TemplatesPage.jsx ......... /templates
   |     +-- QRCodePage.jsx ............ /qr
   |     +-- FeedbackPage.jsx .......... /feedback
   |     +-- CouponsPage.jsx ........... /coupons
   |     +-- SettingsPage.jsx .......... /settings (4 inline tabs)
   |     +-- LoyaltySettingsPage.jsx ... /loyalty-settings
-  |     +-- WhatsAppAutomationPage .... /whatsapp-automation
   |
   +-- Shared Components
         +-- MobileLayout.jsx .......... App shell + bottom nav
@@ -78,33 +77,74 @@ App.js (Routing Only - 59 lines)
         +-- WhatsAppAutomationContent . Reusable (embedded prop)
 ```
 
+## Order & AI Insights Data Flow
+
+```
+POS System (MyGenie)
+        |
+        v
+POST /api/pos/orders
+  (with items[], order_notes, item_notes, item_category)
+        |
+        +---> orders collection (embedded items[])
+        |       Used for: order history display, spending trends
+        |
+        +---> order_items collection (flat, one doc per item)
+        |       Indexed on: customer_id, item_name, order_id
+        |       Used for: AI Insights aggregation
+        |
+        +---> customers collection (update totals)
+                avg_order_value, total_spent, visits, tier
+        
+        
+GET /api/customers/{id}/insights
+        |
+        +---> Aggregates order_items -> top_items, top_categories, common_notes
+        +---> Aggregates orders -> frequency, preferred_day, preferred_time, spending_trend
+        +---> Reads customer -> avg_order_value
+        |
+        v
+    AI Insights Card (CustomerDetailPage.jsx)
+```
+
 ## User Journey Examples
 
 ### Example 1: Production User Login
 ```
 1. User visits login page
-2. Enters email: owner@myrestaurant.com
+2. Enters email: owner@18march.com
 3. Enters password: ********
 4. Clicks "Sign In"
 5. Frontend -> POST /api/auth/login
-6. Backend -> POST https://api.mygenie.com/auth/login
+6. Backend -> POST MyGenie API
 7. MyGenie validates credentials
-8. MyGenie returns user data
-9. Backend syncs user to local DB
-10. Backend creates JWT token
-11. User logged in
-12. No demo banner shown
+8. Backend syncs user to local DB
+9. Backend creates JWT token
+10. User logged in (no demo banner)
 ```
 
-### Example 2: Demo Mode (Quick Testing)
+### Example 2: Demo Mode
 ```
 1. User visits login page
 2. Clicks "Try Demo Mode" button
 3. Frontend -> POST /api/auth/demo-login
 4. Backend -> Query local MongoDB
-5. Returns test@restaurant.com data
+5. Returns demo@restaurant.com data
 6. User logged in instantly
 7. Purple demo banner shown on all pages
+8. 55 customers + AI Insights available
+```
+
+### Example 3: POS Order Processing
+```
+1. Customer orders at restaurant via POS
+2. POS sends POST /api/pos/orders with items[]
+3. Backend creates/finds customer
+4. Order stored in orders collection (embedded items)
+5. Items stored in order_items collection (flat)
+6. Points calculated and awarded
+7. Customer avg_order_value recalculated
+8. AI Insights endpoint now reflects new data
 ```
 
 ## Key Differences
@@ -113,40 +153,28 @@ App.js (Routing Only - 59 lines)
 |--------|--------------|-----------|
 | **Purpose** | Production use | Testing/demos |
 | **Authentication** | MyGenie API | Local DB |
-| **Users** | ALL users | test@restaurant.com only |
+| **Users** | ALL users | demo@restaurant.com only |
 | **Credentials** | Required | Not required |
 | **Banner** | No | Yes (purple) |
 | **Data Source** | MyGenie -> Local sync | Local only |
-| **Speed** | ~1-2 seconds | Instant |
-
-## Integration Status
-
-### Completed
-- Demo Mode fully functional
-- Regular login endpoint structure ready
-- MyGenie API call code prepared
-- User sync logic implemented
-- Frontend UI with both options
-- Demo banner working
-- Full codebase refactored into modular components
-
-### Pending (MyGenie Team)
-- MyGenie API credentials (URL, Key)
-- API endpoint documentation
-- Request/response format confirmation
+| **AI Insights** | Based on real orders | Pre-seeded (1,080 items) |
 
 ## File References
 
 ### Backend
 - **Main server**: `/app/backend/server.py`
 - **Auth router**: `/app/backend/routers/auth.py`
+- **Customers router**: `/app/backend/routers/customers.py` (includes insights)
+- **POS router**: `/app/backend/routers/pos.py` (order webhook)
 - **Schemas**: `/app/backend/models/schemas.py`
 - **Auth helpers**: `/app/backend/core/auth.py`
 - **Database**: `/app/backend/core/database.py`
+- **Demo seeder**: `/app/backend/seed_demo_data.py`
 
 ### Frontend
 - **Routing**: `/app/frontend/src/App.js`
 - **Login UI**: `/app/frontend/src/pages/LoginPage.jsx`
+- **Customer Detail + AI Insights**: `/app/frontend/src/pages/CustomerDetailPage.jsx`
 - **Auth context**: `/app/frontend/src/contexts/AuthContext.jsx`
 - **Settings (4 tabs)**: `/app/frontend/src/pages/SettingsPage.jsx`
 - **WhatsApp Automation**: `/app/frontend/src/components/shared/WhatsAppAutomationContent.jsx`

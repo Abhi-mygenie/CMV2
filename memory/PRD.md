@@ -78,6 +78,7 @@ frontend/capacitor.config.ts      # Capacitor config (plugins, splash, status ba
 - **Mar 2026**: P0 AI Insights on Customer Detail page (top items, preferred cuisine, visit pattern, common requests)
 - **Mar 2026**: Complete 25-screen video reel (1080x1920, 2min, crossfade transitions)
 - **Mar 2026**: Demo data script updated with orders, order_items, categories, notes (AI Insights ready)
+- **Mar 2026**: All project documents updated (README, API docs, User Guide 25 screens, Architecture, Demo Mode, Auth, Integration Guide)
 
 ## Prioritized Backlog
 - P1: Build Data Migration Script (bulk import from legacy POS)

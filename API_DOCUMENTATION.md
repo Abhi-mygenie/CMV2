@@ -2,146 +2,127 @@
 
 **Base URL:** `https://hybrid-pos-system-3.preview.emergentagent.com/api`
 
-**Authentication:** All endpoints require `X-API-Key` header
+**Authentication:** All POS endpoints require `X-API-Key` header. All CRM endpoints require `Authorization: Bearer <token>` header.
 
 ---
 
 ## Authentication
 
+### POS API Authentication
 All POS API endpoints require authentication via API Key in the request header:
-
 ```
 X-API-Key: your_api_key_here
 ```
 
-**Example API Key:** `dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4`
+### CRM API Authentication
+CRM endpoints (customers, insights, settings) require JWT token:
+```
+Authorization: Bearer <jwt_token>
+```
+
+Obtain a token via `POST /api/auth/login` or `POST /api/auth/demo-login`.
 
 ---
 
-## 1. Create Customer
+## CRM Endpoints
 
-Create a new customer in the loyalty system.
+### Login
+```
+POST /api/auth/login
+```
+**Request Body:**
+```json
+{"email": "owner@18march.com", "password": "Qplazm@10"}
+```
+**Response:**
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "bearer",
+  "user": {"id": "...", "email": "...", "restaurant_name": "..."},
+  "is_demo": false
+}
+```
 
-### Endpoint
+### Demo Login
+```
+POST /api/auth/demo-login
+```
+No body required. Returns token with `is_demo: true`.
+
+---
+
+### AI Insights
+
+Get AI-powered customer insights aggregated from order history.
+
+```
+GET /api/customers/{customer_id}/insights
+```
+
+**Headers:**
+| Header | Type | Required | Description |
+|--------|------|----------|-------------|
+| `Authorization` | string | Yes | `Bearer <jwt_token>` |
+
+**Response (200 OK):**
+```json
+{
+  "top_items": [
+    {"name": "Butter Chicken", "count": 12},
+    {"name": "Naan", "count": 8}
+  ],
+  "top_categories": [
+    {"name": "North Indian", "count": 20, "percent": 55},
+    {"name": "Beverages", "count": 10, "percent": 28}
+  ],
+  "avg_frequency_days": 12,
+  "preferred_day": "Saturday",
+  "preferred_time": "Dinner (7-11 PM)",
+  "spending_trend": {"change_percent": 15, "direction": "up"},
+  "common_notes": [
+    {"note": "Extra gravy", "count": 5},
+    {"note": "Less spicy", "count": 3}
+  ],
+  "avg_order_value": 1250.50
+}
+```
+
+**Data Sources:**
+- `top_items` and `top_categories`: Aggregated from `order_items` collection
+- `avg_frequency_days`, `preferred_day`, `preferred_time`, `spending_trend`: Calculated from `orders` collection
+- `common_notes`: Aggregated from `item_notes` in `order_items`
+- `avg_order_value`: Stored on customer document, recalculated on each order
+
+---
+
+## POS Endpoints
+
+### 1. Create Customer
+
 ```
 POST /api/pos/customers
 ```
 
-### Headers
+**Headers:**
 | Header | Type | Required | Description |
 |--------|------|----------|-------------|
 | `X-API-Key` | string | Yes | API key for authentication |
 | `Content-Type` | string | Yes | `application/json` |
 
-### Request Body
+**Request Body:**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `pos_id` | string | **Yes** | POS system identifier (e.g., "mygenie", "petpooja", "ezzo") |
+| `pos_id` | string | **Yes** | POS system identifier (e.g., "mygenie") |
 | `restaurant_id` | string | **Yes** | Restaurant ID in the POS system |
 | `name` | string | **Yes** | Customer's full name |
 | `phone` | string | **Yes** | Phone number (10 digits, without country code) |
 | `country_code` | string | No | Country code (default: "+91") |
 | `email` | string | No | Email address |
-| `dob` | string | No | Date of birth (format: YYYY-MM-DD) |
-| `anniversary` | string | No | Anniversary date (format: YYYY-MM-DD) |
+| `dob` | string | No | Date of birth (YYYY-MM-DD) |
+| `anniversary` | string | No | Anniversary date (YYYY-MM-DD) |
 | `customer_type` | string | No | "normal" or "corporate" (default: "normal") |
-| `gst_name` | string | No | GST registered name |
-| `gst_number` | string | No | GST number |
-| `address` | string | No | Street address |
-| `city` | string | No | City |
-| `pincode` | string | No | PIN/ZIP code |
-| `allergies` | array | No | List of allergies (e.g., ["Gluten", "Dairy"]) |
-| `favorites` | array | No | List of favorite items |
-| `custom_field_1` | string | No | Custom field 1 |
-| `custom_field_2` | string | No | Custom field 2 |
-| `custom_field_3` | string | No | Custom field 3 |
-| `notes` | string | No | Additional notes |
-
-### Example Request
-
-```bash
-curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/customers" \
-  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "pos_id": "mygenie",
-    "restaurant_id": "rest_12345",
-    "name": "John Doe",
-    "phone": "9876543210",
-    "country_code": "+91",
-    "email": "john@example.com",
-    "dob": "1990-05-15",
-    "customer_type": "normal",
-    "city": "Mumbai",
-    "allergies": ["Gluten", "Peanuts"],
-    "favorites": ["Butter Chicken", "Naan"]
-  }'
-```
-
-### Success Response (200 OK)
-
-```json
-{
-  "success": true,
-  "message": "Customer created successfully",
-  "data": {
-    "customer_id": "550e8400-e29b-41d4-a716-446655440000",
-    "name": "John Doe",
-    "phone": "9876543210",
-    "created_at": "2025-02-24T12:30:00.000000+00:00"
-  }
-}
-```
-
-### Error Response - Customer Exists (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Customer with this phone already exists",
-  "data": {
-    "customer_id": "existing_customer_id",
-    "existing": true
-  }
-}
-```
-
----
-
-## 2. Update Customer
-
-Update an existing customer's information.
-
-### Endpoint
-```
-PUT /api/pos/customers/{customer_id}
-```
-
-### Path Parameters
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `customer_id` | string | **Yes** | The unique customer ID returned from create or lookup |
-
-### Headers
-| Header | Type | Required | Description |
-|--------|------|----------|-------------|
-| `X-API-Key` | string | Yes | API key for authentication |
-| `Content-Type` | string | Yes | `application/json` |
-
-### Request Body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `pos_id` | string | **Yes** | POS system identifier |
-| `restaurant_id` | string | **Yes** | Restaurant ID in the POS system |
-| `phone` | string | **Yes** | Phone number (unique identifier) |
-| `name` | string | No | Customer's full name |
-| `country_code` | string | No | Country code |
-| `email` | string | No | Email address |
-| `dob` | string | No | Date of birth (format: YYYY-MM-DD) |
-| `anniversary` | string | No | Anniversary date (format: YYYY-MM-DD) |
-| `customer_type` | string | No | "normal" or "corporate" |
 | `gst_name` | string | No | GST registered name |
 | `gst_number` | string | No | GST number |
 | `address` | string | No | Street address |
@@ -154,91 +135,55 @@ PUT /api/pos/customers/{customer_id}
 | `custom_field_3` | string | No | Custom field 3 |
 | `notes` | string | No | Additional notes |
 
-### Example Request
-
+**Example:**
 ```bash
-curl -X PUT "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/customers/550e8400-e29b-41d4-a716-446655440000" \
+curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/customers" \
   -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
   -H "Content-Type: application/json" \
   -d '{
     "pos_id": "mygenie",
     "restaurant_id": "rest_12345",
+    "name": "John Doe",
     "phone": "9876543210",
-    "name": "John Doe Updated",
-    "email": "john.updated@example.com",
-    "city": "Delhi",
-    "allergies": ["Gluten", "Peanuts", "Dairy"]
+    "email": "john@example.com",
+    "city": "Mumbai",
+    "allergies": ["Gluten", "Peanuts"]
   }'
-```
-
-### Success Response (200 OK)
-
-```json
-{
-  "success": true,
-  "message": "Customer updated successfully",
-  "data": {
-    "customer_id": "550e8400-e29b-41d4-a716-446655440000",
-    "name": "John Doe Updated",
-    "phone": "9876543210",
-    "updated_at": "2025-02-24T12:45:00.000000+00:00"
-  }
-}
-```
-
-### Error Response - Customer Not Found (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Customer not found",
-  "data": null
-}
 ```
 
 ---
 
-## 3. Customer Lookup
+### 2. Update Customer
 
-Look up a customer by phone number to get their loyalty information before processing a transaction.
+```
+PUT /api/pos/customers/{customer_id}
+```
 
-### Endpoint
+Updates an existing customer's information. Same fields as Create Customer (all optional except `pos_id`, `restaurant_id`, `phone`).
+
+---
+
+### 3. Customer Lookup
+
 ```
 POST /api/pos/customer-lookup
 ```
 
-### Headers
-| Header | Type | Required | Description |
-|--------|------|----------|-------------|
-| `X-API-Key` | string | Yes | API key for authentication |
-| `Content-Type` | string | Yes | `application/json` |
+Look up a customer by phone number to get loyalty info before processing a transaction.
 
-### Request Body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `phone` | string | **Yes** | Customer phone number (10 digits) |
-
-### Example Request
-
-```bash
-curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/customer-lookup" \
-  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "phone": "9876543210"
-  }'
+**Request Body:**
+```json
+{"phone": "9876543210"}
 ```
 
-### Success Response - Customer Found (200 OK)
-
+**Success Response:**
 ```json
 {
   "success": true,
   "message": "Customer found",
   "data": {
     "registered": true,
-    "customer_id": "550e8400-e29b-41d4-a716-446655440000",
+    "customer_id": "...",
     "name": "John Doe",
     "phone": "9876543210",
     "tier": "Gold",
@@ -247,67 +192,34 @@ curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/cust
     "wallet_balance": 250.00,
     "total_visits": 25,
     "total_spent": 15000.00,
-    "allergies": ["Gluten", "Peanuts"],
-    "favorites": ["Butter Chicken", "Naan"],
-    "last_visit": "2025-02-20T18:30:00.000000+00:00"
-  }
-}
-```
-
-### Response - Customer Not Found (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Customer not found",
-  "data": {
-    "registered": false
+    "allergies": ["Gluten"],
+    "favorites": ["Butter Chicken"],
+    "last_visit": "2026-02-20T18:30:00.000000+00:00"
   }
 }
 ```
 
 ---
 
-## 4. Max Redeemable Points
+### 4. Max Redeemable Points
 
-Check the maximum loyalty points a customer can redeem for a given bill amount. Use this before checkout to validate redemption.
-
-### Endpoint
 ```
 POST /api/pos/max-redeemable
 ```
 
-### Headers
-| Header | Type | Required | Description |
-|--------|------|----------|-------------|
-| `X-API-Key` | string | Yes | API key for authentication |
-| `Content-Type` | string | Yes | `application/json` |
+Calculate maximum redeemable loyalty points for a given bill amount.
 
-### Request Body
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `pos_id` | string | **Yes** | POS system identifier ("mygenie") |
-| `restaurant_id` | string | **Yes** | Restaurant ID in POS system |
-| `cust_mobile` | string | **Yes** | Customer phone number (10 digits) |
-| `bill_amount` | float | **Yes** | Order bill amount |
-
-### Example Request
-
-```bash
-curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/max-redeemable" \
-  -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "pos_id": "mygenie",
-    "restaurant_id": "478",
-    "cust_mobile": "9876543210",
-    "bill_amount": 1000
-  }'
+**Request Body:**
+```json
+{
+  "pos_id": "mygenie",
+  "restaurant_id": "478",
+  "cust_mobile": "9876543210",
+  "bill_amount": 1000
+}
 ```
 
-### Success Response (200 OK)
-
+**Response:**
 ```json
 {
   "success": true,
@@ -319,91 +231,48 @@ curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/max-
 }
 ```
 
-### Response - Customer Not Found (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Customer not found",
-  "data": {
-    "registered": false
-  }
-}
-```
-
-### Response - Below Minimum Points (200 OK)
-
-```json
-{
-  "success": true,
-  "message": "Customer does not have minimum points required for redemption",
-  "data": {
-    "max_points_redeemable": 0,
-    "max_discount_value": 0.0,
-    "available_points": 50,
-    "min_points_required": 100
-  }
-}
-```
-
-### Calculation Logic
-
-The maximum redeemable points are calculated considering:
-
-1. **Customer's available points** - Cannot redeem more than they have
-2. **Minimum points required** - Customer must have at least 100 points (configurable)
-3. **Max redemption percent** - Cannot exceed 50% of bill amount (configurable)
-4. **Max redemption cap** - Cannot exceed ₹500 absolute cap (configurable)
-
-The API returns the **lowest** of all these limits.
+**Calculation considers:** Customer's available points, minimum points threshold, max redemption percent of bill, and absolute redemption cap.
 
 ---
 
-## 5. Order Webhook
+### 5. Order Webhook
 
-Webhook endpoint for MyGenie to send order data on every completed order. Automatically calculates and awards loyalty points.
+Webhook for POS systems to send order data on every completed order. Automatically calculates loyalty points and stores items for AI analytics.
 
-### Endpoint
 ```
 POST /api/pos/orders
 ```
 
-### Headers
-| Header | Type | Required | Description |
-|--------|------|----------|-------------|
-| `X-API-Key` | string | Yes | API key for authentication |
-| `Content-Type` | string | Yes | `application/json` |
-
-### Request Body
+**Request Body:**
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `pos_id` | string | **Yes** | POS system identifier ("mygenie") |
-| `restaurant_id` | string | **Yes** | Restaurant ID in POS system |
+| `pos_id` | string | **Yes** | POS system identifier |
+| `restaurant_id` | string | **Yes** | Restaurant ID |
 | `order_id` | string | **Yes** | Unique order ID from POS |
-| `cust_mobile` | string | **Yes** | Customer phone number (10 digits) |
-| `cust_name` | string | No | Customer name (required only for new customers) |
+| `cust_mobile` | string | **Yes** | Customer phone (10 digits) |
+| `cust_name` | string | No | Customer name (required for new customers) |
 | `order_amount` | float | **Yes** | Total order amount |
 | `wallet_used` | float | No | Wallet amount used (default: 0) |
 | `coupon_code` | string | No | Coupon code applied |
-| `coupon_discount` | float | No | Discount from coupon (default: 0) |
-| `payment_method` | string | No | Payment method (e.g., "TAB", "CASH", "CARD") |
+| `coupon_discount` | float | No | Discount amount (default: 0) |
+| `payment_method` | string | No | "cash", "upi", "card", "TAB" |
 | `payment_status` | string | **Yes** | Must be "success" to process |
-| `order_type` | string | No | Order type: "pos", "dine_in", "takeaway", "delivery" |
-| `order_notes` | string | No | Order-level notes (e.g., "Anniversary dinner, corner table") |
-| `items` | array | No | Line items with food-level notes (see below) |
+| `order_type` | string | No | "pos", "dine_in", "takeaway", "delivery" |
+| `order_notes` | string | No | Order-level notes |
+| `items` | array | No | Line items (see below) |
 
 #### Items Array Schema
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `item_name` | string | **Yes** | Name of the menu item |
-| `item_qty` | integer | No | Quantity ordered (default: 1) |
+| `item_name` | string | **Yes** | Menu item name |
+| `item_qty` | integer | No | Quantity (default: 1) |
 | `item_price` | float | No | Price per unit (default: 0) |
-| `item_notes` | string | No | Food-level notes (e.g., "Extra gravy, less spicy") |
+| `item_notes` | string | No | Food-level notes (e.g., "extra gravy") |
+| `item_category` | string | No | Food category (e.g., "North Indian", "Beverages") |
 
-### Example Request
-
+**Example:**
 ```bash
 curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/orders" \
   -H "X-API-Key: dp_live_u-AFJd9rSTjej07ENWfbXT3XaK9OuoxdAJ70BWSylb4" \
@@ -411,41 +280,43 @@ curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/orde
   -d '{
     "pos_id": "mygenie",
     "restaurant_id": "478",
-    "order_id": "ORD-2025-001234",
+    "order_id": "ORD-2026-001234",
     "cust_mobile": "9653078025",
     "cust_name": "Piyush",
     "order_amount": 1850.0,
-    "wallet_used": 0.0,
-    "coupon_code": "",
-    "coupon_discount": 0.0,
     "payment_method": "TAB",
     "payment_status": "success",
     "order_type": "dine_in",
-    "order_notes": "Anniversary dinner, requested corner table with candle",
+    "order_notes": "Anniversary dinner, corner table",
     "items": [
-      {"item_name": "Butter Chicken", "item_qty": 2, "item_price": 450.0, "item_notes": "Extra gravy, less spicy"},
-      {"item_name": "Garlic Naan", "item_qty": 4, "item_price": 80.0},
-      {"item_name": "Gulab Jamun", "item_qty": 1, "item_price": 180.0, "item_notes": "No sugar syrup on top"}
+      {"item_name": "Butter Chicken", "item_qty": 2, "item_price": 450.0, "item_notes": "Extra gravy, less spicy", "item_category": "North Indian"},
+      {"item_name": "Garlic Naan", "item_qty": 4, "item_price": 80.0, "item_category": "Breads"},
+      {"item_name": "Gulab Jamun", "item_qty": 1, "item_price": 180.0, "item_notes": "Warm", "item_category": "Desserts"}
     ]
   }'
 ```
 
-### Success Response (200 OK)
+**Dual Storage:** When `items` are provided:
+1. **Embedded in order doc** (`orders` collection) - for fast order display
+2. **Separate `order_items` collection** - indexed by `customer_id`, `item_name`, `order_id` for AI analytics
 
+Both `order_notes` and `item_notes` are persisted. Orders without items are backward compatible.
+
+**Success Response:**
 ```json
 {
   "success": true,
   "message": "Order processed successfully",
   "data": {
-    "order_id": "e4252338-1f3b-413b-83a6-d90072bb9ecd",
-    "pos_order_id": "ORD-2025-001234",
-    "customer_id": "f95ce018-89d8-4818-a90d-a541078d10a9",
+    "order_id": "e4252338-...",
+    "pos_order_id": "ORD-2026-001234",
+    "customer_id": "f95ce018-...",
     "customer_name": "Piyush",
-    "is_new_customer": true,
-    "order_amount": 987.0,
-    "points_earned": 49,
-    "total_points": 49,
-    "tier": "Bronze",
+    "is_new_customer": false,
+    "order_amount": 1850.0,
+    "points_earned": 185,
+    "total_points": 1685,
+    "tier": "Gold",
     "wallet_used": 0.0,
     "wallet_balance_after": 500.0,
     "coupon_applied": "",
@@ -454,46 +325,11 @@ curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/pos/orde
 }
 ```
 
-### Response - Insufficient Wallet Balance (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Insufficient wallet balance. Available: 300.0, Requested: 500.0",
-  "data": {
-    "available_balance": 300.0
-  }
-}
-```
-
-### Response - Duplicate Order (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Duplicate order - already processed",
-  "data": {
-    "order_id": "e4252338-1f3b-413b-83a6-d90072bb9ecd",
-    "duplicate": true
-  }
-}
-```
-
-### Response - Payment Not Successful (200 OK)
-
-```json
-{
-  "success": false,
-  "message": "Order not processed - payment status: failed",
-  "data": null
-}
-```
-
 ---
 
 ## Response Schema
 
-All API responses follow this standard format:
+All POS API responses follow this standard format:
 
 ```json
 {
@@ -503,74 +339,43 @@ All API responses follow this standard format:
 }
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `success` | boolean | `true` if operation succeeded, `false` otherwise |
-| `message` | string | Human-readable message describing the result |
-| `data` | object/null | Response data (varies by endpoint) |
-
----
-
 ## Error Codes
 
 | HTTP Status | Description |
 |-------------|-------------|
-| 200 | Success (check `success` field for operation result) |
-| 401 | Unauthorized - Missing or invalid API key |
+| 200 | Success (check `success` field) |
+| 401 | Unauthorized - Missing or invalid API key / JWT token |
+| 404 | Resource not found |
 | 500 | Internal Server Error |
-
----
 
 ## Points Calculation
 
-Points are calculated automatically based on tier:
+Points are earned based on tier and configurable loyalty settings:
 
-| Tier | Points Earned | Threshold |
-|------|---------------|-----------|
-| Bronze | 5% of order amount | 0 - 499 points |
-| Silver | 7% of order amount | 500 - 1,499 points |
-| Gold | 10% of order amount | 1,500 - 4,999 points |
-| Platinum | 15% of order amount | 5,000+ points |
+| Tier | Default Earning Rate | Threshold |
+|------|---------------------|-----------|
+| Bronze | 100% of base rate | 0+ spent |
+| Silver | 110% of base rate | 5,000+ spent |
+| Gold | 125% of base rate | 15,000+ spent |
+| Platinum | 150% of base rate | 30,000+ spent |
 
-**Note:** Points are only earned on orders meeting the minimum order value (default: ₹100).
-
----
-
-## Rate Limits
-
-Currently no rate limits are enforced. Please use responsibly.
-
----
+Off-peak bonus hours and birthday/anniversary bonuses are configurable via the Loyalty Settings.
 
 ## Notes for Integration
 
-1. **Phone Number Format**: Send phone numbers as 10-digit strings without country code.
+1. **Phone Numbers**: Send as 10-digit strings without country code
+2. **Customer Auto-Creation**: Orders for unknown customers auto-create using `cust_mobile` + `cust_name`
+3. **Duplicate Prevention**: Same `pos_id` + `order_id` combination is rejected
+4. **Payment Status**: Only `payment_status: "success"` orders are processed
+5. **avg_order_value**: Automatically recalculated on customer record with each new order
 
-2. **Customer Auto-Creation**: If an order is received for a non-existent customer, the system will auto-create the customer using `cust_mobile` and `cust_name`.
-
-3. **Duplicate Prevention**: Orders with the same `pos_id` + `order_id` combination will be rejected as duplicates.
-
-4. **Payment Status**: Only orders with `payment_status: "success"` will be processed.
-
-5. **Points Calculation**: Points are calculated locally based on `order_amount` and the customer's current tier.
-
-6. **Order Items & Notes (Dual Storage)**: When `items` are provided in the order webhook, they are stored in two places:
-   - **Embedded in the order document** (`orders` collection) - for fast order display
-   - **Separate `order_items` collection** - indexed by `customer_id` and `item_name` for AI/analytics queries (taste profiling, preference extraction, recommendation engines)
-   
-   Both `order_notes` (order-level) and `item_notes` (food-level) are persisted. Orders without `items` or `order_notes` are fully backward compatible.
-
----
-
-## Contact
-
-For API support or questions, please contact the development team.
-
-## File References (Post-Refactor)
-- **Backend API**: `/app/backend/server.py`
+## File References
+- **Backend Entry**: `/app/backend/server.py`
+- **POS Router**: `/app/backend/routers/pos.py`
+- **Customers Router**: `/app/backend/routers/customers.py`
 - **Auth Router**: `/app/backend/routers/auth.py`
 - **Frontend Routing**: `/app/frontend/src/App.js`
-- **Settings Page**: `/app/frontend/src/pages/SettingsPage.jsx`
-- **Customer Management**: `/app/frontend/src/pages/CustomersPage.jsx`
+
+---
 
 **Last Updated**: March 3, 2026

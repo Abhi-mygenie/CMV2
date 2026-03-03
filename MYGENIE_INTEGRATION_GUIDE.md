@@ -15,7 +15,7 @@ LOGIN PAGE
   ------------- or -------------
 
   [Try Demo Mode Button]
-     -> Local DB Only (test@restaurant.com)
+     -> Local DB Only (demo@restaurant.com)
 ```
 
 ## Authentication Flows
@@ -27,6 +27,7 @@ LOGIN PAGE
 ### 2. Demo Mode (Local DB) - TESTING ONLY
 **For**: Quick demos without MyGenie dependency
 **Endpoint**: `POST /api/auth/demo-login`
+**Credentials**: `demo@restaurant.com` / `demo123`
 
 ## Integration Steps
 
@@ -70,28 +71,60 @@ X-API-Key: your_api_key_here
 }
 ```
 
-### Step 5: Test
-```bash
-# Test regular login (uses MyGenie after uncommenting)
-curl -X POST "http://localhost:8001/api/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"email": "real@restaurant.com", "password": "password123"}'
+### Step 5: POS Order Integration
 
-# Test demo mode (always uses local DB)
-curl -X POST "http://localhost:8001/api/auth/demo-login"
+The order webhook supports detailed item-level data for AI analytics:
+
+```bash
+POST /api/pos/orders
+Content-Type: application/json
+X-API-Key: your_api_key_here
+
+{
+  "pos_id": "mygenie",
+  "restaurant_id": "478",
+  "order_id": "ORD-2026-001",
+  "cust_mobile": "9876543210",
+  "order_amount": 1850.0,
+  "payment_status": "success",
+  "order_notes": "Anniversary dinner",
+  "items": [
+    {"item_name": "Butter Chicken", "item_qty": 2, "item_price": 450, "item_notes": "Less spicy", "item_category": "North Indian"},
+    {"item_name": "Naan", "item_qty": 4, "item_price": 60, "item_category": "Breads"}
+  ]
+}
+```
+
+Items are stored in two places:
+1. **Embedded in order doc** - for quick display
+2. **Separate `order_items` collection** - indexed for AI aggregation
+
+### Step 6: Test
+```bash
+# Test regular login
+curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "owner@18march.com", "password": "Qplazm@10"}'
+
+# Test demo mode
+curl -X POST "https://hybrid-pos-system-3.preview.emergentagent.com/api/auth/demo-login"
 ```
 
 ## File References
 
 ### Backend
 - **Auth logic**: `/app/backend/routers/auth.py`
+- **POS/Order logic**: `/app/backend/routers/pos.py`
+- **Customer + Insights**: `/app/backend/routers/customers.py`
 - **Environment**: `/app/backend/.env`
 - **Auth helpers**: `/app/backend/core/auth.py`
 - **Database**: `/app/backend/core/database.py`
+- **Demo seeder**: `/app/backend/seed_demo_data.py`
 
 ### Frontend
 - **Login UI**: `/app/frontend/src/pages/LoginPage.jsx`
 - **Auth context**: `/app/frontend/src/contexts/AuthContext.jsx`
+- **Customer Detail (AI Insights)**: `/app/frontend/src/pages/CustomerDetailPage.jsx`
 
 ## Error Handling
 
@@ -112,6 +145,7 @@ curl -X POST "http://localhost:8001/api/auth/demo-login"
 - [ ] Demo mode still works independently
 - [ ] User sync to local DB working
 - [ ] Loyalty settings created for new users
+- [ ] POS order webhook tested with items + notes
 
 ## Security Notes
 1. Never commit MYGENIE_API_KEY to git
