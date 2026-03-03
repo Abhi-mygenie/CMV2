@@ -1,38 +1,47 @@
-# MyGenie CRM - Product Requirements Document
+# DinePoints (MyGenie) - Restaurant CRM & Loyalty System
 
 ## Original Problem Statement
-Pull https://github.com/Abhi-mygenie/CMV2.git - Restaurant CRM/Loyalty system
+Clone and develop a Restaurant CRM and Loyalty System with customer management, loyalty points, WhatsApp automation, coupon management, and feedback collection.
 
-## Schema Migration Complete (55 New Fields)
-All phases completed. Fields ready for business logic mapping.
+## Architecture
+- **Frontend**: React + Tailwind CSS + Shadcn/UI (single App.js monolith)
+- **Backend**: FastAPI (Python)
+- **Database**: MongoDB
+- **Auth**: JWT-based with demo mode support
 
-## UI Implementation Status
+## Core Features (Implemented)
+- Customer CRUD with 55+ fields
+- Advanced customer filtering (11 filter parameters)
+- Loyalty points system with tier management
+- Coupon management
+- WhatsApp automation (event-based templates)
+- Feedback collection
+- QR code generation
+- Segments management
+- Demo mode with pre-loaded data
 
-### Add Customer Form - Accordion Sections
-| Section | Status | Badge |
-|---------|--------|-------|
-| Basic Information | ✅ ACTIVE | None |
-| Contact Preferences | 🚀 Coming Soon | Blue |
-| Membership | 🚀 Coming Soon | Purple |
-| Address | 🚀 Coming Soon | Cyan |
-| Corporate Info | 🚀 Coming Soon | Orange |
-| Source & Journey | 🚀 Coming Soon | Amber |
-| Dining Preferences | 🚀 Coming Soon | Rose |
-| Special Occasions | 🚀 Coming Soon | Pink |
-| Tags & Flags | 🚀 Coming Soon | Indigo |
-| Custom Fields | 🚀 Coming Soon | Gray |
+## What's Been Implemented
+- **Customer Management**: Full CRUD with advanced filtering, quick filter chips, full-screen filter drawer
+- **Settings Page Refactor (COMPLETED Feb 2026)**: 4-tab layout (Profile, Coupons, WhatsApp, Loyalty) with ALL tabs displaying content inline:
+  - Profile: WhatsApp API key config + Business profile
+  - Coupons: Full CRUD inline
+  - WhatsApp: Automation content embedded via `WhatsAppAutomationContent` component with `embedded` prop
+  - Loyalty: Full settings inline with tier thresholds, earning/redemption rules, bonus features
+- **WhatsApp Automation**: Event-based template mapping, variable mapping, template preview
+- **Demo Data**: Populated via `scripts/import_demo_data.py`
 
-## Section Rollout Plan (1 per day)
-- Day 1: Contact Preferences → WhatsApp opt-in date auto-set
-- Day 2: Membership → Referral code generation
-- Day 3: Address → Map location picker
-- Day 4: Corporate Info → GST validation
-- Day 5: Source & Journey → Lead source tracking
-- Day 6: Dining Preferences → Favorites auto-update from POS
-- Day 7: Special Occasions → Birthday/Anniversary reminders
-- Day 8: Tags & Flags → VIP/Blacklist rules
-- Day 9: Custom Fields → Dynamic field config
+## Key Technical Decisions
+- `WhatsAppAutomationContent` component uses `ContentWrapper` pattern with `embedded` prop to work both inline (Settings tab) and as standalone page (`/whatsapp-automation`)
+- Default tab on Settings page is "Profile"
 
-## Documentation
-- `/app/docs/CUSTOMER_SCHEMA_MIGRATION_WORKBOOK.md`
-- `/app/docs/PHASE1_DEPENDENCY_ANALYSIS.md`
+## Prioritized Backlog
+- No pending tasks from user
+- Potential: Extract more components from monolithic App.js for better maintainability
+
+## Key Files
+- `/app/frontend/src/App.js` - Main monolithic frontend file (8400+ lines)
+- `/app/backend/server.py` - FastAPI backend
+- `/app/scripts/import_demo_data.py` - Demo data import
+
+## Test Credentials
+- Use "Try Demo Mode" button on login page
