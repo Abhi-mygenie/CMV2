@@ -14,6 +14,10 @@ from routers import auth, customers, points, wallet, coupons, feedback, whatsapp
 async def lifespan(app: FastAPI):
     # Startup
     start_scheduler()
+    # Create indexes for order_items collection (AI query performance)
+    await db.order_items.create_index("customer_id")
+    await db.order_items.create_index("item_name")
+    await db.order_items.create_index("order_id")
     yield
     # Shutdown
     stop_scheduler()
