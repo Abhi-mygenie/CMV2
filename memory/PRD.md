@@ -72,6 +72,17 @@ frontend/src/
 - `POST /api/settings/loyalty` - Save loyalty config
 - `POST /api/users/me/whatsapp-key` - Update WhatsApp API key
 - `POST /api/auth/demo-login` - Demo mode access
+- `POST /api/pos/orders` - Order webhook (supports items + notes)
+
+## Key DB Collections
+- `customers` - Customer profiles (~75 fields)
+- `orders` - Order documents with embedded items array + order_notes
+- `order_items` - Flat item records for AI queries (indexed by customer_id, item_name)
+- `points_transactions` - Loyalty point earn/redeem history
+- `wallet_transactions` - Wallet debit/credit history
+- `coupons` - Coupon definitions
+- `loyalty_settings` - Loyalty program config
+- `users` - Restaurant owner profiles
 
 ## Test Credentials
 Use "Try Demo Mode" button on login page for instant access.

@@ -390,6 +390,17 @@ POST /api/pos/orders
 | `payment_method` | string | No | Payment method (e.g., "TAB", "CASH", "CARD") |
 | `payment_status` | string | **Yes** | Must be "success" to process |
 | `order_type` | string | No | Order type: "pos", "dine_in", "takeaway", "delivery" |
+| `order_notes` | string | No | Order-level notes (e.g., "Anniversary dinner, corner table") |
+| `items` | array | No | Line items with food-level notes (see below) |
+
+#### Items Array Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `item_name` | string | **Yes** | Name of the menu item |
+| `item_qty` | integer | No | Quantity ordered (default: 1) |
+| `item_price` | float | No | Price per unit (default: 0) |
+| `item_notes` | string | No | Food-level notes (e.g., "Extra gravy, less spicy") |
 
 ### Example Request
 
@@ -403,13 +414,19 @@ curl -X POST "https://whatsapp-tab-embed.preview.emergentagent.com/api/pos/order
     "order_id": "ORD-2025-001234",
     "cust_mobile": "9653078025",
     "cust_name": "Piyush",
-    "order_amount": 987.0,
+    "order_amount": 1850.0,
     "wallet_used": 0.0,
     "coupon_code": "",
     "coupon_discount": 0.0,
     "payment_method": "TAB",
     "payment_status": "success",
-    "order_type": "pos"
+    "order_type": "dine_in",
+    "order_notes": "Anniversary dinner, requested corner table with candle",
+    "items": [
+      {"item_name": "Butter Chicken", "item_qty": 2, "item_price": 450.0, "item_notes": "Extra gravy, less spicy"},
+      {"item_name": "Garlic Naan", "item_qty": 4, "item_price": 80.0},
+      {"item_name": "Gulab Jamun", "item_qty": 1, "item_price": 180.0, "item_notes": "No sugar syrup on top"}
+    ]
   }'
 ```
 
@@ -536,6 +553,12 @@ Currently no rate limits are enforced. Please use responsibly.
 4. **Payment Status**: Only orders with `payment_status: "success"` will be processed.
 
 5. **Points Calculation**: Points are calculated locally based on `order_amount` and the customer's current tier.
+
+6. **Order Items & Notes (Dual Storage)**: When `items` are provided in the order webhook, they are stored in two places:
+   - **Embedded in the order document** (`orders` collection) - for fast order display
+   - **Separate `order_items` collection** - indexed by `customer_id` and `item_name` for AI/analytics queries (taste profiling, preference extraction, recommendation engines)
+   
+   Both `order_notes` (order-level) and `item_notes` (food-level) are persisted. Orders without `items` or `order_notes` are fully backward compatible.
 
 ---
 

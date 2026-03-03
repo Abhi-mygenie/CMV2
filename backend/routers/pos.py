@@ -715,6 +715,13 @@ async def _save_order_and_transactions(
 ) -> str:
     """Persist order, points transaction, and wallet transaction. Returns order id."""
     order_id = str(uuid.uuid4())
+    
+    # Prepare embedded items array
+    items_embedded = []
+    if order_data.items:
+        for item in order_data.items:
+            items_embedded.append(item.model_dump())
+    
     await db.orders.insert_one({
         "id": order_id,
         "user_id": user["id"],
@@ -731,8 +738,27 @@ async def _save_order_and_transactions(
         "payment_method": order_data.payment_method,
         "payment_status": order_data.payment_status,
         "order_type": order_data.order_type,
+        "order_notes": order_data.order_notes,
+        "items": items_embedded,
         "created_at": now,
     })
+    
+    # Write to order_items collection for AI queries
+    if order_data.items:
+        order_items_docs = []
+        for item in order_data.items:
+            order_items_docs.append({
+                "id": str(uuid.uuid4()),
+                "order_id": order_id,
+                "customer_id": customer["id"],
+                "user_id": user["id"],
+                "item_name": item.item_name,
+                "item_qty": item.item_qty,
+                "item_price": item.item_price,
+                "item_notes": item.item_notes,
+                "created_at": now,
+            })
+        await db.order_items.insert_many(order_items_docs)
 
     if points_earned > 0:
         desc = f"Earned on order {order_data.order_id} (Rs.{order_data.order_amount})"
@@ -765,6 +791,14 @@ async def _save_order_and_transactions(
 
     return order_id
 
+class OrderItem(BaseModel):
+    """Individual item within an order - supports food-level notes"""
+    item_name: str
+    item_qty: int = 1
+    item_price: float = 0.0
+    item_notes: Optional[str] = None
+
+
 class POSOrderWebhook(BaseModel):
     """Schema for order data from MyGenie/POS systems"""
     # POS Identification (Required)
@@ -794,6 +828,10 @@ class POSOrderWebhook(BaseModel):
     
     # Order Meta
     order_type: Optional[str] = "pos"  # pos, dine_in, takeaway, delivery
+    
+    # Notes & Items
+    order_notes: Optional[str] = None  # Order-level notes
+    items: Optional[List[OrderItem]] = None  # Line items with food-level notes
 
 
 @router.post("/orders", response_model=POSResponse)
