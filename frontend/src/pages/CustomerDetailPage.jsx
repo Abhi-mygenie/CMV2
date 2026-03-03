@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, ChevronRight, ArrowUpRight, ArrowDownRight, Gift, Phone, Mail, Edit2, Save, Wallet, ChevronLeft } from "lucide-react";
+import { Plus, ChevronRight, ArrowUpRight, ArrowDownRight, Gift, Phone, Mail, Edit2, Save, Wallet, ChevronLeft, TrendingUp, TrendingDown, Clock, CalendarDays, Utensils, Sparkles, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,8 @@ export default function CustomerDetailPage() {
     const [transactions, setTransactions] = useState([]);
     const [walletTransactions, setWalletTransactions] = useState([]);
     const [expiringPoints, setExpiringPoints] = useState(null);
+    const [insights, setInsights] = useState(null);
+    const [insightsLoading, setInsightsLoading] = useState(true);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("points");
     const [showPointsModal, setShowPointsModal] = useState(false);
@@ -54,8 +56,21 @@ export default function CustomerDetailPage() {
         }
     };
 
+    const fetchInsights = async () => {
+        try {
+            setInsightsLoading(true);
+            const res = await api.get(`/customers/${id}/insights`);
+            setInsights(res.data);
+        } catch (err) {
+            // Insights are non-critical, fail silently
+        } finally {
+            setInsightsLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchInsights();
     }, [id]);
 
     const handlePointsTransaction = async (e) => {
@@ -326,6 +341,111 @@ export default function CustomerDetailPage() {
                         <p className="text-xs text-[#52525B] uppercase tracking-wider">Last Visit</p>
                     </div>
                 </div>
+
+                {/* AI Insights Card */}
+                {!insightsLoading && insights && (insights.top_items?.length > 0 || insights.common_notes?.length > 0 || insights.preferred_day || insights.avg_frequency_days) && (
+                    <Card className="rounded-xl border-0 shadow-sm mb-4 overflow-hidden" data-testid="insights-card">
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 flex items-center gap-2 border-b border-amber-100">
+                            <Sparkles className="w-4 h-4 text-amber-500" />
+                            <span className="text-sm font-semibold text-amber-800">AI Insights</span>
+                        </div>
+                        <CardContent className="p-4 space-y-3">
+                            {/* Top Items */}
+                            {insights.top_items?.length > 0 && (
+                                <div className="flex items-start gap-2.5" data-testid="insight-top-items">
+                                    <Utensils className="w-4 h-4 text-[#F26B33] mt-0.5 shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-[#52525B] font-medium mb-1">Top Items</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {insights.top_items.map((item, i) => (
+                                                <span key={i} className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                                    {item.name} <span className="text-orange-400">({item.count}x)</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Top Categories */}
+                            {insights.top_categories?.length > 0 && (
+                                <div className="flex items-start gap-2.5" data-testid="insight-categories">
+                                    <Gift className="w-4 h-4 text-purple-500 mt-0.5 shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-[#52525B] font-medium mb-1">Preferred Cuisine</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {insights.top_categories.map((cat, i) => (
+                                                <span key={i} className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                                    {cat.name} <span className="text-purple-400">({cat.percent}%)</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Visit Pattern Row */}
+                            <div className="flex flex-wrap gap-x-6 gap-y-2">
+                                {/* Frequency */}
+                                {insights.avg_frequency_days && (
+                                    <div className="flex items-center gap-2" data-testid="insight-frequency">
+                                        <Clock className="w-4 h-4 text-blue-500 shrink-0" />
+                                        <span className="text-xs text-[#1A1A1A]">Every <strong>~{insights.avg_frequency_days} days</strong></span>
+                                    </div>
+                                )}
+
+                                {/* Preferred Day */}
+                                {insights.preferred_day && (
+                                    <div className="flex items-center gap-2" data-testid="insight-day">
+                                        <CalendarDays className="w-4 h-4 text-green-500 shrink-0" />
+                                        <span className="text-xs text-[#1A1A1A]">Prefers <strong>{insights.preferred_day}s</strong></span>
+                                    </div>
+                                )}
+
+                                {/* Preferred Time */}
+                                {insights.preferred_time && (
+                                    <div className="flex items-center gap-2" data-testid="insight-time">
+                                        <Clock className="w-4 h-4 text-indigo-500 shrink-0" />
+                                        <span className="text-xs text-[#1A1A1A]"><strong>{insights.preferred_time}</strong></span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Spending Trend */}
+                            {insights.spending_trend && (
+                                <div className="flex items-center gap-2" data-testid="insight-spending">
+                                    {insights.spending_trend.direction === "up" ? (
+                                        <TrendingUp className="w-4 h-4 text-green-500 shrink-0" />
+                                    ) : (
+                                        <TrendingDown className="w-4 h-4 text-red-500 shrink-0" />
+                                    )}
+                                    <span className="text-xs text-[#1A1A1A]">
+                                        Spending <strong className={insights.spending_trend.direction === "up" ? "text-green-600" : "text-red-600"}>
+                                            {insights.spending_trend.direction === "up" ? "+" : ""}{insights.spending_trend.change_percent}%
+                                        </strong> vs last 3 months
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Common Customizations */}
+                            {insights.common_notes?.length > 0 && (
+                                <div className="flex items-start gap-2.5" data-testid="insight-notes">
+                                    <MessageCircle className="w-4 h-4 text-teal-500 mt-0.5 shrink-0" />
+                                    <div>
+                                        <p className="text-xs text-[#52525B] font-medium mb-1">Common Requests</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {insights.common_notes.map((n, i) => (
+                                                <span key={i} className="bg-teal-50 text-teal-700 text-xs px-2 py-0.5 rounded-full">
+                                                    {n.note}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Tabs for Points & Wallet History */}
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

@@ -1,0 +1,81 @@
+{
+  "summary": "Completed testing of P0 AI Insights feature on Customer Detail page. Backend API (GET /api/customers/{id}/insights) returns correct aggregation data from order_items and orders collections. Frontend correctly displays insights card with all required sections for customers WITH orders, and correctly hides the insights card for customers WITHOUT order data.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_customer_insights.py",
+    "/app/test_reports/pytest/pytest_customer_insights.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "AI Insights endpoint correctly aggregates data from order_items and orders collections",
+    "Frontend conditionally renders insights card based on data presence - good implementation",
+    "All data-testid attributes present for testing (insights-card, insight-top-items, insight-categories, etc.)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_customer_insights.py"
+  ],
+  "success_rate": {
+    "backend": "100% (15/15 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": "Demo Mode (Try Demo Mode button)",
+  "seed_data_creation": "N/A - Used existing Test Customer (f69d1332-a0d0-4020-8ba7-3cbc5abd1b2b) with 5 orders",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "AI Insights feature is fully functional. Test Customer has 5 orders and shows insights. Other demo customers (e.g., customer-demo-51 Sanjay Gupta) have 0 orders and insights card is hidden. Insights API endpoint is at /api/customers/{id}/insights.",
+  "features_tested": [
+    {
+      "feature": "Backend API: GET /api/customers/{customer_id}/insights",
+      "status": "PASSED",
+      "details": "Returns top_items, top_categories, preferred_day, preferred_time, common_notes, avg_order_value"
+    },
+    {
+      "feature": "Customer Detail page shows AI Insights card between stats row and tabs",
+      "status": "PASSED",
+      "details": "Insights card positioned correctly after stats row (Visits, Total Spent, Last Visit) and before Points/Wallet History tabs"
+    },
+    {
+      "feature": "AI Insights card shows Top Items with count badges",
+      "status": "PASSED",
+      "details": "Shows Garlic Naan (4x), Masala Dosa (2x), Butter Chicken (2x), etc."
+    },
+    {
+      "feature": "AI Insights card shows Preferred Cuisine with percentage",
+      "status": "PASSED",
+      "details": "Shows Sides (50%), Mughlai (50%)"
+    },
+    {
+      "feature": "AI Insights card shows Preferred Day and Time",
+      "status": "PASSED",
+      "details": "Shows 'Prefers Tuesdays' and 'Late Night (11 PM+)'"
+    },
+    {
+      "feature": "AI Insights card shows Common Requests (food-level notes)",
+      "status": "PASSED",
+      "details": "Shows 'No sugar syrup on top', 'Extra charred', 'Extra gravy, less spicy', 'Less spicy'"
+    },
+    {
+      "feature": "AI Insights card hidden when customer has no order data",
+      "status": "PASSED",
+      "details": "Tested with Sanjay Gupta (customer-demo-51) - insights card not in DOM"
+    },
+    {
+      "feature": "Customer profile header shows correctly",
+      "status": "PASSED",
+      "details": "Name, phone, tier (BRONZE/GOLD), points, wallet balance all displayed correctly"
+    },
+    {
+      "feature": "Points History and Wallet History tabs work below insights card",
+      "status": "PASSED",
+      "details": "Both tabs functional, switching works, transaction history displays"
+    }
+  ]
+}

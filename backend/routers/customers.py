@@ -1031,3 +1031,127 @@ async def get_all_segment_whatsapp_configs(user: dict = Depends(get_current_user
     return {"configs": configs}
 
 
+@router.get("/{customer_id}/insights")
+async def get_customer_insights(customer_id: str, user: dict = Depends(get_current_user)):
+    """P0 AI Insights - aggregation-based, no ML required"""
+    customer = await db.customers.find_one({"id": customer_id, "user_id": user["id"]}, {"_id": 0})
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    insights = {}
+
+    # 1. Top Items (from order_items)
+    top_items_pipeline = [
+        {"$match": {"customer_id": customer_id, "user_id": user["id"]}},
+        {"$group": {"_id": "$item_name", "count": {"$sum": "$item_qty"}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5}
+    ]
+    top_items = await db.order_items.aggregate(top_items_pipeline).to_list(5)
+    insights["top_items"] = [{"name": i["_id"], "count": i["count"]} for i in top_items]
+
+    # 2. Preferred Category (from order_items)
+    category_pipeline = [
+        {"$match": {"customer_id": customer_id, "user_id": user["id"], "item_category": {"$ne": None}}},
+        {"$group": {"_id": "$item_category", "count": {"$sum": "$item_qty"}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 3}
+    ]
+    categories = await db.order_items.aggregate(category_pipeline).to_list(3)
+    total_cat = sum(c["count"] for c in categories) if categories else 0
+    insights["top_categories"] = [
+        {"name": c["_id"], "count": c["count"], "percent": round(c["count"] / total_cat * 100) if total_cat > 0 else 0}
+        for c in categories
+    ]
+
+    # 3. Order Frequency & Preferred Day/Time (from orders)
+    orders = await db.orders.find(
+        {"customer_id": customer_id, "user_id": user["id"]},
+        {"_id": 0, "created_at": 1, "order_amount": 1}
+    ).sort("created_at", 1).to_list(1000)
+
+    if len(orders) >= 2:
+        dates = []
+        for o in orders:
+            try:
+                dt = datetime.fromisoformat(o["created_at"].replace("Z", "+00:00")) if isinstance(o["created_at"], str) else o["created_at"]
+                dates.append(dt)
+            except Exception:
+                pass
+
+        if len(dates) >= 2:
+            gaps = [(dates[i+1] - dates[i]).days for i in range(len(dates)-1) if (dates[i+1] - dates[i]).days > 0]
+            insights["avg_frequency_days"] = round(sum(gaps) / len(gaps)) if gaps else None
+
+            # Preferred day of week
+            day_counts = {}
+            for dt in dates:
+                day_name = dt.strftime("%A")
+                day_counts[day_name] = day_counts.get(day_name, 0) + 1
+            if day_counts:
+                preferred_day = max(day_counts, key=day_counts.get)
+                insights["preferred_day"] = preferred_day
+
+            # Preferred time slot
+            hour_slots = {"Breakfast (8-11 AM)": 0, "Lunch (12-3 PM)": 0, "Evening (4-7 PM)": 0, "Dinner (7-11 PM)": 0, "Late Night (11 PM+)": 0}
+            for dt in dates:
+                h = dt.hour
+                if 8 <= h < 11:
+                    hour_slots["Breakfast (8-11 AM)"] += 1
+                elif 12 <= h < 15:
+                    hour_slots["Lunch (12-3 PM)"] += 1
+                elif 16 <= h < 19:
+                    hour_slots["Evening (4-7 PM)"] += 1
+                elif 19 <= h < 23:
+                    hour_slots["Dinner (7-11 PM)"] += 1
+                else:
+                    hour_slots["Late Night (11 PM+)"] += 1
+            active_slots = {k: v for k, v in hour_slots.items() if v > 0}
+            if active_slots:
+                insights["preferred_time"] = max(active_slots, key=active_slots.get)
+        else:
+            insights["avg_frequency_days"] = None
+    else:
+        insights["avg_frequency_days"] = None
+
+    # 4. Spending Trend (last 3 months vs previous 3 months)
+    if len(orders) >= 3:
+        now = datetime.now(timezone.utc)
+        recent = []
+        older = []
+        for o in orders:
+            try:
+                dt = datetime.fromisoformat(o["created_at"].replace("Z", "+00:00")) if isinstance(o["created_at"], str) else o["created_at"]
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                days_ago = (now - dt).days
+                if days_ago <= 90:
+                    recent.append(o["order_amount"])
+                elif days_ago <= 180:
+                    older.append(o["order_amount"])
+            except Exception:
+                pass
+
+        if recent and older:
+            recent_avg = sum(recent) / len(recent)
+            older_avg = sum(older) / len(older)
+            if older_avg > 0:
+                change = round((recent_avg - older_avg) / older_avg * 100)
+                insights["spending_trend"] = {"change_percent": change, "direction": "up" if change > 0 else "down"}
+
+    # 5. Common Customizations (from item_notes)
+    notes_pipeline = [
+        {"$match": {"customer_id": customer_id, "user_id": user["id"], "item_notes": {"$ne": None}}},
+        {"$group": {"_id": "$item_notes", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 5}
+    ]
+    notes = await db.order_items.aggregate(notes_pipeline).to_list(5)
+    insights["common_notes"] = [{"note": n["_id"], "count": n["count"]} for n in notes]
+
+    # 6. Avg order value
+    insights["avg_order_value"] = customer.get("avg_order_value", 0)
+
+    return insights
+
+
